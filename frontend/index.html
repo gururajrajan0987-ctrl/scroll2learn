@@ -1,0 +1,5637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Scroll2Learn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════════
+   ROOT VARIABLES & RESET
+═══════════════════════════════════════════════════════ */
+    :root {
+      --bg: #0A0F16;
+      --surface: #131B26;
+      --surface2: #1C2736;
+      --border: rgba(0, 255, 255, 0.08);
+      --text: #E2E8F0;
+      --sub: #94A3B8;
+      --accent: #00F0FF;
+      --accent2: #FF3366;
+      --accent3: #7000FF;
+      --grad: linear-gradient(135deg, #00F0FF, #7000FF);
+      --grad2: linear-gradient(135deg, #FF3366, #00F0FF);
+      --story-ring: linear-gradient(45deg, #00F0FF, #FF3366, #7000FF);
+      --nav-h: 64px;
+      --top-h: 56px;
+      --radius: 18px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ═══ LIGHT MODE ═══ */
+    [data-theme="light"] {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface2: #F1F5F9;
+      --border: rgba(0, 0, 0, 0.06);
+      --text: #0F172A;
+      --sub: #64748B;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .topbar-logo {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    [data-theme="light"] .auth-logo {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    [data-theme="light"] .pstat-num {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    [data-theme="light"] .asc-num {
+      -webkit-text-fill-color: initial;
+    }
+
+    [data-theme="light"] .notif-panel {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Theme toggle button */
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      background: transparent;
+      transition: background .15s, transform .15s;
+      position: relative;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    .theme-toggle:active {
+      background: var(--surface);
+      transform: scale(.92);
+    }
+
+    .theme-toggle .material-icons-round {
+      font-size: 22px;
+      transition: transform .3s ease;
+    }
+
+    .theme-toggle:hover .material-icons-round {
+      transform: rotate(30deg);
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    * {
+      scrollbar-width: none;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    input,
+    textarea {
+      font-family: inherit;
+      outline: none;
+      border: none;
+      background: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════════════ */
+    #app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   AUTH SCREEN
+═══════════════════════════════════════════════════════ */
+    #authScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 28px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .auth-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .auth-tagline {
+      font-size: 14px;
+      color: var(--sub);
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 28px;
+      width: 100%;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sub);
+      background: none;
+      transition: .2s;
+    }
+
+    .auth-tab.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .auth-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .auth-input-wrap {
+      position: relative;
+    }
+
+    .auth-input-wrap .i-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--sub);
+      font-size: 20px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color .2s;
+    }
+
+    .auth-input:focus {
+      border-color: var(--accent);
+    }
+
+    .auth-input::placeholder {
+      color: var(--sub);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--grad);
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      margin-top: 4px;
+      transition: opacity .2s, transform .15s;
+      letter-spacing: 0.3px;
+    }
+
+    .auth-btn:active {
+      opacity: .85;
+      transform: scale(.98);
+    }
+
+    .auth-err {
+      font-size: 13px;
+      color: #FF6B6B;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   SETUP SCREEN
+═══════════════════════════════════════════════════════ */
+    #setupScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 998;
+      background: var(--bg);
+      display: none;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-y: auto;
+    }
+
+    .setup-header {
+      padding: 56px 28px 20px;
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .setup-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .setup-header p {
+      font-size: 14px;
+      color: var(--sub);
+    }
+
+    .avatar-pick {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0 16px;
+    }
+
+    .avatar-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid transparent;
+      background: var(--grad);
+      padding: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface2);
+    }
+
+    .avatar-label {
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .setup-body {
+      padding: 0 28px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .setup-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .setup-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color .2s;
+    }
+
+    .setup-input:focus {
+      border-color: var(--accent2);
+    }
+
+    .setup-input::placeholder {
+      color: var(--sub);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   DOMAIN / INTEREST SELECTION
+═══════════════════════════════════════════════════════ */
+    .domain-section {
+      margin-top: 8px;
+    }
+
+    .domain-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .domain-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .domain-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: all .25s ease;
+      user-select: none;
+    }
+
+    .domain-chip:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .domain-chip.selected {
+      background: linear-gradient(135deg, rgba(255, 107, 107, .15), rgba(196, 77, 255, .15));
+      color: var(--accent2);
+      border-color: var(--accent2);
+      box-shadow: 0 0 12px rgba(196, 77, 255, .15);
+    }
+
+    .domain-picker {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 16px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%238a8a9a'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 18px;
+    }
+
+    .domain-picker:focus {
+      border-color: var(--accent2);
+    }
+
+    .domain-picker option {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    /* Eye toggle on password */
+    .eye-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--sub);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .eye-toggle .material-icons-round {
+      font-size: 20px;
+    }
+
+    /* Post menu options */
+    .post-menu-opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: background .2s;
+    }
+
+    .post-menu-opt:hover {
+      background: var(--border);
+    }
+
+    .post-menu-opt .material-icons-round {
+      font-size: 22px;
+      color: var(--sub);
+    }
+
+    .post-menu-delete {
+      color: #ff4444;
+    }
+
+    .post-menu-delete .material-icons-round {
+      color: #ff4444;
+    }
+
+    /* Profile posts grid */
+    .profile-posts-section {
+      margin-top: 16px;
+      padding: 0 4px 80px;
+    }
+
+    .profile-posts-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      padding: 12px 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .profile-posts-header .material-icons-round {
+      font-size: 20px;
+    }
+
+    .profile-posts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+    }
+
+    .profile-post-thumb {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 4px;
+      cursor: pointer;
+      background: var(--surface);
+    }
+
+    .profile-post-thumb img,
+    .profile-post-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-post-thumb .ppt-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-post-thumb:hover .ppt-overlay {
+      display: flex;
+    }
+
+    .ppt-overlay .material-icons-round {
+      color: #fff;
+      font-size: 20px;
+    }
+
+    .ppt-overlay small {
+      color: rgba(255, 255, 255, .8);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .ppt-type-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 16px;
+    }
+
+    .ppt-status {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+    }
+
+    .ppt-status.pending {
+      background: rgba(255, 165, 0, .8);
+    }
+
+    .ppt-status.approved {
+      background: rgba(74, 222, 128, .8);
+    }
+
+    .ppt-status.rejected {
+      background: rgba(255, 68, 68, .8);
+    }
+
+    .ppt-delete-btn {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(255, 68, 68, .85);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .profile-post-thumb:hover .ppt-delete-btn {
+      display: flex;
+    }
+
+    .ppt-delete-btn .material-icons-round {
+      font-size: 16px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   TOP BAR
+═══════════════════════════════════════════════════════ */
+    .topbar {
+      height: var(--top-h);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 50;
+    }
+
+    /* Reel sound toggle */
+    .video-sound-toggle {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.1s;
+    }
+
+    .video-sound-toggle:active {
+      transform: scale(0.9);
+    }
+
+    .video-sound-toggle span {
+      font-size: 20px;
+    }
+
+    /* Admin edit modal */
+    .admin-edit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .admin-edit-modal.show {
+      display: flex;
+    }
+
+    .admin-edit-content {
+      background: var(--surface);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 24px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-edit-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .admin-edit-field {
+      margin-bottom: 16px;
+    }
+
+    .admin-edit-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .admin-edit-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .admin-edit-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .admin-edit-btn {
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .ae-save {
+      background: var(--grad);
+      color: #fff;
+    }
+
+    .ae-cancel {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      background: transparent;
+      transition: background .15s, transform .15s;
+      position: relative;
+    }
+
+    .icon-btn:active {
+      background: var(--surface);
+      transform: scale(.92);
+    }
+
+    .icon-btn .material-icons-round {
+      font-size: 22px;
+    }
+
+    .notif-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      border: 2px solid var(--bg);
+      display: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════════════ */
+    .main {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   STORIES
+═══════════════════════════════════════════════════════ */
+    .stories-row {
+      display: flex;
+      gap: 14px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .story-bubble {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .story-ring {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      padding: 2.5px;
+      background: var(--story-ring);
+      transition: transform .2s;
+    }
+
+    .story-ring.seen {
+      background: var(--surface2);
+    }
+
+    .story-ring:active {
+      transform: scale(.92);
+    }
+
+    .story-ring-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2.5px solid var(--bg);
+      overflow: hidden;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .story-ring-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .story-add-inner {
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .story-add-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .story-add-btn .material-icons-round {
+      font-size: 18px;
+    }
+
+    .story-name {
+      font-size: 11px;
+      color: var(--sub);
+      max-width: 64px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   POST CARD
+═══════════════════════════════════════════════════════ */
+    .post-card {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+      animation: fadeUp .4s ease;
+    }
+
+    .post-head {
+      display: flex;
+      align-items: center;
+      padding: 11px 14px;
+      gap: 11px;
+    }
+
+    .post-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+
+    .post-user {
+      flex: 1;
+    }
+
+    .post-author {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .post-time {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .post-more {
+      color: var(--sub);
+      background: none;
+    }
+
+    .post-media {
+      width: 100%;
+      position: relative;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .post-media img {
+      width: 100%;
+      display: block;
+      max-height: 420px;
+      object-fit: cover;
+    }
+
+    .post-media video {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+
+    .post-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px 4px;
+    }
+
+    .post-acts-left {
+      display: flex;
+      gap: 2px;
+    }
+
+    .act-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      background: transparent;
+      transition: transform .15s, color .15s;
+    }
+
+    .act-btn:active {
+      transform: scale(.85);
+    }
+
+    .act-btn .material-icons-round {
+      font-size: 24px;
+    }
+
+    .act-btn.liked .material-icons-round {
+      color: var(--accent);
+    }
+
+    .act-btn.saved .material-icons-round {
+      color: var(--accent3);
+    }
+
+    .post-likes {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 14px 4px;
+    }
+
+    .post-caption {
+      padding: 0 14px 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .post-caption strong {
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .post-caption .tags {
+      color: var(--accent3);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .post-view-comments {
+      padding: 0 14px 14px;
+      font-size: 13px;
+      color: var(--sub);
+      cursor: pointer;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   REEL IN FEED
+═══════════════════════════════════════════════════════ */
+    .reel-card {
+      margin: 12px 0;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000;
+      max-height: 520px;
+    }
+
+    .reel-card video {
+      width: 100%;
+      display: block;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 20px;
+      background: #000;
+    }
+
+    .reel-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: linear-gradient(to top, rgba(0, 0, 0, .85) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .reel-info {
+      position: absolute;
+      bottom: 72px;
+      left: 16px;
+      right: 72px;
+      color: #fff;
+      pointer-events: none;
+    }
+
+    .reel-info .reel-author {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reel-info .reel-cap {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .75);
+    }
+
+    .reel-side-acts {
+      position: absolute;
+      bottom: 60px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .reel-act-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .reel-act-btn .material-icons-round {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5));
+    }
+
+    .reel-act-btn small {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .reel-act-btn.liked .material-icons-round {
+      color: var(--accent);
+    }
+
+    .reel-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      opacity: 0;
+      transition: opacity .2s;
+      pointer-events: none;
+    }
+
+    .reel-play-btn .material-icons-round {
+      font-size: 32px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   FEED LOADING / SPINNER
+═══════════════════════════════════════════════════════ */
+    .feed-spinner {
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      animation: spin .8s linear infinite;
+    }
+
+    .end-msg {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   REELS SCREEN (Vertical fullscreen)
+═══════════════════════════════════════════════════════ */
+    #reelsScreen {
+      background: #000;
+      overflow: hidden;
+    }
+
+    .reels-container {
+      height: 100%;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+
+    .reel-full {
+      height: 100%;
+      scroll-snap-align: start;
+      position: relative;
+      background: #000;
+    }
+
+    .reel-full video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+
+    .reel-full-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, .8) 0%, transparent 50%);
+    }
+
+    .reel-full-info {
+      position: absolute;
+      bottom: 90px;
+      left: 16px;
+      right: 80px;
+      color: #fff;
+    }
+
+    .reel-full-info .rfa {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .rfa-av {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      background: var(--surface);
+    }
+
+    .rfa-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .reel-full-info .rfc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .8);
+      line-height: 1.4;
+    }
+
+    .reel-full-acts {
+      position: absolute;
+      bottom: 90px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .rfab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .rfab .material-icons-round {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
+    }
+
+    .rfab small {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .rfab.liked .material-icons-round {
+      color: var(--accent);
+    }
+
+    .reel-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 4px;
+      padding: 10px 12px 0;
+    }
+
+    .reel-prog-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .3);
+      overflow: hidden;
+    }
+
+    .reel-prog-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+      transition: width .1s linear;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   ADD SCREEN
+═══════════════════════════════════════════════════════ */
+    #addScreen {
+      background: var(--bg);
+      padding: 20px 16px 80px;
+    }
+
+    .add-type-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .type-tab {
+      flex: 1;
+      padding: 11px;
+      border-radius: 12px;
+      background: var(--surface);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sub);
+      transition: .2s;
+    }
+
+    .type-tab.active {
+      background: var(--grad);
+      color: #fff;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .form-inp {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 16px;
+      transition: border-color .2s;
+    }
+
+    .form-inp:focus {
+      border-color: var(--accent2);
+    }
+
+    .form-inp::placeholder {
+      color: var(--sub);
+    }
+
+    textarea.form-inp {
+      resize: none;
+      height: 90px;
+    }
+
+    .upload-zone {
+      width: 100%;
+      padding: 36px 20px;
+      background: var(--surface);
+      border-radius: 16px;
+      border: 2px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color .2s;
+      margin-bottom: 16px;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent);
+    }
+
+    .upload-zone .material-icons-round {
+      font-size: 40px;
+      color: var(--sub);
+    }
+
+    .upload-zone p {
+      font-size: 13px;
+      color: var(--sub);
+      text-align: center;
+    }
+
+    .upload-preview {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .upload-preview img,
+    .upload-preview video {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hashtag-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .htag {
+      padding: 7px 14px;
+      border-radius: 20px;
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: .2s;
+    }
+
+    .htag.sel {
+      background: rgba(196, 77, 255, .15);
+      color: var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    .pub-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      background: var(--grad);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      transition: transform .15s, opacity .15s;
+      margin-top: 8px;
+    }
+
+    .pub-btn:active {
+      transform: scale(.97);
+      opacity: .85;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   SEARCH SCREEN
+═══════════════════════════════════════════════════════ */
+    #searchScreen {
+      padding: 16px;
+    }
+
+    .search-bar {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-bar .material-icons-round {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--sub);
+      font-size: 20px;
+    }
+
+    .search-inp {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color .2s;
+    }
+
+    .search-inp:focus {
+      border-color: var(--accent);
+    }
+
+    .search-inp::placeholder {
+      color: var(--sub);
+    }
+
+    .tag-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tag-chip {
+      padding: 7px 16px;
+      border-radius: 20px;
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: .2s;
+    }
+
+    .tag-chip.active {
+      background: rgba(255, 107, 107, .15);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .search-card {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 14px;
+      background: var(--surface);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform .15s;
+      animation: fadeUp .3s ease;
+    }
+
+    .search-card:active {
+      transform: scale(.97);
+    }
+
+    .search-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+
+    .search-card-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .search-card-text h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .search-card-text p {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   PROFILE SCREEN
+═══════════════════════════════════════════════════════ */
+    #profileScreen {
+      padding-bottom: 80px;
+    }
+
+    .profile-banner {
+      height: 120px;
+      position: relative;
+      background: linear-gradient(135deg, #FF6B6B22, #C44DFF22, #4DAAFF22);
+    }
+
+    .profile-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .profile-pic-area {
+      display: flex;
+      align-items: flex-end;
+      padding: 0 20px;
+      margin-top: -40px;
+      margin-bottom: 14px;
+      gap: 16px;
+    }
+
+    .profile-av-wrap {
+      position: relative;
+    }
+
+    .profile-av {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--bg);
+      background: var(--surface);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+    }
+
+    .profile-av-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--grad);
+      z-index: -1;
+    }
+
+    .profile-edit-btn {
+      margin-left: auto;
+      padding: 9px 18px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      align-self: flex-end;
+    }
+
+    .profile-info {
+      padding: 0 20px 20px;
+    }
+
+    .profile-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .profile-username {
+      font-size: 14px;
+      color: var(--sub);
+      margin-bottom: 10px;
+    }
+
+    .profile-bio {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .profile-link {
+      font-size: 13px;
+      color: var(--accent3);
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 0;
+      background: var(--surface);
+      border-radius: 16px;
+      margin: 16px 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .pstat {
+      flex: 1;
+      padding: 16px 10px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .pstat:last-child {
+      border-right: none;
+    }
+
+    .pstat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .pstat-lbl {
+      font-size: 11px;
+      color: var(--sub);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .profile-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 20px 20px;
+    }
+
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 107, 107, .1);
+      color: var(--accent);
+      border: 1px solid rgba(255, 107, 107, .2);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════════════════ */
+    .bottom-nav {
+      height: var(--nav-h);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 50;
+    }
+
+    .nav-btn {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--sub);
+      background: none;
+      transition: color .15s;
+      position: relative;
+    }
+
+    .nav-btn .material-icons-round {
+      font-size: 24px;
+    }
+
+    .nav-btn small {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .nav-btn.active {
+      color: var(--text);
+    }
+
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 3px;
+      border-radius: 0 0 3px 3px;
+      background: var(--grad);
+    }
+
+    .nav-add-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--grad);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s;
+      box-shadow: 0 4px 16px rgba(255, 107, 107, .3);
+    }
+
+    .nav-add-btn:active {
+      transform: scale(.9);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   STORY VIEWER
+═══════════════════════════════════════════════════════ */
+    .story-viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .story-viewer.show {
+      display: flex;
+    }
+
+    .story-viewer-bg {
+      position: absolute;
+      inset: 0;
+    }
+
+    .story-viewer-bg img,
+    .story-viewer-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .story-viewer-top {
+      position: relative;
+      z-index: 2;
+      padding: 14px 14px 0;
+    }
+
+    .story-bars {
+      display: flex;
+      gap: 4px;
+    }
+
+    .story-bar {
+      flex: 1;
+      height: 2.5px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .3);
+      overflow: hidden;
+    }
+
+    .story-bar-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+    }
+
+    .story-viewer-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    .sv-av {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      background: #333;
+    }
+
+    .sv-name {
+      font-size: 14px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .sv-close {
+      color: #fff;
+      background: none;
+      padding: 4px;
+    }
+
+    .story-viewer-tap-areas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+    }
+
+    .sv-tap-prev {
+      flex: 0 0 33%;
+    }
+
+    .sv-tap-next {
+      flex: 1;
+    }
+
+    .story-caption {
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 10px 24px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, .7));
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+      z-index: 5;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   COMMENT SHEET
+═══════════════════════════════════════════════════════ */
+    .overlay-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(4px);
+      display: none;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .overlay-bg.show {
+      display: block;
+    }
+
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 810;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 16px 0 0;
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-50%) translateY(100%);
+      transition: transform .35s cubic-bezier(.32, 1.2, .58, 1);
+    }
+
+    .bottom-sheet.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin: 0 auto 16px;
+    }
+
+    .sheet-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 0 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comment-list-inner {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 16px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comment-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+
+    .comment-body {
+      flex: 1;
+    }
+
+    .comment-body strong {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .comment-body p {
+      font-size: 13px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    .comment-body small {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .comment-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .comm-inp {
+      flex: 1;
+      padding: 11px 14px;
+      border-radius: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .comm-inp::placeholder {
+      color: var(--sub);
+    }
+
+    .comm-send {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--grad);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      align-self: flex-end;
+    }
+
+    .comm-send .material-icons-round {
+      font-size: 18px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   SHARE SHEET
+═══════════════════════════════════════════════════════ */
+    .share-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 20px 16px;
+    }
+
+    .share-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .share-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s;
+    }
+
+    .share-icon:active {
+      transform: scale(.88);
+    }
+
+    .share-icon .material-icons-round {
+      font-size: 24px;
+      color: var(--text);
+    }
+
+    .share-opt span {
+      font-size: 11px;
+      color: var(--sub);
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   NOTIF PANEL
+═══════════════════════════════════════════════════════ */
+    .notif-panel {
+      position: fixed;
+      top: calc(var(--top-h) + 8px);
+      right: 16px;
+      width: 300px;
+      background: var(--surface);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 500;
+      display: none;
+      animation: fadeUp .25s ease;
+      max-width: calc(100vw - 32px);
+    }
+
+    .notif-panel.show {
+      display: block;
+    }
+
+    .notif-head {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notif-items {
+      padding: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .notif-item {
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      background: var(--surface2);
+      color: var(--sub);
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 11px 22px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      z-index: 9999;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes heartPop {
+      0% {
+        transform: scale(1)
+      }
+
+      40% {
+        transform: scale(1.35)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .heart-pop {
+      animation: heartPop .35s ease;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--sub);
+      text-align: center;
+      gap: 12px;
+    }
+
+    .empty-state .material-icons-round {
+      font-size: 48px;
+      opacity: .4;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   AI MODAL
+═══════════════════════════════════════════════════════ */
+    .ai-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .ai-modal-overlay.show {
+      display: flex;
+    }
+
+    .ai-modal {
+      width: 100%;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px 32px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp .3s ease;
+      border: 1px solid var(--border);
+    }
+
+    .ai-modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .ai-modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      background: var(--grad2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .ai-topic-label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 8px;
+      padding: 6px 12px;
+      background: var(--surface2);
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .ai-chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+      max-height: 50vh;
+      min-height: 200px;
+    }
+
+    .ai-msg {
+      margin-bottom: 10px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.65;
+      max-width: 90%;
+      word-wrap: break-word;
+    }
+
+    .ai-msg ul {
+      margin: 6px 0;
+      padding-left: 18px;
+    }
+
+    .ai-msg li {
+      margin-bottom: 4px;
+    }
+
+    .ai-msg code {
+      background: rgba(255, 255, 255, .08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .ai-msg strong {
+      color: var(--accent2);
+    }
+
+    .ai-msg-user {
+      background: var(--grad);
+      color: #fff;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .ai-msg-bot {
+      background: var(--surface2);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .ai-input-area {
+      display: flex;
+      gap: 8px;
+      padding: 12px 0 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .ai-chat-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .ai-chat-input:focus {
+      border-color: var(--accent2);
+    }
+
+    .ai-send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--grad);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .ai-send-btn .material-icons-round {
+      font-size: 20px;
+    }
+
+    /* Typing indicator */
+    .ai-typing {
+      display: flex;
+      gap: 5px;
+      padding: 4px 0;
+    }
+
+    .ai-typing span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sub);
+      animation: aiTypingDot 1.2s infinite;
+    }
+
+    .ai-typing span:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .ai-typing span:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes aiTypingDot {
+
+      0%,
+      80%,
+      100% {
+        opacity: .3;
+        transform: scale(.8);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   FOLLOW BUTTON
+═══════════════════════════════════════════════════════ */
+    .follow-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: var(--grad);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      transition: opacity .15s, transform .15s;
+      letter-spacing: 0.3px;
+      margin-left: 8px;
+    }
+
+    .follow-btn:active {
+      opacity: .85;
+      transform: scale(.95);
+    }
+
+    .follow-btn.following {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--sub);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   LOGOUT BUTTON
+═══════════════════════════════════════════════════════ */
+    .logout-btn {
+      width: calc(100% - 40px);
+      margin: 8px 20px 24px;
+      padding: 13px;
+      border-radius: 14px;
+      background: rgba(255, 107, 107, .1);
+      border: 1.5px solid rgba(255, 107, 107, .2);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .15s, transform .15s;
+    }
+
+    .logout-btn:active {
+      background: rgba(255, 107, 107, .2);
+      transform: scale(.98);
+    }
+
+    .logout-btn .material-icons-round {
+      font-size: 20px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+   ADMIN SCREEN
+═══════════════════════════════════════════════════════ */
+    .admin-header {
+      padding: 20px 20px 12px;
+      background: linear-gradient(135deg, rgba(255, 107, 107, .1), rgba(196, 77, 255, .1));
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .admin-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .admin-subtitle {
+      font-size: 13px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 0 16px 20px;
+    }
+
+    .admin-stat-card {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 14px 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .asc-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .asc-lbl {
+      font-size: 10px;
+      color: var(--sub);
+      margin-top: 2px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .admin-section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 0 16px 12px;
+      color: var(--text);
+    }
+
+    .admin-post-card {
+      margin: 0 16px 16px;
+      background: var(--surface);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      animation: fadeUp .3s ease;
+    }
+
+    .apc-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+
+    .apc-av {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+
+    .apc-meta {
+      flex: 1;
+    }
+
+    .apc-author {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .apc-type-badge {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: var(--grad);
+      color: #fff;
+    }
+
+    .apc-time {
+      font-size: 11px;
+      color: var(--sub);
+    }
+
+    .apc-media {
+      padding: 0 14px 10px;
+    }
+
+    .apc-caption {
+      padding: 0 14px 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .apc-tags {
+      padding: 0 14px 8px;
+      font-size: 12px;
+      color: var(--accent3);
+    }
+
+    .apc-actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .apc-approve {
+      flex: 1;
+      padding: 11px;
+      border-radius: 12px;
+      background: rgba(74, 222, 128, .15);
+      color: #4ade80;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background .15s;
+    }
+
+    .apc-approve:active {
+      background: rgba(74, 222, 128, .3);
+    }
+
+    .apc-approve .material-icons-round {
+      font-size: 18px;
+    }
+
+    .apc-reject {
+      flex: 1;
+      padding: 11px;
+      border-radius: 12px;
+      background: rgba(255, 107, 107, .15);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background .15s;
+    }
+
+    .apc-reject:active {
+      background: rgba(255, 107, 107, .3);
+    }
+
+    .apc-reject .material-icons-round {
+      font-size: 18px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RADIAL & EMOJI BOTTOM NAV
+    ═══════════════════════════════════════════════════════ */
+    .bottom-nav {
+      position: relative; /* ensure absolute children flow nicely */
+    }
+
+    .nav-btn-emoji {
+      position: relative;
+      transform: scale(1.1);
+      width: 58px;
+      height: 58px;
+      margin-top: -10px; /* Slight bump up but still anchored inside */
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3), 0 0 12px rgba(255, 51, 102, 0.2);
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s;
+      z-index: 100;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      border: 3px solid var(--surface); /* blends with nav */
+    }
+    
+    .nav-btn-emoji:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 10px rgba(0, 240, 255, 0.4);
+    }
+    
+    .radial-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 22, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 99;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .radial-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .radial-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      height: 380px;
+      overflow: hidden; 
+      pointer-events: none;
+    }
+    
+    .radial-overlay.open .radial-wrapper {
+      pointer-events: auto;
+    }
+
+    .radial-wheel {
+      position: absolute;
+      left: 50%;
+      bottom: -160px; /* Center is hidden below the fold */
+      width: 320px;
+      height: 320px;
+      margin-left: -160px;
+      border-radius: 50%;
+      transform-origin: center center;
+      /* default rotated closed state */
+      --wheel-rot: 0deg;
+      transform: scale(0.4) rotate(var(--wheel-rot)); 
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      touch-action: pan-x pan-y; /* managed in JS JS for preventing default */
+      opacity: 0;
+    }
+    
+    .radial-overlay.open .radial-wheel {
+      /* open state */
+      transform: scale(1) rotate(var(--wheel-rot));
+      opacity: 1;
+    }
+
+    .radial-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 64px;
+      height: 64px;
+      margin-left: -32px;
+      margin-top: -32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0; /* JS handles visibility for clipping 3 items */
+      pointer-events: none;
+      transition: transform 0.1s, opacity 0.3s ease;
+      /* The magic formula keeps items upright securely */
+      transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle) - var(--wheel-rot)));
+    }
+
+    .radial-item:active .radial-icon {
+      transform: scale(0.85);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .radial-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .radial-icon .material-icons-round {
+      font-size: 28px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SETTINGS SCREEN
+    ═══════════════════════════════════════════════════════ */
+    #settingsScreen { padding: 0 0 80px; background: var(--bg); }
+    .settings-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 20px 16px 16px; border-bottom: 1px solid var(--border);
+    }
+    .settings-back {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: var(--surface); color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: 1px solid var(--border);
+      transition: transform .15s, background .15s;
+    }
+    .settings-back:active { transform: scale(.9); background: var(--surface2); }
+    .settings-title {
+      font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+    }
+    .settings-section { padding: 20px 16px 0; }
+    .settings-section-label {
+      font-size: 11px; font-weight: 700; color: var(--sub);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 10px; padding-left: 4px;
+    }
+    .settings-card {
+      background: var(--surface); border-radius: 18px;
+      border: 1px solid var(--border); overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+    .settings-row {
+      display: flex; align-items: center; padding: 15px 16px;
+      gap: 14px; cursor: pointer; transition: background .15s, transform .1s;
+      position: relative; border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row:active { background: var(--surface2); transform: scale(.98); }
+    .settings-row-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .settings-row-title { flex: 1; font-size: 15px; font-weight: 500; color: var(--text); }
+    .settings-row-arrow { color: var(--sub); font-size: 20px; flex-shrink: 0; }
+    .settings-row.danger .settings-row-title { color: #FF4444; }
+    .settings-row.danger .settings-row-icon { background: rgba(255,68,68,.1); }
+    .settings-row.highlight { background: rgba(255,107,107,.05); }
+    .settings-row.highlight:active { background: rgba(255,107,107,.12); }
+
+    /* Toggle Switch */
+    .toggle-switch { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: var(--surface2); border-radius: 28px;
+      transition: background .3s; border: 1.5px solid var(--border);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; height: 20px; width: 20px;
+      left: 3px; bottom: 2.5px; background: var(--sub);
+      border-radius: 50%; transition: transform .3s, background .3s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #00F0FF, #7000FF); border-color: transparent;
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(20px); background: #fff;
+    }
+
+    /* Confirmation Modal */
+    .confirm-modal-overlay {
+      position: fixed; inset: 0; z-index: 960;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px; max-width: 480px; margin: 0 auto;
+    }
+    .confirm-modal-overlay.show { display: flex; }
+    .confirm-modal {
+      background: var(--surface); border-radius: 24px;
+      padding: 28px 24px; border: 1px solid var(--border);
+      box-shadow: 0 16px 48px rgba(0,0,0,.5);
+      width: 100%; max-width: 360px; animation: fadeUp .25s ease; text-align: center;
+    }
+    .confirm-modal-icon { font-size: 48px; margin-bottom: 12px; }
+    .confirm-modal h3 {
+      font-family: 'Syne', sans-serif; font-size: 20px;
+      font-weight: 800; margin-bottom: 8px;
+    }
+    .confirm-modal p { font-size: 14px; color: var(--sub); line-height: 1.5; margin-bottom: 24px; }
+    .confirm-modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .confirm-btn {
+      padding: 13px; border-radius: 14px; font-size: 14px;
+      font-weight: 700; cursor: pointer; transition: transform .15s, opacity .15s;
+    }
+    .confirm-btn:active { transform: scale(.96); opacity: .85; }
+    .confirm-btn-cancel { background: var(--surface2); color: var(--text); }
+    .confirm-btn-danger { background: linear-gradient(135deg, #FF4444, #FF6B6B); color: #fff; }
+    .confirm-btn-primary { background: var(--grad); color: #fff; }
+
+    /* Password Modal */
+    .pwd-modal-overlay {
+      position: fixed; inset: 0; z-index: 960;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px; max-width: 480px; margin: 0 auto;
+    }
+    .pwd-modal-overlay.show { display: flex; }
+    .pwd-modal {
+      background: var(--surface); border-radius: 24px;
+      padding: 28px 24px; border: 1px solid var(--border);
+      box-shadow: 0 16px 48px rgba(0,0,0,.5);
+      width: 100%; max-width: 360px; animation: fadeUp .25s ease;
+    }
+    .pwd-modal h3 {
+      font-family: 'Syne', sans-serif; font-size: 20px;
+      font-weight: 800; margin-bottom: 20px; text-align: center;
+    }
+    .pwd-field { margin-bottom: 14px; }
+    .pwd-field label {
+      font-size: 11px; font-weight: 700; color: var(--sub);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px; display: block;
+    }
+    .pwd-field input {
+      width: 100%; padding: 13px 16px; background: var(--surface2);
+      border-radius: 14px; border: 1.5px solid var(--border);
+      color: var(--text); font-size: 15px; transition: border-color .2s;
+    }
+    .pwd-field input:focus { border-color: var(--accent); }
+    .pwd-err { color: #FF4444; font-size: 13px; text-align: center; min-height: 18px; margin-bottom: 8px; }
+    .settings-version { text-align: center; padding: 24px 16px; color: var(--sub); font-size: 12px; opacity: .6; }
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ═══ AUTH SCREEN ═══ -->
+    <div id="authScreen">
+      <div style="text-align:center">
+        <div class="auth-logo">Scroll2Learn</div>
+        <div class="auth-tagline">Master new skills, one scroll at a time ✨</div>
+      </div>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" onclick="switchAuthTab('login')">Log In</button>
+        <button type="button" class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+      <div class="auth-form">
+        <div id="signupFields" class="hidden">
+          <div class="auth-input-wrap" style="margin-bottom:14px">
+            <span class="material-icons-round i-icon">alternate_email</span>
+            <input class="auth-input" id="regUsername" placeholder="Username" autocapitalize="off">
+          </div>
+        </div>
+        <div class="auth-input-wrap" style="margin-bottom:14px">
+          <span class="material-icons-round i-icon">mail_outline</span>
+          <input class="auth-input" id="authEmail" type="email" placeholder="Email address" autocapitalize="off">
+        </div>
+        <div class="auth-input-wrap" style="margin-bottom:14px;position:relative">
+          <span class="material-icons-round i-icon">lock_outline</span>
+          <input class="auth-input" id="authPass" type="password" placeholder="Password" style="padding-right:44px">
+          <button type="button" class="eye-toggle" onclick="togglePasswordVisibility()">
+            <span class="material-icons-round" id="eyeIcon">visibility_off</span>
+          </button>
+        </div>
+        <div class="auth-err" id="authErr"></div>
+        <button type="button" class="auth-btn" id="authSubmit" onclick="handleAuth()">Log In</button>
+      </div>
+    </div>
+
+    <!-- ═══ SETUP SCREEN ═══ -->
+    <div id="setupScreen">
+      <div class="setup-header">
+        <h2>Set Up Your Profile 👋</h2>
+        <p>Tell the community a little about yourself</p>
+      </div>
+      <div class="avatar-pick">
+        <div class="avatar-preview">
+          <img id="setupAvatarImg" src="" alt="Avatar"
+            onerror="this.src='https://ui-avatars.com/api/?name=U&background=FF6B6B&color=fff&size=100'">
+        </div>
+        <label class="avatar-label" for="setupAvatarInput">+ Change Photo</label>
+        <input type="file" id="setupAvatarInput" accept="image/*" class="hidden" onchange="previewSetupAvatar(this)">
+      </div>
+      <div class="setup-body">
+        <div>
+          <div class="setup-label">Full Name</div>
+          <input class="setup-input" id="setupName" placeholder="Your display name">
+        </div>
+        <div>
+          <div class="setup-label">Bio</div>
+          <textarea class="setup-input" id="setupBio" placeholder="What are you about? 🚀" rows="3"
+            style="resize:none"></textarea>
+        </div>
+        <div>
+          <div class="setup-label">Website (optional)</div>
+          <input class="setup-input" id="setupWebsite" placeholder="https://yoursite.com" type="url">
+        </div>
+        <div>
+          <div class="setup-label">Profession <span style="color:#FF3366">*</span></div>
+          <select class="setup-input" id="setupProfession" required style="padding:14px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text); width:100%; font-family:inherit; margin-bottom:12px; cursor:pointer">
+            <option value="School">School Student</option>
+            <option value="College" selected>College Student</option>
+            <option value="Working">Working Professional</option>
+          </select>
+        </div>
+        <div class="domain-section">
+          <div class="setup-label">Your Interests</div>
+          <div class="domain-section-title">Select the domains you want to learn about 🎯</div>
+          <div class="domain-grid" id="setupDomainGrid">
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="UPSC">📚 UPSC</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="TNPSC">📖 TNPSC</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="GATE">🎓 GATE</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="AI">🤖 AI</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Machine Learning">🧠 Machine
+              Learning</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Python">🐍 Python</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="JavaScript">⚡ JavaScript</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="WebDev">🌐 WebDev</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="DataScience">📊 DataScience</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="CSS">🎨 CSS</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="React">⚛️ React</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Flutter">📱 Flutter</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Cybersecurity">🔒
+              Cybersecurity</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Cloud Computing">☁️ Cloud
+              Computing</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="DSA">🧩 DSA</span>
+            <span class="domain-chip" onclick="toggleSetupDomain(this)" data-domain="Banking">🏦 Banking</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input class="setup-input" id="customSetupDomainInput" placeholder="Add custom domain..." style="flex:1"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSetupDomain();}">
+            <button type="button" onclick="addCustomSetupDomain()"
+              style="padding:0 16px;border-radius:14px;background:var(--grad2);color:#fff;font-size:20px;font-weight:700;flex-shrink:0;height:44px">+</button>
+          </div>
+        </div>
+        <button type="button" class="auth-btn" onclick="submitSetup()" style="margin-top:18px">Let's Go! 🚀</button>
+        <button type="button" onclick="skipSetup()"
+          style="background:none;color:var(--sub);font-size:14px;padding:8px;width:100%">Skip for now</button>
+      </div>
+    </div>
+
+    <!-- ═══ TOPBAR ═══ -->
+    <div class="topbar" id="topbar" style="display:none">
+      <div class="topbar-logo">Scroll2Learn</div>
+      <div class="topbar-actions">
+        <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()"
+          title="Toggle light/dark mode">
+          <span class="material-icons-round" id="themeIcon">light_mode</span>
+        </button>
+        <button type="button" class="icon-btn" onclick="toggleNotif()">
+          <span class="material-icons-round">notifications_none</span>
+          <div class="notif-dot" id="notifDot"></div>
+        </button>
+        <button type="button" class="icon-btn" id="directBtn" onclick="openChat()">
+          <span class="material-icons-round" style="color:var(--accent2)">forum</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main" id="mainArea" style="display:none">
+
+      <!-- HOME SCREEN -->
+      <div class="screen active" id="homeScreen">
+        <!-- Feed -->
+        <div id="feedContainer"></div>
+        <div id="feedSpinner" class="feed-spinner hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="feedEnd" class="end-msg hidden">You're all caught up ✨</div>
+      </div>
+
+      <!-- REELS SCREEN -->
+      <div class="screen" id="reelsScreen">
+        <div class="reels-container" id="reelsContainer"></div>
+      </div>
+
+      <!-- ADD SCREEN -->
+      <div class="screen" id="addScreen">
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:20px">Create ✨</div>
+        <div class="add-type-tabs">
+          <button type="button" class="type-tab active" onclick="selectType('post',this)">📸 Post</button>
+          <button type="button" class="type-tab" onclick="selectType('reel',this)">🎬 Reel</button>
+        </div>
+        <div id="postFieldsWrap">
+          <div style="margin-bottom:16px" id="domainPickerWrap">
+            <div class="form-label" style="margin-bottom:8px">📂 Domain / Category</div>
+            <select class="domain-picker" id="postDomain">
+              <option value="">Select a domain...</option>
+              <option value="UPSC">📚 UPSC</option>
+              <option value="TNPSC">📖 TNPSC</option>
+              <option value="GATE">🎓 GATE</option>
+              <option value="AI">🤖 AI</option>
+              <option value="Machine Learning">🧠 Machine Learning</option>
+              <option value="Python">🐍 Python</option>
+              <option value="JavaScript">⚡ JavaScript</option>
+              <option value="WebDev">🌐 WebDev</option>
+              <option value="DataScience">📊 DataScience</option>
+              <option value="CSS">🎨 CSS</option>
+              <option value="React">⚛️ React</option>
+              <option value="Flutter">📱 Flutter</option>
+              <option value="Cybersecurity">🔒 Cybersecurity</option>
+              <option value="Cloud Computing">☁️ Cloud Computing</option>
+              <option value="DSA">🧩 DSA</option>
+              <option value="Banking">🏦 Banking</option>
+            </select>
+            <div style="display:flex;gap:8px;margin-top:-8px;margin-bottom:12px">
+              <input class="form-inp" id="customDomainInput" placeholder="Add custom domain..."
+                style="margin-bottom:0;flex:1"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDomain();}">
+              <button type="button" onclick="addCustomDomain()"
+                style="padding:0 16px;border-radius:14px;background:var(--grad2);color:#fff;font-size:20px;font-weight:700;flex-shrink:0;height:47px">+</button>
+            </div>
+          </div>
+          <input class="form-inp" id="postTitle" placeholder="Title (optional)">
+          <textarea class="form-inp" id="postDesc" placeholder="Caption... what are you teaching today?"></textarea>
+          <div id="targetProfessionSection">
+            <div class="form-label" style="margin-bottom:10px; margin-top:8px">🎯 Target Audience <span style="color:#FF3366">*</span></div>
+            <div class="hashtag-wrap" id="targetProfChips" style="margin-bottom:18px">
+              <span class="htag sel" onclick="toggleProfTag(this)">School</span>
+              <span class="htag sel" onclick="toggleProfTag(this)">College</span>
+              <span class="htag sel" onclick="toggleProfTag(this)">Working</span>
+            </div>
+          </div>
+          <div id="hashtagSection">
+            <div class="form-label" style="margin-bottom:10px"># Hashtags</div>
+            <div class="hashtag-wrap" id="hashtagChips">
+              <span class="htag" onclick="toggleHtag(this)">#Python</span>
+              <span class="htag" onclick="toggleHtag(this)">#HTML</span>
+              <span class="htag" onclick="toggleHtag(this)">#JavaScript</span>
+              <span class="htag" onclick="toggleHtag(this)">#AI</span>
+              <span class="htag" onclick="toggleHtag(this)">#WebDev</span>
+              <span class="htag" onclick="toggleHtag(this)">#CSS</span>
+              <span class="htag" onclick="toggleHtag(this)">#React</span>
+              <span class="htag" onclick="toggleHtag(this)">#DataScience</span>
+              <span class="htag" onclick="toggleHtag(this)">#Flutter</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;margin-bottom:16px">
+              <input class="form-inp" id="customHtagInput" placeholder="Create new #hashtag..."
+                style="margin-bottom:0;flex:1"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomHashtag();}">
+              <button type="button" onclick="addCustomHashtag()"
+                style="padding:0 16px;border-radius:14px;background:var(--grad2);color:#fff;font-size:20px;font-weight:700;flex-shrink:0;height:47px">+</button>
+            </div>
+          </div>
+        </div><!-- end postFieldsWrap -->
+        <div class="upload-zone" onclick="document.getElementById('postFile').click()" id="uploadZone">
+          <span class="material-icons-round">cloud_upload</span>
+          <p>Tap to select image or video</p>
+        </div>
+        <input type="file" id="postFile" class="hidden" onchange="previewUpload(this)">
+        <div id="uploadPreview" class="upload-preview hidden" style="object-fit:cover"></div>
+        <button type="button" class="pub-btn" onclick="publishPost()">Publish 🚀</button>
+      </div>
+
+      <!-- SEARCH SCREEN -->
+      <div class="screen" id="searchScreen">
+        <div class="search-bar">
+          <span class="material-icons-round">search</span>
+          <input class="search-inp" id="searchInp" placeholder="Search topics, users..."
+            oninput="debounceSearch(this.value)">
+        </div>
+        <div class="tag-chips">
+          <span class="tag-chip active" onclick="filterTag(this,'all')">All</span>
+          <span class="tag-chip" onclick="filterTag(this,'Python')">🐍 Python</span>
+          <span class="tag-chip" onclick="filterTag(this,'JavaScript')">⚡ JS</span>
+          <span class="tag-chip" onclick="filterTag(this,'AI')">🤖 AI</span>
+          <span class="tag-chip" onclick="filterTag(this,'WebDev')">🌐 Web</span>
+          <span class="tag-chip" onclick="filterTag(this,'CSS')">🎨 CSS</span>
+        </div>
+        <div id="searchResults">
+          <div class="empty-state">
+            <span class="material-icons-round">search</span>
+            <p>Search for posts, reels, and creators</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT SCREEN -->
+      <div class="screen" id="chatScreen">
+        <div style="padding: 16px; border-bottom: 1px solid var(--border)">
+          <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">Messages 💬</h2>
+          <p style="font-size:13px;color:var(--sub);margin-top:4px">Tap a user to slide into their DMs</p>
+        </div>
+        <div id="chatUsersList" style="padding:16px">
+          <div class="empty-state">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE SCREEN -->
+      <div class="screen" id="profileScreen">
+        <div class="profile-banner"></div>
+        <div class="profile-pic-area">
+          <div class="profile-av-wrap">
+            <div class="profile-av-ring"></div>
+            <img class="profile-av" id="profileAvatar" src="" alt="Profile"
+              onerror="this.src='https://ui-avatars.com/api/?name=U&background=FF6B6B&color=fff&size=88'">
+          </div>
+          <button type="button" class="profile-edit-btn" onclick="openEditProfile()">Edit Profile</button>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-username" id="profileUsername">@—</div>
+          <div class="profile-bio" id="profileBio"></div>
+          <div class="profile-link" id="profileLink"></div>
+        </div>
+        <div class="profile-stats">
+          <div class="pstat">
+            <div class="pstat-num" id="statPosts">0</div>
+            <div class="pstat-lbl">Posts</div>
+          </div>
+          <div class="pstat">
+            <div class="pstat-num" id="statReels">0</div>
+            <div class="pstat-lbl">Reels</div>
+          </div>
+          <div class="pstat">
+            <div class="pstat-num" id="statLikes">0</div>
+            <div class="pstat-lbl">Likes</div>
+          </div>
+          <div class="pstat">
+            <div class="pstat-num" id="statSaved">0</div>
+            <div class="pstat-lbl">Saved</div>
+          </div>
+        </div>
+        <div class="profile-badges" id="profileBadges"></div>
+        <div class="profile-posts-section">
+          <div class="profile-posts-header">
+            <span class="material-icons-round">grid_on</span> My Posts
+          </div>
+          <div class="profile-posts-grid" id="profilePostsGrid"></div>
+        </div>
+        <button class="logout-btn" onclick="logoutUser()">
+          <span class="material-icons-round">logout</span>
+          Log Out
+        </button>
+      </div>
+
+      <!-- ADMIN SCREEN -->
+      <div class="screen" id="adminScreen">
+        <div class="admin-header">
+          <div class="admin-title">🛡️ Admin Dashboard</div>
+          <div class="admin-subtitle">username: <b>guru</b> · Review & approve content</div>
+        </div>
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-pending" style="color:var(--accent)">—</div>
+            <div class="asc-lbl">Pending</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-approved" style="color:#4ade80">—</div>
+            <div class="asc-lbl">Approved</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-rejected" style="color:var(--accent)">—</div>
+            <div class="asc-lbl">Rejected</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-users" style="color:var(--accent3)">—</div>
+            <div class="asc-lbl">Users</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-posts" style="color:var(--accent2)">—</div>
+            <div class="asc-lbl">Posts</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-reels" style="color:var(--accent2)">—</div>
+            <div class="asc-lbl">Reels</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-likes">—</div>
+            <div class="asc-lbl">Likes</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="asc-num" id="adm-comments">—</div>
+            <div class="asc-lbl">Comments</div>
+          </div>
+        </div>
+        <div class="admin-section-title">⏳ Pending Review</div>
+        <div id="adminPendingList">
+          <div class="empty-state"><span class="material-icons-round">hourglass_empty</span>
+            <p>Loading...</p>
+          </div>
+        </div>
+
+        <div class="admin-section-title" style="margin-top:24px">👥 Manage Users</div>
+        <div id="adminUsersList" style="padding: 0 16px 20px;">
+          <div class="empty-state">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS SCREEN -->
+      <div class="screen" id="settingsScreen">
+        <div class="settings-header">
+          <button type="button" class="settings-back" onclick="navigate('home', null)">
+            <span class="material-icons-round">arrow_back</span>
+          </button>
+          <div class="settings-title">Settings</div>
+        </div>
+
+        <!-- Account -->
+        <div class="settings-section">
+          <div class="settings-section-label">Account</div>
+          <div class="settings-card">
+            <div class="settings-row" onclick="openEditProfile()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">👤</div>
+              <div class="settings-row-title">Edit Profile</div>
+              <span class="material-icons-round settings-row-arrow">chevron_right</span>
+            </div>
+            <div class="settings-row" onclick="openChangePassword()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">🔐</div>
+              <div class="settings-row-title">Change Password</div>
+              <span class="material-icons-round settings-row-arrow">chevron_right</span>
+            </div>
+            <div class="settings-row danger" onclick="showDeleteAccountConfirm()">
+              <div class="settings-row-icon">❌</div>
+              <div class="settings-row-title">Delete Account</div>
+              <span class="material-icons-round settings-row-arrow">chevron_right</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="settings-section">
+          <div class="settings-section-label">Preferences</div>
+          <div class="settings-card">
+            <div class="settings-row" onclick="toggleTheme()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(112,0,255,.15))">🌗</div>
+              <div class="settings-row-title">Theme</div>
+              <label class="toggle-switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="settingsThemeToggle" onchange="toggleTheme()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(255,51,102,.15))">🔔</div>
+              <div class="settings-row-title">Notifications</div>
+              <label class="toggle-switch" onclick="event.stopPropagation()">
+                <input type="checkbox" id="settingsNotifToggle" checked onchange="toggleSettingsNotif()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chatbot -->
+        <div class="settings-section">
+          <div class="settings-section-label">Chatbot</div>
+          <div class="settings-card">
+            <div class="settings-row" onclick="showClearChatConfirm()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,51,102,.15), rgba(255,107,107,.15))">🗑️</div>
+              <div class="settings-row-title">Clear Chat History</div>
+              <span class="material-icons-round settings-row-arrow">chevron_right</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="settings-section">
+          <div class="settings-section-label">Security</div>
+          <div class="settings-card">
+            <div class="settings-row highlight" onclick="logoutUser()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,107,107,.15), rgba(255,51,102,.15))">🚪</div>
+              <div class="settings-row-title" style="font-weight:600;color:var(--accent)">Logout</div>
+              <span class="material-icons-round settings-row-arrow" style="color:var(--accent)">chevron_right</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-version">Scroll2Learn v2.1 ✨</div>
+      </div>
+
+    </div>
+
+    <!-- ═══ BOTTOM NAV ═══ -->
+    <nav class="bottom-nav" id="bottomNav" style="display:none">
+      <button type="button" class="nav-btn active" data-section="home" onclick="navigate('home',this)">
+        <span class="material-icons-round">home</span>
+      </button>
+      <button type="button" class="nav-btn-emoji" id="radialTriggerBtn" onclick="toggleRadialMenu()">
+        😊
+      </button>
+      <button type="button" class="nav-btn" data-section="reels" onclick="navigate('reels',this)">
+        <span class="material-icons-round">play_circle</span>
+      </button>
+    </nav>
+
+  </div><!-- #app -->
+
+  <!-- ═══ RADIAL MENU OVERLAY ═══ -->
+  <div id="radialMenuOverlay" class="radial-overlay" onclick="closeRadialMenu(event)">
+    <div id="radialMenuWrapper" class="radial-wrapper">
+      <!-- Items will pop up here mathematically or structurally positioned -->
+      <div class="radial-wheel" id="radialWheel">
+        <div class="radial-item" data-action="profile" onclick="handleRadialClick('profile')">
+          <div class="radial-icon" style="background:linear-gradient(135deg, #00F0FF, #C44DFF)"><span class="material-icons-round">person_outline</span></div>
+        </div>
+        <div class="radial-item" data-action="add" onclick="handleRadialClick('add')">
+          <div class="radial-icon" style="background:var(--grad)"><span class="material-icons-round">add</span></div>
+        </div>
+        <div class="radial-item" data-action="search" onclick="handleRadialClick('search')">
+          <div class="radial-icon" style="background:linear-gradient(135deg, #FF3366, #ff8c42)"><span class="material-icons-round">search</span></div>
+        </div>
+        <div class="radial-item" data-action="ai" onclick="handleRadialClick('ai')">
+          <div class="radial-icon" style="background:#5A4FCF"><span class="material-icons-round">smart_toy</span></div>
+        </div>
+        <div class="radial-item" data-action="notif" onclick="handleRadialClick('notif')">
+          <div class="radial-icon" style="background:#FF9F1C"><span class="material-icons-round">notifications_none</span></div>
+        </div>
+        <div class="radial-item" data-action="settings" onclick="handleRadialClick('settings')">
+          <div class="radial-icon" style="background:#6B7280"><span class="material-icons-round">settings</span></div>
+        </div>
+        <div class="radial-item" data-action="explore" onclick="handleRadialClick('explore')">
+          <div class="radial-icon" style="background:#2DD4BF"><span class="material-icons-round">explore</span></div>
+        </div>
+        <div class="radial-item" id="adminRadialItem" data-action="admin" onclick="handleRadialClick('admin')" style="display:none">
+          <div class="radial-icon" style="background:linear-gradient(135deg, #FF0055, #FFB300)"><span class="material-icons-round">admin_panel_settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ OVERLAYS ═══ -->
+
+  <!-- OTP Overlay Modal -->
+  <div class="screen" id="otpOverlay" style="display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);align-items:center;justify-content:center;padding:32px 28px;">
+    <div style="background:var(--surface);width:100%;max-width:400px;border-radius:24px;padding:32px 24px;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center">
+      <div style="font-size:42px;margin-bottom:12px">📩</div>
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;margin-bottom:8px">Check your email</h2>
+      <p style="color:var(--sub);font-size:14px;margin-bottom:24px;line-height:1.5">We've sent a 6-digit code to verify your account. It expires in 5 minutes.</p>
+      
+      <input type="text" id="otpInput" class="auth-input" placeholder="000000" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:8px;font-family:monospace;margin-bottom:12px;padding:14px">
+      <div id="otpErr" style="color:var(--accent);font-size:13px;margin-bottom:16px;min-height:16px"></div>
+      
+      <button type="button" class="auth-btn" id="otpVerifyBtn" onclick="verifyOTP()" style="margin-bottom:12px">Verify OTP ✨</button>
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+          <button type="button" onclick="cancelOTP()" style="background:none;color:var(--sub);font-size:13px;font-weight:600">← Back</button>
+          <button type="button" onclick="resendOTP()" style="background:none;color:var(--accent3);font-size:13px;font-weight:700">Resend OTP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment Sheet -->
+  <div class="overlay-bg" id="commentOverlay" onclick="closeComment()"></div>
+  <div class="bottom-sheet" id="commentSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Comments</div>
+    <div class="comment-list-inner" id="commentList">
+      <div class="empty-state" style="padding:30px 0">
+        <span class="material-icons-round">chat_bubble_outline</span>
+        <p>No comments yet. Be first!</p>
+      </div>
+    </div>
+    <div class="comment-input-row">
+      <input class="comm-inp" id="commInput" placeholder="Add a comment..."
+        onkeypress="if(event.key==='Enter')sendComment()">
+      <button type="button" class="comm-send" onclick="sendComment()"><span
+          class="material-icons-round">send</span></button>
+    </div>
+  </div>
+
+  <!-- Share Sheet -->
+  <div class="overlay-bg" id="shareOverlay" onclick="closeShare()"></div>
+  <div class="bottom-sheet" id="shareSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Share</div>
+    <div class="share-grid">
+      <div class="share-opt" onclick="shareAction('copy')">
+        <div class="share-icon"><span class="material-icons-round">link</span></div>
+        <span>Copy Link</span>
+      </div>
+      <div class="share-opt" onclick="shareAction('whatsapp')">
+        <div class="share-icon"><span class="material-icons-round">chat</span></div>
+        <span>WhatsApp</span>
+      </div>
+      <div class="share-opt" onclick="shareAction('twitter')">
+        <div class="share-icon"><span class="material-icons-round">tag</span></div>
+        <span>Twitter</span>
+      </div>
+      <div class="share-opt" onclick="shareAction('more')">
+        <div class="share-icon"><span class="material-icons-round">more_horiz</span></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Upload Sheet -->
+  <div class="overlay-bg" id="storyOverlay" onclick="closeStoryUpload()"></div>
+  <div class="bottom-sheet" id="storySheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Story</div>
+    <div style="padding:16px;overflow-y:auto">
+      <div class="upload-zone" onclick="document.getElementById('storyFile').click()" style="margin-bottom:14px">
+        <span class="material-icons-round">add_photo_alternate</span>
+        <p>Tap to add photo or video</p>
+      </div>
+      <input type="file" id="storyFile" class="hidden" accept="image/*,video/*" onchange="previewStory(this)">
+      <div id="storyPreviewWrap" class="hidden upload-preview" style="margin-bottom:14px"></div>
+      <input class="form-inp" id="storyCaption" placeholder="Add a caption..." style="margin-bottom:14px">
+      <button type="button" class="pub-btn" onclick="submitStory()">Share Story ⚡</button>
+    </div>
+  </div>
+
+  <!-- Story Viewer -->
+  <div class="story-viewer" id="storyViewer">
+    <div class="story-viewer-bg" id="storyViewerBg"></div>
+    <div class="story-viewer-top">
+      <div class="story-bars" id="storyBars"></div>
+      <div class="story-viewer-user">
+        <img class="sv-av" id="svAvatar" src="">
+        <span class="sv-name" id="svName"></span>
+        <span style="color:rgba(255,255,255,.6);font-size:12px" id="svTime"></span>
+        <button type="button" class="sv-close" onclick="closeStoryViewer()">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+    </div>
+    <div class="story-viewer-tap-areas">
+      <div class="sv-tap-prev" onclick="prevStory()"></div>
+      <div class="sv-tap-next" onclick="nextStory()"></div>
+    </div>
+    <div class="story-caption" id="storyViewerCaption"></div>
+  </div>
+
+  <!-- Notif Panel -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-head">
+      Activity
+      <button type="button" class="icon-btn" onclick="closeNotif()" style="width:28px;height:28px">
+        <span class="material-icons-round" style="font-size:18px">close</span>
+      </button>
+    </div>
+    <div class="notif-items" id="notifItems">
+      <div class="notif-item">👋 Welcome to Scroll2Learn! Start exploring.</div>
+    </div>
+  </div>
+
+  <!-- AI Doubt Solver Modal -->
+  <div class="ai-modal-overlay" id="aiModalOverlay" onclick="if(event.target===this)closeAI()">
+    <div class="ai-modal">
+      <div class="ai-modal-head">
+        <div class="ai-modal-title">🤖 AI Doubt Solver</div>
+        <button type="button" class="icon-btn" onclick="closeAI()"><span
+            class="material-icons-round">close</span></button>
+      </div>
+      <div class="ai-topic-label" id="aiTopicLabel">—</div>
+      <div class="ai-chat-area" id="aiChatArea">
+        <div id="aiMessages"></div>
+      </div>
+      <div class="ai-input-area">
+        <input class="ai-chat-input" id="aiChatInput" placeholder="Ask a follow-up question..."
+          onkeydown="if(event.key==='Enter'){event.preventDefault();sendAIMessage();}">
+        <button type="button" class="ai-send-btn" onclick="sendAIMessage()">
+          <span class="material-icons-round">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastEl"></div>
+
+  <!-- DM Chat Sheet -->
+  <div class="overlay-bg" id="chatDMOverlay" onclick="closeDirectMessage()"></div>
+  <div class="bottom-sheet" id="chatDMSheet" style="height: 80vh;">
+    <div class="sheet-handle"></div>
+    <div style="padding:0 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+      <img id="dmRecipientAv" style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700" id="dmRecipientName">@—</div>
+    </div>
+    <div id="dmMsgList" style="flex:1;overflow-y:auto;padding:16px;background:var(--bg)"></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;background:var(--surface)">
+      <input class="comm-inp" id="dmInput" placeholder="Type a message..." style="margin-bottom:0"
+        onkeypress="if(event.key==='Enter')sendDirectMsg()">
+      <button type="button" class="comm-send" onclick="sendDirectMsg()"><span
+          class="material-icons-round">send</span></button>
+    </div>
+  </div>
+
+  <!-- Post Menu Overlay -->
+  <div class="overlay-bg" id="postMenuOverlay" onclick="closePostMenu()"></div>
+  <div class="bottom-sheet" id="postMenuSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Post Options</div>
+    <div style="padding:12px 16px">
+      <button type="button" class="post-menu-opt" onclick="hidePost()">
+        <span class="material-icons-round">visibility_off</span> Hide this post
+      </button>
+      <button type="button" class="post-menu-opt post-menu-delete" id="postMenuDeleteBtn" onclick="deletePost()"
+        style="display:none">
+        <span class="material-icons-round">delete</span> Delete post
+      </button>
+      <button type="button" class="post-menu-opt" onclick="closePostMenu()">
+        <span class="material-icons-round">close</span> Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Admin Edit Modal -->
+  <div id="adminEditModal" class="admin-edit-modal">
+    <div class="admin-edit-content">
+      <h3 class="admin-edit-title">Edit Post</h3>
+      <input type="hidden" id="edit-pid">
+      <div class="admin-edit-field">
+        <label class="admin-edit-label">Title</label>
+        <input type="text" id="edit-title" class="admin-edit-input" placeholder="Enter title">
+      </div>
+      <div class="admin-edit-field">
+        <label class="admin-edit-label">Description</label>
+        <textarea id="edit-desc" class="admin-edit-input" style="min-height:80px;resize:none"
+          placeholder="Enter description"></textarea>
+      </div>
+      <div class="admin-edit-field">
+        <label class="admin-edit-label">Domain</label>
+        <select id="edit-domain" class="admin-edit-input">
+          <option value="Science">Science</option>
+          <option value="Maths">Maths</option>
+          <option value="History">History</option>
+          <option value="Technology">Technology</option>
+          <option value="Geography">Geography</option>
+          <option value="Language">Language</option>
+          <option value="Art">Art</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="admin-edit-btns">
+        <button type="button" class="admin-edit-btn ae-cancel" onclick="adminCloseEdit()">Cancel</button>
+        <button type="button" class="admin-edit-btn ae-save" onclick="adminUpdatePost()">Update ⚡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal (Delete Account / Clear Chat) -->
+  <div class="confirm-modal-overlay" id="confirmModalOverlay" onclick="if(event.target===this)closeConfirmModal()">
+    <div class="confirm-modal">
+      <div class="confirm-modal-icon" id="confirmIcon">&#9888;&#65039;</div>
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMsg">This action cannot be undone.</p>
+      <div class="confirm-modal-btns">
+        <button type="button" class="confirm-btn confirm-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+        <button type="button" class="confirm-btn confirm-btn-danger" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="pwd-modal-overlay" id="pwdModalOverlay" onclick="if(event.target===this)closeChangePassword()">
+    <div class="pwd-modal">
+      <h3>&#128272; Change Password</h3>
+      <div class="pwd-field">
+        <label>Current Password</label>
+        <input type="password" id="pwdOld" placeholder="Enter current password">
+      </div>
+      <div class="pwd-field">
+        <label>New Password</label>
+        <input type="password" id="pwdNew" placeholder="Enter new password (min 6 chars)">
+      </div>
+      <div class="pwd-field">
+        <label>Confirm New Password</label>
+        <input type="password" id="pwdConfirm" placeholder="Confirm new password">
+      </div>
+      <div class="pwd-err" id="pwdErr"></div>
+      <div class="confirm-modal-btns">
+        <button type="button" class="confirm-btn confirm-btn-cancel" onclick="closeChangePassword()">Cancel</button>
+        <button type="button" class="confirm-btn confirm-btn-primary" onclick="submitChangePassword()">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       CONFIG & STATE
+    ═══════════════════════════════════════════════════════ */
+    const API = 'http://localhost:5000';
+    let authToken = localStorage.getItem('s2l_token') || '';
+    let currentUser = JSON.parse(localStorage.getItem('s2l_user') || 'null');
+    let feedPage = 1;
+    let feedLoading = false;
+    let feedDone = false;
+    let scrollObserver = null;          // single global observer reference
+    let appBooted = false;              // prevent double-boot on init
+    let currentPostId = null;
+    let currentAIPostTitle = '';
+    let currentStoryGroup = null;
+    let currentStoryIdx = 0;
+    let storyTimer = null;
+    let storyType = 'post';
+    let selectedHtags = [];
+    let currentCategory = 'All';
+    let reelsData = [];
+    let isMuted = true; // Global muted state for reels
+
+    /* UI HELPERS */
+    function toggleGlobalMute(e, btn) {
+      if (e) e.stopPropagation();
+      isMuted = !isMuted;
+      // Update all visible icons
+      document.querySelectorAll('.video-sound-toggle span').forEach(s => {
+        s.textContent = isMuted ? 'volume_off' : 'volume_up';
+      });
+      // Update all video elements
+      document.querySelectorAll('video').forEach(v => {
+        v.muted = isMuted;
+      });
+    }
+
+    let homeLastTap = 0;
+    const HOME_DOUBLE_TAP_DELAY = 400; // ms window for double-tap
+    let menuPostId = null;
+    let menuPostAuthor = '';
+
+    /* ═══════════════════════════════════════════════════════
+       INIT — runs once on page load, no reload triggers here
+    ═══════════════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Prevent Enter key in auth inputs from submitting anything
+      document.querySelectorAll('.auth-input, .setup-input').forEach(inp => {
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); }
+        });
+      });
+
+      if (authToken && currentUser && !appBooted) {
+        appBooted = true;
+        showMainApp();
+      }
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       INFINITE SCROLL — one observer, never duplicated
+    ═══════════════════════════════════════════════════════ */
+    function initInfiniteScroll() {
+      // Always kill the old observer first
+      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+      const old = document.getElementById('feedSentinel');
+      if (old) old.remove();
+
+      const sentinel = document.createElement('div');
+      sentinel.id = 'feedSentinel';
+      sentinel.style.cssText = 'height:4px;width:100%;flex-shrink:0;';
+
+      // Append at the END of homeScreen (after feedEnd), inside the scrollable container
+      document.getElementById('homeScreen').appendChild(sentinel);
+
+      scrollObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && !feedLoading && !feedDone) {
+          loadFeed();
+        }
+      }, {
+        root: document.getElementById('homeScreen'),  // scroll root = homeScreen
+        rootMargin: '0px 0px 80px 0px',
+        threshold: 0
+      });
+      scrollObserver.observe(sentinel);
+    }
+
+    async function openChat() {
+      navigate('chat', null);
+      loadChatUsers();
+    }
+
+    async function loadChatUsers() {
+      try {
+        const data = await api('/chat/users');
+        const list = document.getElementById('chatUsersList');
+        list.innerHTML = '';
+        if (!data.users || data.users.length === 0) {
+          list.innerHTML = '<div class="empty-state"><p>No users found on the platform yet.</p></div>';
+          return;
+        }
+        data.users.forEach(u => {
+          const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${u.username}&background=C44DFF&color=fff`;
+          const div = document.createElement('div');
+          div.className = 'search-card';
+          div.onclick = () => openDirectMessage(u.id, u.username, av);
+          div.innerHTML = `
+            <div class="search-card-icon"><img src="${av}"></div>
+            <div class="search-card-text">
+              <h4>${u.full_name || u.username}</h4>
+              <p>@${u.username}</p>
+            </div>
+            <span class="material-icons-round" style="color:var(--sub)">chevron_right</span>
+          `;
+          list.appendChild(div);
+        });
+      } catch (e) { toast('⚠️ Error loading users'); }
+    }
+
+    let currentChatUserId = null;
+    function openDirectMessage(uid, username, avatar) {
+      currentChatUserId = uid;
+      document.getElementById('dmRecipientName').textContent = '@' + username;
+      document.getElementById('dmRecipientAv').src = avatar;
+      document.getElementById('dmMsgList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+      showSheet('chatDMSheet', 'chatDMOverlay');
+      refreshChatMsgs();
+    }
+
+    function closeDirectMessage() {
+      hideSheet('chatDMSheet', 'chatDMOverlay');
+      currentChatUserId = null;
+    }
+
+    async function refreshChatMsgs() {
+      if (!currentChatUserId) return;
+      try {
+        const data = await api('/chat/' + currentChatUserId);
+        const list = document.getElementById('dmMsgList');
+        if (!data.messages || data.messages.length === 0) {
+          list.innerHTML = '<div class="empty-state" style="padding:40px 0;opacity:0.5"><span class="material-icons-round" style="font-size:32px">waving_hand</span><p>Say hi!</p></div>';
+          return;
+        }
+        list.innerHTML = '';
+        data.messages.forEach(m => {
+          const isMe = m.sender_id === currentUser.id;
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
+          row.style.marginBottom = '12px';
+          const bubble = document.createElement('div');
+          bubble.textContent = m.text;
+          bubble.style.maxWidth = '80%';
+          bubble.style.padding = '10px 14px';
+          bubble.style.borderRadius = '16px';
+          bubble.style.fontSize = '14px';
+          bubble.style.lineHeight = '1.4';
+          if (isMe) {
+            bubble.style.background = 'var(--grad2)';
+            bubble.style.color = '#fff';
+            bubble.style.borderBottomRightRadius = '4px';
+          } else {
+            bubble.style.background = 'var(--surface2)';
+            bubble.style.color = 'var(--text)';
+            bubble.style.borderBottomLeftRadius = '4px';
+          }
+          row.appendChild(bubble);
+          list.appendChild(row);
+        });
+        setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
+      } catch (e) {
+        console.error('Chat refresh failed', e);
+      }
+    }
+
+    async function sendDirectMsg() {
+      const inp = document.getElementById('dmInput');
+      const text = inp.value.trim();
+      if (!text || !currentChatUserId) return;
+      inp.value = '';
+      try {
+        await api('/chat/' + currentChatUserId, { method: 'POST', body: JSON.stringify({ text }) });
+        refreshChatMsgs();
+      } catch (e) { toast('⚠️ ' + e.message); }
+    }
+
+    // Silently refresh user data without triggering any reloads
+    async function refreshUserSilent() {
+      try {
+        const res = await api('/auth/me');
+        if (res.user) {
+          currentUser = res.user;
+          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          updateProfileUI();
+          // Show admin tab if admin
+          const adminTab = document.getElementById('adminNavBtn');
+          if (adminTab) adminTab.style.display = currentUser.is_admin ? 'flex' : 'none';
+        }
+      } catch { }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       API HELPER
+    ═══════════════════════════════════════════════════════ */
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', ...opts.headers };
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      if (opts.body instanceof FormData) delete headers['Content-Type'];
+      const res = await fetch(API + path, { ...opts, headers });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       AUTH
+    ═══════════════════════════════════════════════════════ */
+    let authMode = 'login';
+
+    function switchAuthTab(mode) {
+      authMode = mode;
+      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (mode === 'login' && i === 0) || (mode === 'signup' && i === 1)));
+      document.getElementById('signupFields').classList.toggle('hidden', mode === 'login');
+      document.getElementById('authSubmit').textContent = mode === 'login' ? 'Log In' : 'Create Account';
+      document.getElementById('authErr').textContent = '';
+    }
+
+    // OTP Handlers
+    let pendingRegData = null;
+
+    async function handleAuth() {
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPass').value;
+      const errEl = document.getElementById('authErr');
+      errEl.textContent = '';
+
+      if (!email || !pass) { errEl.textContent = 'Please fill all fields'; return; }
+
+      const btn = document.getElementById('authSubmit');
+      btn.textContent = '...'; btn.disabled = true;
+
+      try {
+        if (authMode === 'login') {
+          const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ identifier: email, password: pass }) });
+          processAuthSuccess(data);
+        } else {
+          const username = document.getElementById('regUsername').value.trim();
+          if (!username) { errEl.textContent = 'Username required'; btn.textContent = 'Create Account'; btn.disabled = false; return; }
+          
+          pendingRegData = { username, email, password: pass };
+          
+          // Request OTP instead of direct register
+          const res = await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email, username }) });
+          
+          document.getElementById('otpOverlay').style.display = 'flex';
+          document.getElementById('otpErr').textContent = '';
+          document.getElementById('otpInput').value = '';
+          document.getElementById('authScreen').style.display = 'none'; // hide main auth
+          toast('📩 OTP Sent to your email');
+        }
+      } catch (e) {
+        errEl.textContent = e.message;
+      }
+      btn.disabled = false;
+      btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
+    }
+
+    async function verifyOTP() {
+      const otp = document.getElementById('otpInput').value.trim();
+      const errEl = document.getElementById('otpErr');
+      const btn = document.getElementById('otpVerifyBtn');
+      errEl.textContent = '';
+      if(!otp) { errEl.textContent = 'Enter the 6-digit code'; return; }
+
+      btn.disabled = true; btn.textContent = 'Verifying...';
+      try {
+        const payload = { ...pendingRegData, otp };
+        const data = await api('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('otpOverlay').style.display = 'none';
+        processAuthSuccess(data);
+      } catch (e) {
+        errEl.textContent = e.message;
+      }
+      btn.disabled = false; btn.textContent = 'Verify OTP ✨';
+    }
+
+    async function resendOTP() {
+      if(!pendingRegData) return;
+      try {
+        await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email: pendingRegData.email, username: pendingRegData.username }) });
+        toast('📩 OTP Resent Successfully!');
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+      }
+    }
+
+    function cancelOTP() {
+        pendingRegData = null;
+        document.getElementById('otpOverlay').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
+    }
+
+    function processAuthSuccess(data) {
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('s2l_token', authToken);
+        localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+        appBooted = true;
+
+        if (data.is_new || !currentUser.is_setup) {
+          showSetup();
+        } else {
+          showMainApp();
+        }
+    }
+
+    function showSetup() {
+      document.getElementById('authScreen').style.display = 'none';
+      const s = document.getElementById('setupScreen');
+      s.style.display = 'flex';
+      const name = currentUser.full_name || currentUser.username || '';
+      document.getElementById('setupName').value = name;
+      document.getElementById('setupAvatarImg').src = currentUser.avatar ? API + currentUser.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=FF6B6B&color=fff&size=100`;
+    }
+
+    function previewSetupAvatar(input) {
+      if (input.files[0]) {
+        document.getElementById('setupAvatarImg').src = URL.createObjectURL(input.files[0]);
+      }
+    }
+
+    let selectedDomains = [];
+
+    function toggleSetupDomain(el) {
+      el.classList.toggle('selected');
+      const domain = el.dataset.domain;
+      if (el.classList.contains('selected')) {
+        if (!selectedDomains.includes(domain)) selectedDomains.push(domain);
+      } else {
+        selectedDomains = selectedDomains.filter(d => d !== domain);
+      }
+    }
+
+    function addCustomSetupDomain() {
+      const inp = document.getElementById('customSetupDomainInput');
+      const name = inp.value.trim();
+      if (!name) return;
+      // Check if already exists
+      const existing = document.querySelector(`#setupDomainGrid .domain-chip[data-domain="${name}"]`);
+      if (existing) { existing.click(); inp.value = ''; return; }
+      // Create new chip (pre-selected)
+      const chip = document.createElement('span');
+      chip.className = 'domain-chip selected';
+      chip.dataset.domain = name;
+      chip.textContent = '🏷️ ' + name;
+      chip.onclick = function () { toggleSetupDomain(this); };
+      document.getElementById('setupDomainGrid').appendChild(chip);
+      if (!selectedDomains.includes(name)) selectedDomains.push(name);
+      // Also add to domain picker in Add screen
+      addDomainOption(name);
+      inp.value = '';
+      toast('✅ Added: ' + name);
+    }
+
+    function addCustomDomain() {
+      const inp = document.getElementById('customDomainInput');
+      const name = inp.value.trim();
+      if (!name) return;
+      addDomainOption(name);
+      document.getElementById('postDomain').value = name;
+      inp.value = '';
+      toast('✅ Domain added: ' + name);
+    }
+
+    function addDomainOption(name) {
+      const sel = document.getElementById('postDomain');
+      // Check if already exists
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === name) return;
+      }
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = '🏷️ ' + name;
+      sel.appendChild(opt);
+    }
+
+    async function submitSetup() {
+      try {
+        const btn = document.querySelector('#setupScreen .auth-btn');
+        if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+        const fd = new FormData();
+        fd.append('full_name', document.getElementById('setupName')?.value.trim() || '');
+        fd.append('bio', document.getElementById('setupBio')?.value.trim() || '');
+        fd.append('website', document.getElementById('setupWebsite')?.value.trim() || '');
+        fd.append('interests', JSON.stringify(selectedDomains));
+        fd.append('profession', document.getElementById('setupProfession')?.value || 'College');
+        const avatarFile = document.getElementById('setupAvatarInput')?.files[0];
+        if (avatarFile) fd.append('avatar', avatarFile);
+
+        const data = await api('/profile/setup', { method: 'PUT', body: fd });
+        if (data && data.user) {
+          currentUser = data.user;
+          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+        }
+        showMainApp();
+      } catch (e) {
+        console.error('Setup Error:', e);
+        toast('⚠️ ' + e.message);
+        const btn = document.querySelector('#setupScreen .auth-btn');
+        if (btn) { btn.textContent = "Let's Go! 🚀"; btn.disabled = false; }
+      }
+    }
+
+    async function editProfession() {
+      const currentProf = currentUser?.profession || 'College';
+      const prof = prompt("Enter your profession (School, College, or Working):", currentProf);
+      if(!prof) return;
+      const valid = ['School', 'College', 'Working'];
+      const normalized = valid.find(v => v.toLowerCase() === prof.toLowerCase().trim());
+      if(!normalized) {
+        toast('⚠️ Please enter exactly: School, College, or Working');
+        return;
+      }
+      try {
+        const data = await api('/profile/profession', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profession: normalized })
+        });
+        if (data.user) {
+          currentUser = data.user;
+          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          toast('✅ Profession updated to ' + normalized);
+        }
+      } catch(e) {
+        toast('⚠️ Failed to update profession');
+      }
+    }
+
+    function skipSetup() {
+      showMainApp();
+    }
+
+    function showMainApp() {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('setupScreen').style.display = 'none';
+      document.getElementById('topbar').style.display = 'flex';
+      document.getElementById('mainArea').style.display = 'block';
+      document.getElementById('bottomNav').style.display = 'flex';
+
+      // Reset to home screen
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('homeScreen').classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      const homeBtn = document.querySelector('.nav-btn[data-section="home"]');
+      if (homeBtn) homeBtn.classList.add('active');
+
+      // Show/hide admin tab
+      const adminTab = document.getElementById('adminNavBtn');
+      if (adminTab) adminTab.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
+      
+      const adminRadial = document.getElementById('adminRadialItem');
+      if (adminRadial) adminRadial.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
+      
+      initRadialItems(); // Adjust radial layout dynamically for admin item
+
+      // ── CRITICAL: reset feed state BEFORE setting up observer
+      feedPage = 1; feedDone = false; feedLoading = false;
+      document.getElementById('feedContainer').innerHTML = '';
+      document.getElementById('feedEnd').classList.add('hidden');
+
+      updateProfileUI();
+      initInfiniteScroll();   // observer will trigger loadFeed() automatically
+      loadStories();
+      loadReels();
+      // ⚠️  Do NOT call loadFeed() here — the IntersectionObserver handles it
+      // Calling it here + observer = double call = the loop bug
+
+      // Silently verify token in background (no reload side-effects)
+      refreshUserSilent();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════════════ */
+    function navigate(section, btn) {
+      // Pause all videos globally to prevent audio bleed
+      document.querySelectorAll('video').forEach(v => v.pause());
+
+      // ── Double-tap Home to refresh ──
+      if (section === 'home') {
+        const now = Date.now();
+        const isAlreadyHome = document.getElementById('homeScreen').classList.contains('active');
+        if (isAlreadyHome && (now - homeLastTap) < HOME_DOUBLE_TAP_DELAY) {
+          // Double-tap detected → refresh feed
+          homeLastTap = 0;
+          refreshHomeFeed();
+          return;
+        }
+        homeLastTap = now;
+        if (isAlreadyHome) {
+          // Single tap while already on home — just scroll to top, don't navigate
+          document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+
+      // Hide all screens
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      // Deactivate all nav buttons
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+      const screenMap = { home: 'homeScreen', reels: 'reelsScreen', add: 'addScreen', search: 'searchScreen', profile: 'profileScreen', admin: 'adminScreen', settings: 'settingsScreen', chat: 'chatScreen' };
+      const screen = document.getElementById(screenMap[section]);
+      if (screen) screen.classList.add('active');
+
+      // Always find the correct nav button by data-section (avoids wrong-btn bugs)
+      const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
+      if (navBtn) navBtn.classList.add('active');
+
+      if (section === 'profile') { loadProfileStats(); updateProfileUI(); loadMyPosts(); }
+      if (section === 'reels') { setTimeout(activateReels, 100); }
+      if (section === 'admin') { loadAdminScreen(); }
+      if (section === 'settings') { syncSettingsToggles(); }
+    }
+
+    function refreshHomeFeed() {
+      // Reset state
+      feedPage = 1;
+      feedDone = false;
+      feedLoading = false;
+      document.getElementById('feedContainer').innerHTML = '';
+      document.getElementById('feedEnd').classList.add('hidden');
+      // Scroll to top
+      document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
+      // Re-init infinite scroll (which triggers loadFeed)
+      initInfiniteScroll();
+      // Also refresh stories
+      loadStories();
+      toast('🔄 Feed refreshed!');
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STORIES
+    ═══════════════════════════════════════════════════════ */
+    async function loadStories() {
+      try {
+        const stories = await api('/stories');
+        const row = document.getElementById('storiesRow');
+        // Keep "Your Story" bubble
+        const addBubble = row.children[0];
+        row.innerHTML = '';
+        row.appendChild(addBubble);
+        // Update your story ring based on whether you've posted
+        stories.forEach(group => {
+          const av = group.avatar ? API + group.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(group.username)}&background=333&color=fff&size=64`;
+          const isYours = currentUser && group.user_id === currentUser.id;
+          const bubble = document.createElement('div');
+          bubble.className = 'story-bubble';
+          bubble.innerHTML = `
+        <div class="story-ring${group.has_unseen ? '' : ' seen'}">
+          <div class="story-ring-inner">
+            <img src="${av}" alt="${group.username}" onerror="this.src='https://ui-avatars.com/api/?name=${group.username}&background=333&color=fff&size=64'">
+          </div>
+        </div>
+        <span class="story-name">${isYours ? 'Your Story' : group.username}</span>`;
+          bubble.onclick = () => openStoryViewer(group);
+          row.appendChild(bubble);
+        });
+      } catch (e) { console.warn('Stories error:', e); }
+    }
+
+    function openStoryViewer(group) {
+      currentStoryGroup = group;
+      currentStoryIdx = 0;
+      document.getElementById('storyViewer').classList.add('show');
+      renderStory();
+    }
+
+    function renderStory() {
+      const story = currentStoryGroup.stories[currentStoryIdx];
+      const group = currentStoryGroup;
+      const av = group.avatar ? API + group.avatar : `https://ui-avatars.com/api/?name=${group.username}&background=333&color=fff&size=36`;
+      document.getElementById('svAvatar').src = av;
+      document.getElementById('svName').textContent = group.username;
+      document.getElementById('svTime').textContent = story.time;
+      document.getElementById('storyViewerCaption').textContent = story.caption || '';
+
+      const bg = document.getElementById('storyViewerBg');
+      const isVideo = story.media_url.match(/\.(mp4|webm|mov)$/i);
+      const url = story.media_url.startsWith('http') ? story.media_url : API + story.media_url;
+      bg.innerHTML = isVideo
+        ? `<video src="${url}" autoplay muted loop style="width:100%;height:100%;object-fit:contain;background:#000"></video>`
+        : `<img src="${url}" style="width:100%;height:100%;object-fit:contain;background:#000">`;
+
+      // Progress bars
+      const barsEl = document.getElementById('storyBars');
+      barsEl.innerHTML = currentStoryGroup.stories.map((s, i) => `
+    <div class="story-bar">
+      <div class="story-bar-fill" id="sbar${i}" style="width:${i < currentStoryIdx ? '100%' : '0%'}"></div>
+    </div>`).join('');
+
+      clearInterval(storyTimer);
+      const fill = document.getElementById(`sbar${currentStoryIdx}`);
+      let w = 0;
+      storyTimer = setInterval(() => {
+        w += 1; fill.style.width = w + '%';
+        if (w >= 100) { clearInterval(storyTimer); nextStory(); }
+      }, 50); // 5 seconds total
+
+      // Mark as viewed
+      api(`/stories/${story.id}/view`, { method: 'POST' }).catch(() => { });
+    }
+
+    function nextStory() {
+      if (!currentStoryGroup) return;
+      if (currentStoryIdx < currentStoryGroup.stories.length - 1) {
+        currentStoryIdx++;
+        renderStory();
+      } else { closeStoryViewer(); }
+    }
+
+    function prevStory() {
+      if (!currentStoryGroup) return;
+      if (currentStoryIdx > 0) { currentStoryIdx--; renderStory(); }
+    }
+
+    function closeStoryViewer() {
+      clearInterval(storyTimer);
+      document.getElementById('storyViewer').classList.remove('show');
+      currentStoryGroup = null;
+    }
+
+    function openStoryUpload() { showSheet('storySheet', 'storyOverlay'); }
+    function closeStoryUpload() { hideSheet('storySheet', 'storyOverlay'); }
+
+    function previewStory(input) {
+      if (!input.files[0]) return;
+      const wrap = document.getElementById('storyPreviewWrap');
+      const url = URL.createObjectURL(input.files[0]);
+      const isVideo = input.files[0].type.startsWith('video');
+      wrap.innerHTML = isVideo ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
+      wrap.classList.remove('hidden');
+    }
+
+    async function submitStory() {
+      const file = document.getElementById('storyFile').files[0];
+      if (!file) { toast('⚠️ Select a photo or video'); return; }
+      const fd = new FormData();
+      fd.append('media', file);
+      fd.append('caption', document.getElementById('storyCaption').value.trim());
+      try {
+        await api('/stories', { method: 'POST', body: fd });
+        closeStoryUpload();
+        toast('⚡ Story shared!');
+        loadStories();
+        document.getElementById('storyCaption').value = '';
+        document.getElementById('storyPreviewWrap').classList.add('hidden');
+        document.getElementById('storyFile').value = '';
+      } catch (e) { toast('⚠️ ' + e.message); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FEED
+    ═══════════════════════════════════════════════════════ */
+    async function loadFeed() {
+      if (feedLoading || feedDone) return;
+      feedLoading = true;
+      document.getElementById('feedSpinner').classList.remove('hidden');
+
+      try {
+        const data = await api(`/feed?page=${feedPage}&per_page=8`);
+        const container = document.getElementById('feedContainer');
+
+        if (data.posts.length === 0 && feedPage === 1) {
+          container.innerHTML = `<div class="empty-state" style="margin-top:40px">
+        <span class="material-icons-round">auto_stories</span>
+        <p>No approved posts yet. Upload something!</p>
+      </div>`;
+        }
+
+        data.posts.forEach(post => {
+          const card = post.type === 'reel' ? buildReelCard(post) : buildPostCard(post);
+          container.appendChild(card);
+          
+          // Observe video to auto-pause when scrolled out of view, and auto-play reels when visible
+          const vid = card.querySelector('video');
+          if (vid) {
+            if (!window.feedVideoObserver) {
+              window.feedVideoObserver = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                  if (!e.isIntersecting) {
+                    e.target.pause();
+                  } else if (e.target.hasAttribute('autoplay')) {
+                    const playPromise = e.target.play();
+                    if (playPromise !== undefined) playPromise.catch(() => {});
+                  }
+                });
+              }, { threshold: 0.4 });
+            }
+            window.feedVideoObserver.observe(vid);
+          }
+        });
+
+        if (!data.has_more) {
+          feedDone = true;
+          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+          if (feedPage > 1) document.getElementById('feedEnd').classList.remove('hidden');
+        }
+        feedPage++;
+      } catch (e) {
+        // Backend offline — show demo content ONCE, don't set feedDone permanently
+        if (feedPage === 1) {
+          renderDemoPosts();
+          feedDone = true;   // stop observer — no backend to call
+          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+        }
+      }
+
+      feedLoading = false;
+      document.getElementById('feedSpinner').classList.add('hidden');
+    }
+
+    function buildPostCard(p) {
+      const el = document.createElement('div');
+      el.className = 'post-card';
+      el.dataset.postId = p.id;
+      const av = getAvatarUrl(p.avatar, p.author);
+      const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+      const mediaUrl = p.media_url || 'https://picsum.photos/seed/' + p.id + '/600/400';
+      const tags = (p.hashtags || []).map(t => t).join(' ');
+
+      el.innerHTML = `
+    <div class="post-head">
+      <img class="post-avatar" src="${av}" alt="${p.author}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=38'">
+      <div class="post-user">
+        <div class="post-author">${p.full_name || p.author} <span style="font-size:12px;color:var(--sub)">@${p.author}</span></div>
+        <div class="post-time">${p.time}</div>
+      </div>
+      <button type="button" class="icon-btn post-more" onclick="openPostMenu(${p.id}, '${p.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+    </div>
+    <div class="post-media">
+      ${isVideo
+          ? `<video src="${mediaUrl}" muted playsinline loop onclick="this.paused?this.play():this.pause()"></video>`
+          : `<img src="${mediaUrl}" alt="${p.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${p.id}/600/400'">`}
+    </div>
+    <div class="post-actions-row">
+      <div class="post-acts-left">
+        <button type="button" class="act-btn${p.liked ? ' liked' : ''}" onclick="toggleLike(this,${p.id})" data-liked="${p.liked}">
+          <span class="material-icons-round">${p.liked ? 'favorite' : 'favorite_border'}</span>
+        </button>
+        <button type="button" class="act-btn" onclick="openComment(${p.id})">
+          <span class="material-icons-round">chat_bubble_outline</span>
+        </button>
+        <button type="button" class="act-btn" onclick="openShare(${p.id})">
+          <span class="material-icons-round">send</span>
+        </button>
+      </div>
+      <button type="button" class="act-btn${p.saved ? ' saved' : ''}" onclick="toggleSave(this,${p.id})" data-saved="${p.saved}">
+        <span class="material-icons-round">${p.saved ? 'bookmark' : 'bookmark_border'}</span>
+      </button>
+      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${(p.title || p.description || 'this topic').replace(/'/g, '').slice(0, 40)}')" title="AI Doubt Solver">
+        <span class="material-icons-round" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">smart_toy</span>
+      </button>
+    </div>
+    <div class="post-likes" id="likes-${p.id}">${p.likes_count} ${p.likes_count === 1 ? 'like' : 'likes'}</div>
+    <div class="post-caption">
+      <strong>${p.full_name || p.author}</strong>${p.title ? p.title + ' — ' : ''}${p.description}
+      ${tags ? `<div class="tags">${tags}</div>` : ''}
+    </div>
+    ${p.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${p.id})">View all ${p.comments_count} comments</div>` : ''}
+  `;
+      return el;
+    }
+
+    function buildReelCard(r) {
+      const el = document.createElement('div');
+      el.className = 'post-card';
+      el.dataset.postId = r.id;
+      const av = getAvatarUrl(r.avatar, r.author);
+      const tags = (r.hashtags || []).map(t => t).join(' ');
+      const isOwnPost = currentUser && r.author === currentUser.username;
+      el.innerHTML = `
+    <div class="post-head">
+      <img class="post-avatar" src="${av}" alt="${r.author}" onerror="this.src='https://ui-avatars.com/api/?name=${r.author}&background=333&color=fff&size=38'">
+      <div class="post-user">
+        <div class="post-author">${r.full_name || r.author} <span style="font-size:12px;color:var(--sub)">@${r.author}</span> <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:11px;font-weight:700;margin-left:4px">REEL</span></div>
+        <div class="post-time">${r.time}</div>
+      </div>
+      <div style="margin-left:auto"></div>
+      <button type="button" class="icon-btn post-more" onclick="openPostMenu(${r.id}, '${r.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+    </div>
+    <div class="post-media" style="position:relative">
+      <video src="${r.media_url}" ${isMuted ? 'muted' : ''} playsinline loop autoplay onclick="this.paused?this.play():this.pause()" style="max-height:480px"></video>
+      <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)">
+        <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
+      </div>
+    </div>
+    <div class="post-actions-row">
+      <div class="post-acts-left">
+        <button type="button" class="act-btn${r.liked ? ' liked' : ''}" onclick="toggleLike(this,${r.id})" data-liked="${r.liked}">
+          <span class="material-icons-round">${r.liked ? 'favorite' : 'favorite_border'}</span>
+        </button>
+        <button type="button" class="act-btn" onclick="openComment(${r.id})">
+          <span class="material-icons-round">chat_bubble_outline</span>
+        </button>
+        <button type="button" class="act-btn" onclick="openShare(${r.id})">
+          <span class="material-icons-round">send</span>
+        </button>
+      </div>
+      <button type="button" class="act-btn${r.saved ? ' saved' : ''}" onclick="toggleSave(this,${r.id})" data-saved="${r.saved}">
+        <span class="material-icons-round">${r.saved ? 'bookmark' : 'bookmark_border'}</span>
+      </button>
+      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${(r.title || r.description || 'this topic').replace(/'/g, '').slice(0, 40)}')" title="AI Doubt Solver">
+        <span class="material-icons-round" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">smart_toy</span>
+      </button>
+    </div>
+    <div class="post-likes" id="likes-${r.id}">${r.likes_count} ${r.likes_count === 1 ? 'like' : 'likes'}</div>
+    <div class="post-caption">
+      <strong>${r.full_name || r.author}</strong>${r.title ? r.title + ' — ' : ''}${r.description || ''}
+      ${tags ? `<div class="tags">${tags}</div>` : ''}
+    </div>
+    ${r.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${r.id})">View all ${r.comments_count} comments</div>` : ''}
+  `;
+      return el;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       REELS SCREEN
+    ═══════════════════════════════════════════════════════ */
+    async function loadReels() {
+      try {
+        const data = await api('/feed?per_page=20');
+        reelsData = data.posts.filter(p => p.type === 'reel');
+        renderReelsScreen();
+      } catch { }
+    }
+
+    function renderReelsScreen() {
+      const container = document.getElementById('reelsContainer');
+      if (reelsData.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="height:100%;color:#fff">
+      <span class="material-icons-round">play_circle</span>
+      <p>No reels yet. Upload the first one!</p>
+    </div>`;
+        return;
+      }
+      container.innerHTML = '';
+      reelsData.forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'reel-full';
+        const av = getAvatarUrl(r.avatar, r.author);
+        el.innerHTML = `
+      <video src="${r.media_url}" ${isMuted ? 'muted' : ''} playsinline loop></video>
+      <div class="reel-full-overlay"></div>
+      <div class="reel-full-info">
+        <div class="rfa">
+          <img class="rfa-av" src="${av}" onerror="this.src='https://ui-avatars.com/api/?name=${r.author}&background=333&color=fff&size=36'">
+          <span class="rfa-name">@${r.author}</span>
+        </div>
+        <div class="rfc">${r.title || ''} ${r.description || ''}</div>
+      </div>
+      <div class="reel-full-acts">
+        <div class="rfab${r.liked ? ' liked' : ''}" onclick="toggleLike(this,${r.id})">
+          <span class="material-icons-round">${r.liked ? 'favorite' : 'favorite_border'}</span>
+          <small>${r.likes_count}</small>
+        </div>
+        <div class="rfab" onclick="openComment(${r.id})">
+          <span class="material-icons-round">chat_bubble_outline</span>
+          <small>${r.comments_count}</small>
+        </div>
+        <div class="rfab" onclick="openShare(${r.id})">
+          <span class="material-icons-round">send</span>
+          <small>Share</small>
+        </div>
+        <div class="rfab${r.saved ? ' saved' : ''}" onclick="toggleSave(this,${r.id})">
+          <span class="material-icons-round">${r.saved ? 'bookmark' : 'bookmark_border'}</span>
+          <small>Save</small>
+        </div>
+      </div>
+      <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)" style="bottom: 80px; right: 20px;">
+        <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
+      </div>`;
+        container.appendChild(el);
+      });
+    }
+
+    function activateReels() {
+      // Auto-play visible video
+      const videos = document.querySelectorAll('#reelsContainer video');
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { 
+            e.target.play(); 
+          } else { 
+            e.target.pause();
+            e.target.currentTime = 0; // Reset audio position
+          }
+        });
+      }, { threshold: 0.7 });
+      videos.forEach(v => obs.observe(v));
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       INTERACTIONS
+    ═══════════════════════════════════════════════════════ */
+    async function toggleLike(btn, postId) {
+      if (!authToken) { toast('Login to like posts'); return; }
+      const wasLiked = btn.dataset.liked === 'true' || btn.classList.contains('liked');
+      const icon = btn.querySelector('.material-icons-round');
+      const liked = !wasLiked;
+
+      // Optimistic
+      btn.classList.toggle('liked', liked);
+      btn.dataset.liked = liked;
+      icon.textContent = liked ? 'favorite' : 'favorite_border';
+      if (liked) btn.classList.add('heart-pop');
+      setTimeout(() => btn.classList.remove('heart-pop'), 400);
+
+      // Update count
+      const likesEl = document.getElementById(`likes-${postId}`);
+      if (likesEl) {
+        const curr = parseInt(likesEl.textContent);
+        const newCount = liked ? curr + 1 : Math.max(0, curr - 1);
+        likesEl.textContent = `${newCount} ${newCount === 1 ? 'like' : 'likes'}`;
+      }
+      const rlikes = document.getElementById(`rlikes-${postId}`);
+      if (rlikes) rlikes.textContent = parseInt(rlikes.textContent) + (liked ? 1 : -1);
+
+      try {
+        await api(`/posts/${postId}/like`, { method: 'POST' });
+        if (liked) addNotif(`❤️ You liked a post`);
+      } catch { }
+    }
+
+    async function toggleSave(btn, postId) {
+      if (!authToken) { toast('Login to save posts'); return; }
+      const saved = !btn.classList.contains('saved');
+      btn.classList.toggle('saved', saved);
+      const icon = btn.querySelector('.material-icons-round');
+      icon.textContent = saved ? 'bookmark' : 'bookmark_border';
+      toast(saved ? '🔖 Saved!' : 'Removed from saved');
+      try { await api(`/posts/${postId}/save`, { method: 'POST' }); } catch { }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       COMMENTS
+    ═══════════════════════════════════════════════════════ */
+    async function openComment(postId) {
+      currentPostId = postId;
+      showSheet('commentSheet', 'commentOverlay');
+      document.getElementById('commentList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+      try {
+        const comments = await api(`/posts/${postId}/comments`);
+        const list = document.getElementById('commentList');
+        if (comments.length === 0) {
+          list.innerHTML = '<div class="empty-state" style="padding:24px 0"><span class="material-icons-round">chat_bubble_outline</span><p>No comments yet.</p></div>';
+        } else {
+          list.innerHTML = comments.map(c => `
+        <div class="comment-item">
+          <img class="comment-av" src="${c.avatar ? API + c.avatar : `https://ui-avatars.com/api/?name=${c.username}&background=333&color=fff&size=32`}" alt="${c.username}" onerror="this.src='https://ui-avatars.com/api/?name=${c.username}&background=333&color=fff&size=32'">
+          <div class="comment-body">
+            <strong>${c.username}</strong>
+            <p>${c.text}</p>
+            <small>${c.time}</small>
+          </div>
+        </div>`).join('');
+        }
+      } catch { }
+    }
+
+    function closeComment() {
+      hideSheet('commentSheet', 'commentOverlay');
+    }
+
+    async function sendComment() {
+      const inp = document.getElementById('commInput');
+      const text = inp.value.trim();
+      if (!text || !currentPostId) return;
+      if (!authToken) { toast('Login to comment'); return; }
+      inp.value = '';
+      try {
+        await api(`/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
+        openComment(currentPostId);
+        toast('💬 Comment posted!');
+        addNotif(`💬 You commented on a post`);
+      } catch (e) { toast('⚠️ ' + e.message); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SHARE
+    ═══════════════════════════════════════════════════════ */
+    function openShare(postId) { currentPostId = postId; showSheet('shareSheet', 'shareOverlay'); }
+    function closeShare() { hideSheet('shareSheet', 'shareOverlay'); }
+    function shareAction(type) {
+      closeShare();
+      if (type === 'copy') { navigator.clipboard.writeText(window.location.href).then(() => toast('🔗 Link copied!')); }
+      else toast('Sharing via ' + type + '...');
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LOGOUT
+    ═══════════════════════════════════════════════════════ */
+    async function logoutUser() {
+      try {
+        await api('/auth/logout', { method: 'POST' });
+      } catch (e) { /* ignore errors on logout */ }
+      localStorage.removeItem('s2l_token');
+      localStorage.removeItem('s2l_user');
+      authToken = '';
+      currentUser = null;
+      appBooted = false;
+      // Kill feed observer
+      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+      // Hide app shell
+      document.getElementById('topbar').style.display = 'none';
+      document.getElementById('mainArea').style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'none';
+      // Show auth screen
+      document.getElementById('authScreen').style.display = 'flex';
+      toast('👋 Logged out successfully');
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CREATE POST
+    ═══════════════════════════════════════════════════════ */
+    function selectType(type, btn) {
+      storyType = type;
+      document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const isStory = type === 'story';
+      document.getElementById('postFieldsWrap').style.display = isStory ? 'none' : 'block';
+      document.getElementById('storyCaptionWrap').style.display = isStory ? 'block' : 'none';
+    }
+
+    let selectedProfTags = ['School', 'College', 'Working'];
+    function toggleProfTag(el) {
+      el.classList.toggle('sel');
+      const tag = el.textContent.trim();
+      if (el.classList.contains('sel')) { if (!selectedProfTags.includes(tag)) selectedProfTags.push(tag); }
+      else { selectedProfTags = selectedProfTags.filter(t => t !== tag); }
+    }
+
+    function toggleHtag(el) {
+      el.classList.toggle('sel');
+      const tag = el.textContent;
+      if (el.classList.contains('sel')) { if (!selectedHtags.includes(tag)) selectedHtags.push(tag); }
+      else { selectedHtags = selectedHtags.filter(t => t !== tag); }
+    }
+
+    function previewUpload(input) {
+      const wrap = document.getElementById('uploadPreview');
+      if (!input.files[0]) return;
+      const url = URL.createObjectURL(input.files[0]);
+      const isVid = input.files[0].type.startsWith('video');
+      wrap.innerHTML = isVid ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
+      wrap.classList.remove('hidden');
+      document.getElementById('uploadZone').style.display = 'none';
+    }
+
+    async function publishPost() {
+      const file = document.getElementById('postFile').files[0];
+      if (!file) { toast('⚠️ Select media to publish'); return; }
+      if (!authToken) { toast('Please login first'); return; }
+
+      // If story type, route to /stories endpoint instead
+      if (storyType === 'story') {
+        const fd = new FormData();
+        fd.append('media', file);
+        fd.append('caption', document.getElementById('storyDescription').value.trim());
+        const btn = document.querySelector('.pub-btn');
+        btn.textContent = 'Sharing...'; btn.disabled = true;
+        try {
+          await api('/stories', { method: 'POST', body: fd });
+          toast('⚡ Story shared!');
+          addNotif('✨ You shared a new story!');
+          document.getElementById('postTitle').value = '';
+          document.getElementById('postDesc').value = '';
+          document.getElementById('postFile').value = '';
+          document.getElementById('storyDescription').value = '';
+          document.getElementById('uploadPreview').classList.add('hidden');
+          document.getElementById('uploadZone').style.display = 'flex';
+          navigate('home');
+          loadStories();
+        } catch (e) { toast('⚠️ ' + e.message); }
+        btn.textContent = 'Publish 🚀'; btn.disabled = false;
+        return;
+      }
+
+      const title = document.getElementById('postTitle').value.trim();
+      const description = document.getElementById('postDesc').value.trim();
+      const domain = document.getElementById('postDomain').value;
+
+      if (!title || !description || !domain) {
+        toast('⚠️ All fields are mandatory (Title, Description, Domain)');
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append('type', storyType);
+      fd.append('title', title);
+      fd.append('description', description);
+      fd.append('hashtags', JSON.stringify(selectedHtags));
+      fd.append('target_profession', JSON.stringify(selectedProfTags));
+      fd.append('domain', domain);
+      fd.append('media', file);
+
+      const btn = document.querySelector('.pub-btn');
+      btn.textContent = 'Publishing...'; btn.disabled = true;
+
+      try {
+        const data = await api('/posts', { method: 'POST', body: fd });
+        toast('🚀 Published successfully!');
+        addNotif(`✨ You published a new ${storyType}!`);
+        // Reset form
+        document.getElementById('postTitle').value = '';
+        document.getElementById('postDesc').value = '';
+        document.getElementById('postFile').value = '';
+        document.getElementById('postDomain').value = '';
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('uploadZone').style.display = 'flex';
+        document.querySelectorAll('.htag').forEach(h => h.classList.remove('sel'));
+        selectedHtags = [];
+        // Go to home and reload
+        feedPage = 1; feedDone = false; feedLoading = false;
+        document.getElementById('feedContainer').innerHTML = '';
+        document.getElementById('feedEnd').classList.add('hidden');
+        navigate('home');
+        // Reinitialize the infinite scroll observer so feed loads
+        initInfiniteScroll();
+        // Always reload reels data
+        loadReels();
+        // Show pending notice if not admin
+        if (data.pending) {
+          toast('⏳ Submitted for admin review!');
+          addNotif('⏳ Your post is pending admin approval before it appears in the feed.');
+        }
+
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+      }
+      btn.textContent = 'Publish 🚀'; btn.disabled = false;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PASSWORD EYE TOGGLE
+    ═══════════════════════════════════════════════════════ */
+    function togglePasswordVisibility() {
+      const inp = document.getElementById('authPass');
+      const icon = document.getElementById('eyeIcon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.textContent = 'visibility';
+      } else {
+        inp.type = 'password';
+        icon.textContent = 'visibility_off';
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       POST MENU (three-dot)
+    ═══════════════════════════════════════════════════════ */
+    function openPostMenu(postId, author) {
+      menuPostId = postId;
+      menuPostAuthor = author;
+      // Show delete only if owner or admin
+      const canDelete = currentUser && (currentUser.username === author || currentUser.is_admin);
+      document.getElementById('postMenuDeleteBtn').style.display = canDelete ? 'flex' : 'none';
+      showSheet('postMenuSheet', 'postMenuOverlay');
+    }
+
+    function closePostMenu() {
+      hideSheet('postMenuSheet', 'postMenuOverlay');
+      menuPostId = null;
+      menuPostAuthor = '';
+    }
+
+    function hidePost() {
+      if (menuPostId) {
+        const card = document.querySelector(`.post-card[data-post-id="${menuPostId}"]`);
+        if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+        toast('🚫 Post hidden');
+      }
+      closePostMenu();
+    }
+
+    async function deletePost(postId) {
+      const id = postId || menuPostId;
+      if (!id) return;
+      if (!confirm('Are you sure you want to delete this post?')) { closePostMenu(); return; }
+      try {
+        await api(`/posts/${id}`, { method: 'DELETE' });
+        // Remove from feed
+        const card = document.querySelector(`.post-card[data-post-id="${id}"]`);
+        if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+        // Remove from profile grid
+        const thumb = document.querySelector(`.profile-post-thumb[data-post-id="${id}"]`);
+        if (thumb) { thumb.style.transition = 'opacity .3s'; thumb.style.opacity = '0'; setTimeout(() => thumb.remove(), 300); }
+        toast('🗑️ Post deleted');
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+      }
+      closePostMenu();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PROFILE POSTS GRID
+    ═══════════════════════════════════════════════════════ */
+    async function loadMyPosts() {
+      try {
+        const data = await api('/profile/posts');
+        const grid = document.getElementById('profilePostsGrid');
+        grid.innerHTML = '';
+        if (!data.posts || data.posts.length === 0) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--sub);padding:24px"><span class="material-icons-round" style="font-size:48px;opacity:.3">photo_library</span><p>No posts yet</p></div>';
+          return;
+        }
+        data.posts.forEach(p => {
+          const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+          const status = p.is_approved ? 'approved' : (p.rejection_reason ? 'rejected' : 'pending');
+          const statusLabel = status === 'approved' ? '✅' : (status === 'pending' ? '⏳' : '❌');
+          const typeIcon = p.type === 'reel' ? '🎬' : '📸';
+          const thumb = document.createElement('div');
+          thumb.className = 'profile-post-thumb';
+          thumb.dataset.postId = p.id;
+          thumb.innerHTML = `
+            ${isVideo ? `<video src="${p.media_url}" muted preload="metadata"></video>` : `<img src="${p.media_url}" alt="${p.title || 'Post'}" loading="lazy">`}
+            <span class="ppt-type-badge">${typeIcon}</span>
+            <span class="ppt-status ${status}">${statusLabel} ${status}</span>
+            <div class="ppt-overlay">
+              <span class="material-icons-round">favorite</span>
+              <small>${p.likes_count}</small>
+            </div>
+            <button type="button" class="ppt-delete-btn" onclick="event.stopPropagation();deletePost(${p.id})" title="Delete">
+              <span class="material-icons-round">delete</span>
+            </button>
+          `;
+          grid.appendChild(thumb);
+        });
+      } catch (e) {
+        console.warn('Profile posts error:', e);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SEARCH
+    ═══════════════════════════════════════════════════════ */
+    function debounceSearch(q) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => performSearch(q), 400);
+    }
+
+    async function performSearch(q) {
+      if (!q.trim()) {
+        document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
+        return;
+      }
+      try {
+        const data = await api(`/search?q=${encodeURIComponent(q)}`);
+        const el = document.getElementById('searchResults');
+        el.innerHTML = '';
+        if (data.posts.length === 0 && data.users.length === 0) {
+          el.innerHTML = '<div class="empty-state"><span class="material-icons-round">search_off</span><p>No results found</p></div>';
+          return;
+        }
+        data.posts.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'search-card';
+          const thumb = p.media_url || `https://picsum.photos/seed/${p.id}/48`;
+          card.innerHTML = `
+        <div class="search-card-icon"><img src="${thumb}" alt="${p.title}" onerror="this.src='https://picsum.photos/seed/${p.id}/48'"></div>
+        <div class="search-card-text">
+          <h4>${p.title || p.description?.slice(0, 30) || 'Post'}</h4>
+          <p>@${p.author} · ${p.time}</p>
+        </div>`;
+          el.appendChild(card);
+        });
+      } catch { }
+    }
+
+    function filterTag(el, tag) {
+      document.querySelectorAll('.tag-chip').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      if (tag !== 'all') {
+        document.getElementById('searchInp').value = tag;
+        performSearch(tag);
+      } else {
+        document.getElementById('searchInp').value = '';
+        document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PROFILE
+    ═══════════════════════════════════════════════════════ */
+    function updateProfileUI() {
+      if (!currentUser) return;
+      const u = currentUser;
+      const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name || u.username || 'U')}&background=FF6B6B&color=fff&size=88`;
+      document.getElementById('profileAvatar').src = av;
+      document.getElementById('profileName').textContent = u.full_name || u.username || '—';
+      document.getElementById('profileUsername').textContent = '@' + (u.username || '—');
+      document.getElementById('profileBio').textContent = u.bio || '';
+      const linkEl = document.getElementById('profileLink');
+      if (u.website) { linkEl.textContent = u.website; linkEl.href = u.website; }
+      else linkEl.textContent = '';
+
+      // Badges
+      const badges = document.getElementById('profileBadges');
+      badges.innerHTML = [
+        '🔥 Streak 7', '⚡ Fast Learner', '🏆 Top 10%'
+      ].map(b => `<span class="badge">${b}</span>`).join('');
+    }
+
+    async function loadProfileStats() {
+      if (!authToken) return;
+      try {
+        const stats = await api('/profile/stats');
+        document.getElementById('statPosts').textContent = stats.posts;
+        document.getElementById('statReels').textContent = stats.reels;
+        document.getElementById('statLikes').textContent = stats.likes;
+        document.getElementById('statSaved').textContent = stats.saved;
+      } catch { }
+    }
+
+    function openEditProfile() {
+      showSetup();
+      document.getElementById('setupScreen').style.display = 'flex';
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       NOTIFICATIONS
+    ═══════════════════════════════════════════════════════ */
+    function toggleNotif() {
+      document.getElementById('notifPanel').classList.toggle('show');
+      document.getElementById('notifDot').style.display = 'none';
+    }
+    function closeNotif() { document.getElementById('notifPanel').classList.remove('show'); }
+    function addNotif(msg) {
+      const item = document.createElement('div');
+      item.className = 'notif-item';
+      item.textContent = msg;
+      document.getElementById('notifItems').prepend(item);
+      document.getElementById('notifDot').style.display = 'block';
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SHEET HELPERS
+    ═══════════════════════════════════════════════════════ */
+    function showSheet(sheetId, overlayId) {
+      document.getElementById(overlayId).classList.add('show');
+      setTimeout(() => document.getElementById(sheetId).classList.add('show'), 10);
+    }
+    function hideSheet(sheetId, overlayId) {
+      document.getElementById(sheetId).classList.remove('show');
+      document.getElementById(overlayId).classList.remove('show');
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════════════ */
+    let toastTimer;
+    function toast(msg) {
+      const el = document.getElementById('toastEl');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       UTILITIES
+    ═══════════════════════════════════════════════════════ */
+    function getAvatarUrl(avatar, username) {
+      if (avatar) return avatar.startsWith('http') ? avatar : API + avatar;
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'U')}&background=333&color=fff&size=38`;
+    }
+
+    /* Demo posts when backend is offline */
+    function renderDemoPosts() {
+      const demos = [
+        { id: 1, type: 'post', title: 'Python Variables 🐍', description: 'Variables store data. In Python, no type declaration needed!', media_url: 'https://picsum.photos/seed/py1/600/400', author: 'codeguru', full_name: 'Code Guru', time: '2h ago', avatar: '', likes_count: 24, comments_count: 5, liked: false, saved: false, hashtags: ['#Python'] },
+        { id: 2, type: 'post', title: 'CSS Flexbox 🎨', description: 'Flexbox makes responsive layouts a breeze. Use display:flex!', media_url: 'https://picsum.photos/seed/css1/600/400', author: 'webdev', full_name: 'Web Dev', time: '4h ago', avatar: '', likes_count: 18, comments_count: 3, liked: false, saved: false, hashtags: ['#CSS'] },
+        { id: 3, type: 'post', title: 'JavaScript Promises ⚡', description: 'Handle async operations elegantly with Promise chains.', media_url: 'https://picsum.photos/seed/js1/600/400', author: 'jsmaster', full_name: 'JS Master', time: '6h ago', avatar: '', likes_count: 31, comments_count: 7, liked: false, saved: false, hashtags: ['#JavaScript'] },
+      ];
+      const container = document.getElementById('feedContainer');
+      demos.forEach(p => container.appendChild(buildPostCard(p)));
+    }
+
+    // Close notif on outside click
+    document.addEventListener('click', e => {
+      const panel = document.getElementById('notifPanel');
+      const btn = document.getElementById('topbar')?.querySelector('.icon-btn');
+      if (panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
+        closeNotif();
+      }
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       AI DOUBT SOLVER
+    ═══════════════════════════════════════════════════════ */
+    let aiHistory = [];
+
+    function openAI(topic) {
+      aiHistory = [];
+      document.getElementById('aiTopicLabel').textContent = topic;
+      document.getElementById('aiMessages').innerHTML = '';
+      document.getElementById('aiChatInput').value = '';
+      document.getElementById('aiModalOverlay').classList.add('show');
+
+      // Auto-send the first question about the topic
+      const initialMsg = `Explain about: ${topic}`;
+      addAIMessage('user', initialMsg);
+      aiHistory.push({ role: 'user', text: initialMsg });
+      callAI(initialMsg);
+    }
+
+    async function sendAIMessage() {
+      const inp = document.getElementById('aiChatInput');
+      const msg = inp.value.trim();
+      if (!msg) return;
+      inp.value = '';
+      addAIMessage('user', msg);
+      aiHistory.push({ role: 'user', text: msg });
+      await callAI(msg);
+    }
+
+    async function callAI(message) {
+      // Show typing indicator
+      const typingEl = document.createElement('div');
+      typingEl.className = 'ai-msg ai-msg-bot';
+      typingEl.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+      document.getElementById('aiMessages').appendChild(typingEl);
+      scrollAIChat();
+
+      try {
+        const data = await api('/ai/chat', {
+          method: 'POST',
+          body: JSON.stringify({ message, history: aiHistory.slice(0, -1) })
+        });
+        typingEl.remove();
+        const reply = data.reply || 'Sorry, I could not generate a response.';
+        addAIMessage('bot', reply);
+        aiHistory.push({ role: 'model', text: reply });
+      } catch (e) {
+        typingEl.remove();
+        addAIMessage('bot', `⚠️ ${e.message || 'AI service unavailable. Please try again.'}`);
+      }
+    }
+
+    function addAIMessage(role, text) {
+      const el = document.createElement('div');
+      el.className = `ai-msg ai-msg-${role === 'user' ? 'user' : 'bot'}`;
+      if (role === 'user') {
+        el.textContent = text;
+      } else {
+        el.innerHTML = renderAIMarkdown(text);
+      }
+      document.getElementById('aiMessages').appendChild(el);
+      scrollAIChat();
+    }
+
+    function scrollAIChat() {
+      const area = document.getElementById('aiChatArea');
+      setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+    }
+
+    function renderAIMarkdown(text) {
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^[\s]*[-\*]\s+(.+)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        .replace(/\n{2,}/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function closeAI() { document.getElementById('aiModalOverlay').classList.remove('show'); }
+
+    /* ═══════════════════════════════════════════════════════
+       ADMIN DASHBOARD
+    ═══════════════════════════════════════════════════════ */
+    async function loadAdminScreen() {
+      if (!currentUser || !currentUser.is_admin) return;
+      try {
+        const [stats, pending] = await Promise.all([
+          api('/admin/stats'),
+          api('/admin/pending')
+        ]);
+        // Update stat cards
+        document.getElementById('adm-posts').textContent = stats.posts;
+        document.getElementById('adm-reels').textContent = stats.reels;
+        document.getElementById('adm-pending').textContent = stats.pending;
+        document.getElementById('adm-approved').textContent = stats.approved;
+        document.getElementById('adm-rejected').textContent = stats.rejected;
+        document.getElementById('adm-users').textContent = stats.users;
+        document.getElementById('adm-likes').textContent = stats.likes;
+        document.getElementById('adm-comments').textContent = stats.comments;
+
+        // Render pending posts
+        const container = document.getElementById('adminPendingList');
+        if (pending.posts.length === 0) {
+          container.innerHTML = `<div class="empty-state" style="padding:40px 0">
+        <span class="material-icons-round" style="color:var(--accent2)">check_circle</span>
+        <p>All caught up! No pending posts.</p>
+      </div>`;
+          return;
+        }
+        container.innerHTML = '';
+        pending.posts.forEach(p => container.appendChild(buildAdminCard(p)));
+      } catch (e) {
+        console.warn('Admin load error:', e);
+      }
+    }
+
+    function buildAdminCard(p) {
+      const el = document.createElement('div');
+      el.className = 'admin-post-card';
+      el.id = `apc-${p.id}`;
+      const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+      const av = getAvatarUrl(p.avatar, p.author);
+      el.innerHTML = `
+    <div class="apc-head">
+      <img class="apc-av" src="${av}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=36'" alt="">
+      <div class="apc-meta">
+        <div class="apc-author">@${p.author} <span class="apc-type-badge">${p.type.toUpperCase()}</span></div>
+        <div class="apc-time">${p.time}</div>
+      </div>
+    </div>
+    <div class="apc-media">
+      ${isVideo
+          ? `<video src="${p.media_url}" muted playsinline style="width:100%;max-height:200px;object-fit:cover;border-radius:12px"></video>`
+          : `<img src="${p.media_url}" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px" onerror="this.style.display='none'">`}
+    </div>
+    <div class="apc-caption"><strong>${p.title || ''}</strong> ${p.description || ''}</div>
+    ${p.hashtags && p.hashtags.length ? `<div class="apc-tags">${p.hashtags.join(' ')}</div>` : ''}
+    <div class="apc-actions">
+      <button type="button" class="apc-edit" onclick="adminOpenEdit(${p.id}, '${(p.title || '').replace(/'/g, "\\'")}', '${(p.description || '').replace(/'/g, "\\'")}', '${p.domain || 'Other'}')">
+        <span class="material-icons-round">edit</span> Edit
+      </button>
+      <button type="button" class="apc-approve" onclick="adminApprove(${p.id})">
+        <span class="material-icons-round">check_circle</span> Approve
+      </button>
+      <button type="button" class="apc-reject" onclick="adminReject(${p.id})">
+        <span class="material-icons-round">cancel</span> Reject
+      </button>
+    </div>`;
+      return el;
+    }
+
+    async function adminApprove(postId) {
+      const card = document.getElementById(`apc-${postId}`);
+      if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+      try {
+        await api(`/admin/posts/${postId}/approve`, { method: 'POST' });
+        toast('✅ Post approved & published!');
+        addNotif(`✅ You approved post #${postId}`);
+        if (card) card.remove();
+        // Update pending count
+        const el = document.getElementById('adm-pending');
+        if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
+        const appr = document.getElementById('adm-approved');
+        if (appr) appr.textContent = parseInt(appr.textContent || 0) + 1;
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
+      }
+    }
+
+    async function adminReject(postId) {
+      const card = document.getElementById(`apc-${postId}`);
+      if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+      try {
+        await api(`/admin/posts/${postId}/reject`, { method: 'POST', body: JSON.stringify({ reason: 'Does not meet content guidelines' }) });
+        toast('❌ Post rejected');
+        addNotif(`❌ You rejected post #${postId}`);
+        if (card) card.remove();
+        const el = document.getElementById('adm-pending');
+        if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
+        const rej = document.getElementById('adm-rejected');
+        if (rej) rej.textContent = parseInt(rej.textContent || 0) + 1;
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
+      }
+    }
+
+    let editingPost = null;
+    function adminOpenEdit(id, title, desc, domain) {
+      editingPost = { id, title, desc, domain };
+      document.getElementById('edit-pid').value = id;
+      document.getElementById('edit-title').value = title || '';
+      document.getElementById('edit-desc').value = desc || '';
+      document.getElementById('edit-domain').value = domain || 'Other';
+      document.getElementById('adminEditModal').classList.add('show');
+    }
+
+    function adminCloseEdit() {
+      document.getElementById('adminEditModal').classList.remove('show');
+      editingPost = null;
+    }
+
+    async function adminUpdatePost() {
+      const id = document.getElementById('edit-pid').value;
+      const title = document.getElementById('edit-title').value.trim();
+      const desc = document.getElementById('edit-desc').value.trim();
+      const domain = document.getElementById('edit-domain').value;
+
+      if (!title || !desc || !domain) {
+        toast('⚠️ All fields are mandatory');
+        return;
+      }
+
+      const btn = document.querySelector('.ae-save');
+      btn.textContent = 'Updating...'; btn.disabled = true;
+
+      try {
+        await api(`/admin/posts/${id}/edit`, {
+          method: 'PUT',
+          body: JSON.stringify({ title, description: desc, domain })
+        });
+        toast('⚡ Post updated!');
+        // Update local UI card
+        const card = document.getElementById(`apc-${id}`);
+        if (card) {
+          const caption = card.querySelector('.apc-caption');
+          if (caption) caption.innerHTML = `<strong>${title}</strong> ${desc}`;
+          // Update the edit button call as well
+          const editBtn = card.querySelector('.apc-edit');
+          if (editBtn) {
+            editBtn.setAttribute('onclick', `adminOpenEdit(${id}, '${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}', '${domain}')`);
+          }
+        }
+        adminCloseEdit();
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+      }
+      btn.textContent = 'Update ⚡'; btn.disabled = false;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CUSTOM HASHTAGS
+    ═══════════════════════════════════════════════════════ */
+    function addCustomHashtag() {
+      const inp = document.getElementById('customHtagInput');
+      let val = inp.value.trim().replace(/\s+/g, '');
+      if (!val) return;
+      if (!val.startsWith('#')) val = '#' + val;
+      // Check if already exists
+      const existing = Array.from(document.querySelectorAll('#hashtagChips .htag'))
+        .find(el => el.textContent === val);
+      if (existing) { existing.classList.add('sel'); if (!selectedHtags.includes(val)) selectedHtags.push(val); inp.value = ''; return; }
+      // Create new chip
+      const chip = document.createElement('span');
+      chip.className = 'htag sel';
+      chip.textContent = val;
+      chip.onclick = () => toggleHtag(chip);
+      document.getElementById('hashtagChips').appendChild(chip);
+      if (!selectedHtags.includes(val)) selectedHtags.push(val);
+      inp.value = '';
+      toast(`${val} added!`);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LIGHT / DARK MODE TOGGLE
+    ═══════════════════════════════════════════════════════ */
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('s2l_theme', next);
+      
+      // Update toggle checkbox if it exists
+      const toggle = document.getElementById('settingsThemeToggle');
+      if (toggle) toggle.checked = (next === 'light');
+      
+      updateThemeIcon(next);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+      }
+    }
+
+    // Apply saved theme on load
+    (function initTheme() {
+      const saved = localStorage.getItem('s2l_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      // Wait for DOM to sync checkbox and icon
+      document.addEventListener('DOMContentLoaded', () => {
+        updateThemeIcon(saved);
+        const toggle = document.getElementById('settingsThemeToggle');
+        if (toggle) toggle.checked = (saved === 'light');
+      });
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+       RADIAL MENU LOGIC (PHYSICS, INTERACTIONS)
+    ═══════════════════════════════════════════════════════ */
+    const radialOverlay = document.getElementById('radialMenuOverlay');
+    const radialWheel = document.getElementById('radialWheel');
+    
+    let isRadialOpen = false;
+    let radialRot = 0; // Current rotation
+    let rotVelocity = 0;
+    let angularFriction = 0.92; // Inertia decay
+    let isSpinning = false;
+    
+    let lastAngle = 0;
+    let isDraggingRadial = false;
+    let animFrame = null;
+    let lastTime = 0;
+    
+    // Setup variables (will be populated on init)
+    let radialItems = [];
+    let TOTAL_ITEMS = 0;
+    let STEP_ANGLE = 0;
+    
+    function initRadialItems() {
+      // Only parse visible items to prevent gaps in the circle
+      radialItems = Array.from(document.querySelectorAll('.radial-item')).filter(el => el.style.display !== 'none');
+      TOTAL_ITEMS = radialItems.length;
+      if (!TOTAL_ITEMS) return;
+      STEP_ANGLE = 360 / TOTAL_ITEMS;
+
+      radialItems.forEach((item, i) => {
+        const agl = i * STEP_ANGLE; 
+        item.style.setProperty('--angle', `${agl}deg`);
+        item.style.setProperty('--radius', `120px`); 
+      });
+      updateRadialTransform();
+    }
+
+    document.addEventListener('DOMContentLoaded', initRadialItems);
+
+    function toggleRadialMenu() {
+      if (!isRadialOpen) {
+        radialOverlay.classList.add('open');
+        // snap to closest on open
+        radialRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE; 
+        updateRadialTransform();
+        isRadialOpen = true;
+      } else {
+        closeRadialMenuInternal();
+      }
+    }
+
+    function closeRadialMenuInternal() {
+      isRadialOpen = false;
+      radialOverlay.classList.remove('open');
+      cancelAnimationFrame(animFrame);
+    }
+    
+    function closeRadialMenu(e) {
+      if (e && e.target === radialOverlay) closeRadialMenuInternal();
+    }
+    
+    // Touch vs mouse detection for radial menu
+    let isTouchDevice = false;
+    window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
+    let radialDblClickMap = {};
+
+    function handleRadialClick(action) {
+      // On laptop/desktop: require double click to activate
+      if (!isTouchDevice) {
+        const now = Date.now();
+        const lastClick = radialDblClickMap[action] || 0;
+        if (now - lastClick > 400) {
+          radialDblClickMap[action] = now;
+          return; // Wait for second click
+        }
+        radialDblClickMap[action] = 0;
+      }
+      executeRadialAction(action);
+    }
+
+    function executeRadialAction(action) {
+      closeRadialMenuInternal();
+      setTimeout(() => {
+        if (action === 'profile') navigate('profile', null);
+        if (action === 'add') navigate('add', null);
+        if (action === 'search') navigate('search', null);
+        if (action === 'ai') openAI('General Learning');
+        if (action === 'notif') toggleNotif();
+        if (action === 'explore') navigate('reels', null);
+        if (action === 'settings') { navigate('settings', null); }
+        if (action === 'admin') navigate('admin', null);
+      }, 150);
+    }
+
+    // --- PHYSICS / DRAG ---
+    function getAngleCenter(e) {
+      const rect = radialWheel.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      // In atan2, top is usually -90 if 0 is right. We offset by 90 to make top=0.
+      let ang = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+      return ang + 90; 
+    }
+
+    function onDragStart(e) {
+      if (!isRadialOpen) return;
+      isDraggingRadial = true;
+      cancelAnimationFrame(animFrame);
+      isSpinning = false;
+      lastAngle = getAngleCenter(e);
+      lastTime = performance.now();
+    }
+
+    function onDragMove(e) {
+      if (!isDraggingRadial) return;
+      e.preventDefault(); 
+      const currentAngle = getAngleCenter(e);
+      const currentTime = performance.now();
+      
+      let diff = currentAngle - lastAngle;
+      // Handle boundary wrap
+      if (diff > 180) diff -= 360;
+      if (diff < -180) diff += 360;
+      
+      radialRot += diff;
+      rotVelocity = diff; // track last diff as velocity
+      
+      updateRadialTransform();
+      lastAngle = currentAngle;
+      lastTime = currentTime;
+    }
+
+    function onDragEnd() {
+      if (!isDraggingRadial) return;
+      isDraggingRadial = false;
+      isSpinning = true;
+      spinLoop();
+    }
+
+    radialWheel.addEventListener('mousedown', onDragStart);
+    window.addEventListener('mousemove', onDragMove, {passive: false});
+    window.addEventListener('mouseup', onDragEnd);
+
+    radialWheel.addEventListener('touchstart', onDragStart, {passive: false});
+    window.addEventListener('touchmove', onDragMove, {passive: false});
+    window.addEventListener('touchend', onDragEnd);
+
+    function spinLoop() {
+      if (!isSpinning) return;
+      
+      // Decay friction
+      radialRot += rotVelocity;
+      rotVelocity *= angularFriction;
+      
+      // Snapping recoil behavior
+      if (Math.abs(rotVelocity) < 1.0) {
+        const targetRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
+        const diff = targetRot - radialRot;
+        
+        if (Math.abs(diff) < 0.2) {
+          radialRot = targetRot;
+          isSpinning = false;
+        } else {
+          // spring towards target
+          rotVelocity = diff * 0.15;
+          radialRot += rotVelocity;
+        }
+      }
+      
+      updateRadialTransform();
+      if (isSpinning) animFrame = requestAnimationFrame(spinLoop);
+    }
+
+    function updateRadialTransform() {
+      // CSS custom property dynamically updates orientation inside css rule
+      radialWheel.style.setProperty('--wheel-rot', `${radialRot}deg`);
+      
+      // Handle clipping (only 3 visible items!)
+      // Limit visibility to those near the top (absolute angle around 0)
+      radialItems.forEach((item, i) => {
+          let absAngle = (i * STEP_ANGLE + radialRot) % 360;
+          if (absAngle > 180) absAngle -= 360;
+          if (absAngle < -180) absAngle += 360;
+          
+          // Show items within +/- roughly 70 degrees from top.
+          // Because Step is 51 deg. (0, +51, -51 will fit)
+          if (Math.abs(absAngle) <= 75) {
+             item.style.opacity = '1';
+             item.style.pointerEvents = 'auto';
+          } else {
+             item.style.opacity = '0';
+             item.style.pointerEvents = 'none';
+          }
+      });
+    }
+
+    // Advanced Event Listeners
+    document.addEventListener('keydown', (e) => {
+      // ESC bindings
+      if (e.key === 'Escape') {
+         if (isRadialOpen) closeRadialMenuInternal();
+         if (document.getElementById('notifPanel').classList.contains('show')) closeNotif();
+         if (document.getElementById('aiModalOverlay').style.display === 'flex') closeAI();
+      }
+      
+      // Arrow Up/Down & Enter bindings
+      const feedContainer = document.getElementById('feedContainer');
+      const reelsScreen = document.getElementById('reelsScreen');
+      const homeScreen = document.getElementById('homeScreen');
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const isReels = reelsScreen && reelsScreen.classList.contains('active');
+        const isHome = homeScreen && homeScreen.classList.contains('active');
+
+        if (isReels) {
+          const rc = document.getElementById('reelsContainer');
+          const h = window.innerHeight;
+          const currentIdx = Math.round(rc.scrollTop / h);
+          const nextIdx = e.key === 'ArrowDown' ? currentIdx + 1 : currentIdx - 1;
+          rc.scrollTo({ top: nextIdx * h, behavior: 'smooth' });
+        } else if (isHome) {
+          const posts = Array.from(document.querySelectorAll('.post-card'));
+          if (posts.length > 0) {
+            // Find current post in viewport
+            let currentPostIdx = posts.findIndex(p => {
+              const rect = p.getBoundingClientRect();
+              return rect.top >= -100 && rect.top <= 100;
+            });
+            if (currentPostIdx === -1) {
+               // Fallback: finding the one closest to top
+               currentPostIdx = posts.reduce((prev, curr, idx) => {
+                 const prevRect = posts[prev].getBoundingClientRect();
+                 const currRect = curr.getBoundingClientRect();
+                 return Math.abs(currRect.top) < Math.abs(prevRect.top) ? idx : prev;
+               }, 0);
+            }
+            const nextIdx = e.key === 'ArrowDown' ? Math.min(posts.length - 1, currentPostIdx + 1) : Math.max(0, currentPostIdx - 1);
+            posts[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
+
+      if (e.key === 'Enter') {
+         const isReels = reelsScreen && reelsScreen.classList.contains('active');
+         if (isReels) {
+            const currentVideo = document.querySelector('.reel-full video:not([style*="display: none"])'); // Simplification
+            // Actually find the video in the active reel
+            const rc = document.getElementById('reelsContainer');
+            const h = window.innerHeight;
+            const idx = Math.round(rc.scrollTop / h);
+            const videos = rc.querySelectorAll('video');
+            if (videos[idx]) {
+               if (videos[idx].paused) videos[idx].play();
+               else videos[idx].pause();
+            }
+         }
+      }
+    });
+
+  </script>
+</body>
+
+</html>
