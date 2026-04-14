@@ -699,3 +699,4 @@ if __name__ == '__main__':
     print(f"\n>>> Scroll2Learn API running at http://localhost:5000")
     print(f">>> Admin login: username={ADMIN_USERNAME}  password={ADMIN_PASSWORD}\n")
     app.run(debug=True, port=5000, host='0.0.0.0', use_reloader=True)
+app = Flask(__name__)
