@@ -2,3 +2,5 @@ Flask
 flask-cors
 cloudinary
 gunicorn
+python-dotenv
+werkzeug

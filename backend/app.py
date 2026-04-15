@@ -1,18 +1,35 @@
-from flask import Flask, request, jsonify, send_from_directory, Response
+# ── Imports ────────────────────────────────────────────────────────────────
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import sqlite3, os, hashlib, secrets, time, json, random, smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from dotenv import load_dotenv
 
-GMAIL_USER = os.getenv('GMAIL_USER', 'scroll2learncontent@gmail.com')
-GMAIL_PASS = os.getenv('GMAIL_PASS', 'zypj yyou hdct okps')
+# ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
+load_dotenv()
 
+# ── Cloudinary configuration (reads from environment variables) ─────────────
+cloudinary.config(
+    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key    = os.getenv('CLOUDINARY_API_KEY'),
+    api_secret = os.getenv('CLOUDINARY_API_SECRET')
+)
+
+# ── Gmail credentials ───────────────────────────────────────────────────────
+GMAIL_USER = os.getenv('GMAIL_USER')
+GMAIL_PASS = os.getenv('GMAIL_PASS')
+
+# ── Gemini AI ───────────────────────────────────────────────────────────────
 try:
     from google import genai
     from google.genai import types
-    GEMINI_KEY = 'AIzaSyBVKsTGwGB3rRP3HH5RDr2OA4lrWB3OwZ0'
+    GEMINI_KEY = os.getenv('GEMINI_KEY')
     gemini_client = genai.Client(api_key=GEMINI_KEY)
     GEMINI_OK = True
     print('✅ Gemini AI loaded')
@@ -20,23 +37,16 @@ except Exception as e:
     GEMINI_OK = False
     print(f'⚠️  Gemini AI not available: {e}')
 
+# ── Flask app ───────────────────────────────────────────────────────────────
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-UPLOAD_FOLDER = 'uploads'
 DATABASE = 'scroll2learn.db'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'mov'}
-ADMIN_USERNAME = 'guru'
-ADMIN_PASSWORD = '2005'
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'guru')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', '2005')
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
-
-# Create separate upload directories for different content types
-for sub in ['', 'posts', 'reels', 'avatars', 'stories']:
-    d = os.path.join(UPLOAD_FOLDER, sub) if sub else UPLOAD_FOLDER
-    if not os.path.exists(d):
-        os.makedirs(d)
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -78,9 +88,7 @@ def serialize_user(u):
 
 def format_post(d, liked=False, saved=False):
     media = d.get('media_url', '')
-    if media and not media.startswith('http'): media = f"http://localhost:5000{media}"
     avatar = d.get('avatar', '')
-    if avatar and not avatar.startswith('http'): avatar = f"http://localhost:5000{avatar}"
     return {'id': d['id'], 'type': d.get('type', 'post'), 'title': d.get('title', ''),
             'description': d.get('description', ''), 'media_url': media,
             'hashtags': json.loads(d.get('hashtags', '[]')) if isinstance(d.get('hashtags'), str) else [],
@@ -279,8 +287,8 @@ def setup_profile():
     if 'avatar' in request.files:
         f = request.files['avatar']
         if f and allowed_file(f.filename):
-            fn = f"avatar_{user['id']}_{int(time.time())}_{secure_filename(f.filename)}"
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'],'avatars',fn)); avatar_url = f"/uploads/avatars/{fn}"
+            result = cloudinary.uploader.upload(f, resource_type="auto")
+            avatar_url = result.get('secure_url')
     conn = get_db()
     conn.execute('UPDATE users SET full_name=?,bio=?,website=?,avatar=?,interests=?,profession=?,is_setup=1 WHERE id=?',
                  (full_name,bio,website,avatar_url,interests,profession,user['id']))
@@ -371,13 +379,14 @@ def create_post():
         return jsonify({'error':'Title, description, and domain are mandatory'}),400
     f = request.files.get('media')
     if not f or not allowed_file(f.filename): return jsonify({'error':'Valid media file required'}),400
-    fn = f"{post_type}_{user['id']}_{int(time.time())}_{secure_filename(f.filename)}"
-    subdir = 'reels' if post_type == 'reel' else 'posts'
-    f.save(os.path.join(app.config['UPLOAD_FOLDER'], subdir, fn))
+    
+    result = cloudinary.uploader.upload(f, resource_type="auto")
+    media_url = result.get('secure_url')
+    
     is_approved = 1 if user.get('is_admin') else 0  # Only admin posts auto-approved
     conn = get_db()
     c = conn.execute('INSERT INTO posts (user_id,type,title,description,media_url,hashtags,is_approved,domain,target_profession) VALUES (?,?,?,?,?,?,?,?,?)',
-                     (user['id'],post_type,title,description,f"/uploads/{subdir}/{fn}",hashtags,is_approved,domain,target_profession))
+                     (user['id'],post_type,title,description,media_url,hashtags,is_approved,domain,target_profession))
     conn.commit()
     row = conn.execute('SELECT p.*,u.username,u.full_name,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.id=?',(c.lastrowid,)).fetchone()
     conn.close()
@@ -566,10 +575,12 @@ def create_story():
     caption=request.form.get('caption','')
     f=request.files.get('media')
     if not f or not allowed_file(f.filename): return jsonify({'error':'Media required'}),400
-    fn=f"story_{user['id']}_{int(time.time())}_{secure_filename(f.filename)}"
-    f.save(os.path.join(app.config['UPLOAD_FOLDER'],'stories',fn))
+    
+    result = cloudinary.uploader.upload(f, resource_type="auto")
+    media_url = result.get('secure_url')
+    
     expires=( datetime.utcnow()+timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
-    conn=get_db(); conn.execute('INSERT INTO stories (user_id,media_url,caption,expires_at) VALUES (?,?,?,?)',(user['id'],f"/uploads/stories/{fn}",caption,expires)); conn.commit(); conn.close()
+    conn=get_db(); conn.execute('INSERT INTO stories (user_id,media_url,caption,expires_at) VALUES (?,?,?,?)',(user['id'],media_url,caption,expires)); conn.commit(); conn.close()
     return jsonify({'message':'ok'}),201
 
 @app.route('/stories/<int:sid>/view', methods=['POST'])
@@ -689,14 +700,11 @@ Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answer
     except Exception as e:
         return jsonify({'error': f'AI error: {str(e)}'}), 500
 
-@app.route('/uploads/<path:filename>')
-def serve_upload(filename): return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
-
 @app.route('/')
 def index(): return jsonify({'status':'Scroll2Learn API v2.1 🚀'})
 
 if __name__ == '__main__':
-    print(f"\n>>> Scroll2Learn API running at http://localhost:5000")
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\n>>> Scroll2Learn API running on port {port}")
     print(f">>> Admin login: username={ADMIN_USERNAME}  password={ADMIN_PASSWORD}\n")
-    app.run(debug=True, port=5000, host='0.0.0.0', use_reloader=True)
-app = Flask(__name__)
+    app.run(debug=False, port=port, host='0.0.0.0', use_reloader=False)
