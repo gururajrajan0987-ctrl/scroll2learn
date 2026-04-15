@@ -2669,7 +2669,8 @@
        RADIAL & EMOJI BOTTOM NAV
     ═══════════════════════════════════════════════════════ */
     .bottom-nav {
-      position: relative; /* ensure absolute children flow nicely */
+      position: relative;
+      /* ensure absolute children flow nicely */
     }
 
     .nav-btn-emoji {
@@ -2677,7 +2678,8 @@
       transform: scale(1.1);
       width: 58px;
       height: 58px;
-      margin-top: -10px; /* Slight bump up but still anchored inside */
+      margin-top: -10px;
+      /* Slight bump up but still anchored inside */
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent2), var(--accent));
       display: flex;
@@ -2690,14 +2692,15 @@
       z-index: 100;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      border: 3px solid var(--surface); /* blends with nav */
+      border: 3px solid var(--surface);
+      /* blends with nav */
     }
-    
+
     .nav-btn-emoji:active {
       transform: scale(0.95);
       box-shadow: 0 2px 10px rgba(0, 240, 255, 0.4);
     }
-    
+
     .radial-overlay {
       position: fixed;
       inset: 0;
@@ -2712,21 +2715,21 @@
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    
+
     .radial-overlay.open {
       opacity: 1;
       pointer-events: auto;
     }
-    
+
     .radial-wrapper {
       position: relative;
       width: 100%;
       max-width: 400px;
       height: 380px;
-      overflow: hidden; 
+      overflow: hidden;
       pointer-events: none;
     }
-    
+
     .radial-overlay.open .radial-wrapper {
       pointer-events: auto;
     }
@@ -2734,7 +2737,8 @@
     .radial-wheel {
       position: absolute;
       left: 50%;
-      bottom: -160px; /* Center is hidden below the fold */
+      bottom: -160px;
+      /* Center is hidden below the fold */
       width: 320px;
       height: 320px;
       margin-left: -160px;
@@ -2742,12 +2746,13 @@
       transform-origin: center center;
       /* default rotated closed state */
       --wheel-rot: 0deg;
-      transform: scale(0.4) rotate(var(--wheel-rot)); 
+      transform: scale(0.4) rotate(var(--wheel-rot));
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
-      touch-action: pan-x pan-y; /* managed in JS JS for preventing default */
+      touch-action: pan-x pan-y;
+      /* managed in JS JS for preventing default */
       opacity: 0;
     }
-    
+
     .radial-overlay.open .radial-wheel {
       /* open state */
       transform: scale(1) rotate(var(--wheel-rot));
@@ -2766,7 +2771,8 @@
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      opacity: 0; /* JS handles visibility for clipping 3 items */
+      opacity: 0;
+      /* JS handles visibility for clipping 3 items */
       pointer-events: none;
       transition: transform 0.1s, opacity 0.3s ease;
       /* The magic formula keeps items upright securely */
@@ -2775,7 +2781,7 @@
 
     .radial-item:active .radial-icon {
       transform: scale(0.85);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     .radial-icon {
@@ -2785,7 +2791,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
       color: #fff;
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -2797,135 +2803,339 @@
     /* ═══════════════════════════════════════════════════════
        SETTINGS SCREEN
     ═══════════════════════════════════════════════════════ */
-    #settingsScreen { padding: 0 0 80px; background: var(--bg); }
-    .settings-header {
-      display: flex; align-items: center; gap: 12px;
-      padding: 20px 16px 16px; border-bottom: 1px solid var(--border);
+    #settingsScreen {
+      padding: 0 0 80px;
+      background: var(--bg);
     }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
     .settings-back {
-      width: 38px; height: 38px; border-radius: 12px;
-      background: var(--surface); color: var(--text);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; border: 1px solid var(--border);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid var(--border);
       transition: transform .15s, background .15s;
     }
-    .settings-back:active { transform: scale(.9); background: var(--surface2); }
+
+    .settings-back:active {
+      transform: scale(.9);
+      background: var(--surface2);
+    }
+
     .settings-title {
-      font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
     }
-    .settings-section { padding: 20px 16px 0; }
+
+    .settings-section {
+      padding: 20px 16px 0;
+    }
+
     .settings-section-label {
-      font-size: 11px; font-weight: 700; color: var(--sub);
-      text-transform: uppercase; letter-spacing: 1.5px;
-      margin-bottom: 10px; padding-left: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      padding-left: 4px;
     }
+
     .settings-card {
-      background: var(--surface); border-radius: 18px;
-      border: 1px solid var(--border); overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+      background: var(--surface);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .15);
     }
+
     .settings-row {
-      display: flex; align-items: center; padding: 15px 16px;
-      gap: 14px; cursor: pointer; transition: background .15s, transform .1s;
-      position: relative; border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 15px 16px;
+      gap: 14px;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      position: relative;
+      border-bottom: 1px solid var(--border);
     }
-    .settings-row:last-child { border-bottom: none; }
-    .settings-row:active { background: var(--surface2); transform: scale(.98); }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row:active {
+      background: var(--surface2);
+      transform: scale(.98);
+    }
+
     .settings-row-icon {
-      width: 40px; height: 40px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
     }
-    .settings-row-title { flex: 1; font-size: 15px; font-weight: 500; color: var(--text); }
-    .settings-row-arrow { color: var(--sub); font-size: 20px; flex-shrink: 0; }
-    .settings-row.danger .settings-row-title { color: #FF4444; }
-    .settings-row.danger .settings-row-icon { background: rgba(255,68,68,.1); }
-    .settings-row.highlight { background: rgba(255,107,107,.05); }
-    .settings-row.highlight:active { background: rgba(255,107,107,.12); }
+
+    .settings-row-title {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .settings-row-arrow {
+      color: var(--sub);
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .settings-row.danger .settings-row-title {
+      color: #FF4444;
+    }
+
+    .settings-row.danger .settings-row-icon {
+      background: rgba(255, 68, 68, .1);
+    }
+
+    .settings-row.highlight {
+      background: rgba(255, 107, 107, .05);
+    }
+
+    .settings-row.highlight:active {
+      background: rgba(255, 107, 107, .12);
+    }
 
     /* Toggle Switch */
-    .toggle-switch { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
     .toggle-slider {
-      position: absolute; cursor: pointer; inset: 0;
-      background: var(--surface2); border-radius: 28px;
-      transition: background .3s; border: 1.5px solid var(--border);
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--surface2);
+      border-radius: 28px;
+      transition: background .3s;
+      border: 1.5px solid var(--border);
     }
+
     .toggle-slider::before {
-      content: ''; position: absolute; height: 20px; width: 20px;
-      left: 3px; bottom: 2.5px; background: var(--sub);
-      border-radius: 50%; transition: transform .3s, background .3s;
+      content: '';
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 2.5px;
+      background: var(--sub);
+      border-radius: 50%;
+      transition: transform .3s, background .3s;
     }
-    .toggle-switch input:checked + .toggle-slider {
-      background: linear-gradient(135deg, #00F0FF, #7000FF); border-color: transparent;
+
+    .toggle-switch input:checked+.toggle-slider {
+      background: linear-gradient(135deg, #00F0FF, #7000FF);
+      border-color: transparent;
     }
-    .toggle-switch input:checked + .toggle-slider::before {
-      transform: translateX(20px); background: #fff;
+
+    .toggle-switch input:checked+.toggle-slider::before {
+      transform: translateX(20px);
+      background: #fff;
     }
 
     /* Confirmation Modal */
     .confirm-modal-overlay {
-      position: fixed; inset: 0; z-index: 960;
-      background: rgba(0,0,0,.75); backdrop-filter: blur(10px);
-      display: none; align-items: center; justify-content: center;
-      padding: 24px; max-width: 480px; margin: 0 auto;
+      position: fixed;
+      inset: 0;
+      z-index: 960;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      max-width: 480px;
+      margin: 0 auto;
     }
-    .confirm-modal-overlay.show { display: flex; }
+
+    .confirm-modal-overlay.show {
+      display: flex;
+    }
+
     .confirm-modal {
-      background: var(--surface); border-radius: 24px;
-      padding: 28px 24px; border: 1px solid var(--border);
-      box-shadow: 0 16px 48px rgba(0,0,0,.5);
-      width: 100%; max-width: 360px; animation: fadeUp .25s ease; text-align: center;
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 28px 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+      width: 100%;
+      max-width: 360px;
+      animation: fadeUp .25s ease;
+      text-align: center;
     }
-    .confirm-modal-icon { font-size: 48px; margin-bottom: 12px; }
+
+    .confirm-modal-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
     .confirm-modal h3 {
-      font-family: 'Syne', sans-serif; font-size: 20px;
-      font-weight: 800; margin-bottom: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
-    .confirm-modal p { font-size: 14px; color: var(--sub); line-height: 1.5; margin-bottom: 24px; }
-    .confirm-modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .confirm-modal p {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .confirm-modal-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
     .confirm-btn {
-      padding: 13px; border-radius: 14px; font-size: 14px;
-      font-weight: 700; cursor: pointer; transition: transform .15s, opacity .15s;
+      padding: 13px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, opacity .15s;
     }
-    .confirm-btn:active { transform: scale(.96); opacity: .85; }
-    .confirm-btn-cancel { background: var(--surface2); color: var(--text); }
-    .confirm-btn-danger { background: linear-gradient(135deg, #FF4444, #FF6B6B); color: #fff; }
-    .confirm-btn-primary { background: var(--grad); color: #fff; }
+
+    .confirm-btn:active {
+      transform: scale(.96);
+      opacity: .85;
+    }
+
+    .confirm-btn-cancel {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .confirm-btn-danger {
+      background: linear-gradient(135deg, #FF4444, #FF6B6B);
+      color: #fff;
+    }
+
+    .confirm-btn-primary {
+      background: var(--grad);
+      color: #fff;
+    }
 
     /* Password Modal */
     .pwd-modal-overlay {
-      position: fixed; inset: 0; z-index: 960;
-      background: rgba(0,0,0,.75); backdrop-filter: blur(10px);
-      display: none; align-items: center; justify-content: center;
-      padding: 24px; max-width: 480px; margin: 0 auto;
+      position: fixed;
+      inset: 0;
+      z-index: 960;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      max-width: 480px;
+      margin: 0 auto;
     }
-    .pwd-modal-overlay.show { display: flex; }
-    .pwd-modal {
-      background: var(--surface); border-radius: 24px;
-      padding: 28px 24px; border: 1px solid var(--border);
-      box-shadow: 0 16px 48px rgba(0,0,0,.5);
-      width: 100%; max-width: 360px; animation: fadeUp .25s ease;
-    }
-    .pwd-modal h3 {
-      font-family: 'Syne', sans-serif; font-size: 20px;
-      font-weight: 800; margin-bottom: 20px; text-align: center;
-    }
-    .pwd-field { margin-bottom: 14px; }
-    .pwd-field label {
-      font-size: 11px; font-weight: 700; color: var(--sub);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 6px; display: block;
-    }
-    .pwd-field input {
-      width: 100%; padding: 13px 16px; background: var(--surface2);
-      border-radius: 14px; border: 1.5px solid var(--border);
-      color: var(--text); font-size: 15px; transition: border-color .2s;
-    }
-    .pwd-field input:focus { border-color: var(--accent); }
-    .pwd-err { color: #FF4444; font-size: 13px; text-align: center; min-height: 18px; margin-bottom: 8px; }
-    .settings-version { text-align: center; padding: 24px 16px; color: var(--sub); font-size: 12px; opacity: .6; }
 
+    .pwd-modal-overlay.show {
+      display: flex;
+    }
+
+    .pwd-modal {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 28px 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+      width: 100%;
+      max-width: 360px;
+      animation: fadeUp .25s ease;
+    }
+
+    .pwd-modal h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .pwd-field {
+      margin-bottom: 14px;
+    }
+
+    .pwd-field label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .pwd-field input {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface2);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color .2s;
+    }
+
+    .pwd-field input:focus {
+      border-color: var(--accent);
+    }
+
+    .pwd-err {
+      color: #FF4444;
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+      margin-bottom: 8px;
+    }
+
+    .settings-version {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--sub);
+      font-size: 12px;
+      opacity: .6;
+    }
   </style>
 </head>
 
@@ -2995,7 +3205,8 @@
         </div>
         <div>
           <div class="setup-label">Profession <span style="color:#FF3366">*</span></div>
-          <select class="setup-input" id="setupProfession" required style="padding:14px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text); width:100%; font-family:inherit; margin-bottom:12px; cursor:pointer">
+          <select class="setup-input" id="setupProfession" required
+            style="padding:14px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text); width:100%; font-family:inherit; margin-bottom:12px; cursor:pointer">
             <option value="School">School Student</option>
             <option value="College" selected>College Student</option>
             <option value="Working">Working Professional</option>
@@ -3114,7 +3325,8 @@
           <input class="form-inp" id="postTitle" placeholder="Title (optional)">
           <textarea class="form-inp" id="postDesc" placeholder="Caption... what are you teaching today?"></textarea>
           <div id="targetProfessionSection">
-            <div class="form-label" style="margin-bottom:10px; margin-top:8px">🎯 Target Audience <span style="color:#FF3366">*</span></div>
+            <div class="form-label" style="margin-bottom:10px; margin-top:8px">🎯 Target Audience <span
+                style="color:#FF3366">*</span></div>
             <div class="hashtag-wrap" id="targetProfChips" style="margin-bottom:18px">
               <span class="htag sel" onclick="toggleProfTag(this)">School</span>
               <span class="htag sel" onclick="toggleProfTag(this)">College</span>
@@ -3305,12 +3517,14 @@
           <div class="settings-section-label">Account</div>
           <div class="settings-card">
             <div class="settings-row" onclick="openEditProfile()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">👤</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">👤</div>
               <div class="settings-row-title">Edit Profile</div>
               <span class="material-icons-round settings-row-arrow">chevron_right</span>
             </div>
             <div class="settings-row" onclick="openChangePassword()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">🔐</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(112,0,255,.15))">🔐</div>
               <div class="settings-row-title">Change Password</div>
               <span class="material-icons-round settings-row-arrow">chevron_right</span>
             </div>
@@ -3327,7 +3541,8 @@
           <div class="settings-section-label">Preferences</div>
           <div class="settings-card">
             <div class="settings-row" onclick="toggleTheme()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(112,0,255,.15))">🌗</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(112,0,255,.15))">🌗</div>
               <div class="settings-row-title">Theme</div>
               <label class="toggle-switch" onclick="event.stopPropagation()">
                 <input type="checkbox" id="settingsThemeToggle" onchange="toggleTheme()">
@@ -3335,7 +3550,8 @@
               </label>
             </div>
             <div class="settings-row">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(255,51,102,.15))">🔔</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(0,240,255,.15), rgba(255,51,102,.15))">🔔</div>
               <div class="settings-row-title">Notifications</div>
               <label class="toggle-switch" onclick="event.stopPropagation()">
                 <input type="checkbox" id="settingsNotifToggle" checked onchange="toggleSettingsNotif()">
@@ -3350,7 +3566,8 @@
           <div class="settings-section-label">Chatbot</div>
           <div class="settings-card">
             <div class="settings-row" onclick="showClearChatConfirm()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,51,102,.15), rgba(255,107,107,.15))">🗑️</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(255,51,102,.15), rgba(255,107,107,.15))">🗑️</div>
               <div class="settings-row-title">Clear Chat History</div>
               <span class="material-icons-round settings-row-arrow">chevron_right</span>
             </div>
@@ -3362,7 +3579,8 @@
           <div class="settings-section-label">Security</div>
           <div class="settings-card">
             <div class="settings-row highlight" onclick="logoutUser()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,107,107,.15), rgba(255,51,102,.15))">🚪</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(255,107,107,.15), rgba(255,51,102,.15))">🚪</div>
               <div class="settings-row-title" style="font-weight:600;color:var(--accent)">Logout</div>
               <span class="material-icons-round settings-row-arrow" style="color:var(--accent)">chevron_right</span>
             </div>
@@ -3395,19 +3613,22 @@
       <!-- Items will pop up here mathematically or structurally positioned -->
       <div class="radial-wheel" id="radialWheel">
         <div class="radial-item" data-action="profile" onclick="handleRadialClick('profile')">
-          <div class="radial-icon" style="background:linear-gradient(135deg, #00F0FF, #C44DFF)"><span class="material-icons-round">person_outline</span></div>
+          <div class="radial-icon" style="background:linear-gradient(135deg, #00F0FF, #C44DFF)"><span
+              class="material-icons-round">person_outline</span></div>
         </div>
         <div class="radial-item" data-action="add" onclick="handleRadialClick('add')">
           <div class="radial-icon" style="background:var(--grad)"><span class="material-icons-round">add</span></div>
         </div>
         <div class="radial-item" data-action="search" onclick="handleRadialClick('search')">
-          <div class="radial-icon" style="background:linear-gradient(135deg, #FF3366, #ff8c42)"><span class="material-icons-round">search</span></div>
+          <div class="radial-icon" style="background:linear-gradient(135deg, #FF3366, #ff8c42)"><span
+              class="material-icons-round">search</span></div>
         </div>
         <div class="radial-item" data-action="ai" onclick="handleRadialClick('ai')">
           <div class="radial-icon" style="background:#5A4FCF"><span class="material-icons-round">smart_toy</span></div>
         </div>
         <div class="radial-item" data-action="notif" onclick="handleRadialClick('notif')">
-          <div class="radial-icon" style="background:#FF9F1C"><span class="material-icons-round">notifications_none</span></div>
+          <div class="radial-icon" style="background:#FF9F1C"><span
+              class="material-icons-round">notifications_none</span></div>
         </div>
         <div class="radial-item" data-action="settings" onclick="handleRadialClick('settings')">
           <div class="radial-icon" style="background:#6B7280"><span class="material-icons-round">settings</span></div>
@@ -3415,8 +3636,10 @@
         <div class="radial-item" data-action="explore" onclick="handleRadialClick('explore')">
           <div class="radial-icon" style="background:#2DD4BF"><span class="material-icons-round">explore</span></div>
         </div>
-        <div class="radial-item" id="adminRadialItem" data-action="admin" onclick="handleRadialClick('admin')" style="display:none">
-          <div class="radial-icon" style="background:linear-gradient(135deg, #FF0055, #FFB300)"><span class="material-icons-round">admin_panel_settings</span></div>
+        <div class="radial-item" id="adminRadialItem" data-action="admin" onclick="handleRadialClick('admin')"
+          style="display:none">
+          <div class="radial-icon" style="background:linear-gradient(135deg, #FF0055, #FFB300)"><span
+              class="material-icons-round">admin_panel_settings</span></div>
         </div>
       </div>
     </div>
@@ -3425,20 +3648,27 @@
   <!-- ═══ OVERLAYS ═══ -->
 
   <!-- OTP Overlay Modal -->
-  <div class="screen" id="otpOverlay" style="display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);align-items:center;justify-content:center;padding:32px 28px;">
-    <div style="background:var(--surface);width:100%;max-width:400px;border-radius:24px;padding:32px 24px;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center">
+  <div class="screen" id="otpOverlay"
+    style="display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);align-items:center;justify-content:center;padding:32px 28px;">
+    <div
+      style="background:var(--surface);width:100%;max-width:400px;border-radius:24px;padding:32px 24px;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center">
       <div style="font-size:42px;margin-bottom:12px">📩</div>
       <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;margin-bottom:8px">Check your email</h2>
-      <p style="color:var(--sub);font-size:14px;margin-bottom:24px;line-height:1.5">We've sent a 6-digit code to verify your account. It expires in 5 minutes.</p>
-      
-      <input type="text" id="otpInput" class="auth-input" placeholder="000000" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:8px;font-family:monospace;margin-bottom:12px;padding:14px">
+      <p style="color:var(--sub);font-size:14px;margin-bottom:24px;line-height:1.5">We've sent a 6-digit code to verify
+        your account. It expires in 5 minutes.</p>
+
+      <input type="text" id="otpInput" class="auth-input" placeholder="000000" maxlength="6"
+        style="text-align:center;font-size:24px;letter-spacing:8px;font-family:monospace;margin-bottom:12px;padding:14px">
       <div id="otpErr" style="color:var(--accent);font-size:13px;margin-bottom:16px;min-height:16px"></div>
-      
-      <button type="button" class="auth-btn" id="otpVerifyBtn" onclick="verifyOTP()" style="margin-bottom:12px">Verify OTP ✨</button>
-      
+
+      <button type="button" class="auth-btn" id="otpVerifyBtn" onclick="verifyOTP()" style="margin-bottom:12px">Verify
+        OTP ✨</button>
+
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
-          <button type="button" onclick="cancelOTP()" style="background:none;color:var(--sub);font-size:13px;font-weight:600">← Back</button>
-          <button type="button" onclick="resendOTP()" style="background:none;color:var(--accent3);font-size:13px;font-weight:700">Resend OTP</button>
+        <button type="button" onclick="cancelOTP()"
+          style="background:none;color:var(--sub);font-size:13px;font-weight:600">← Back</button>
+        <button type="button" onclick="resendOTP()"
+          style="background:none;color:var(--accent3);font-size:13px;font-weight:700">Resend OTP</button>
       </div>
     </div>
   </div>
@@ -3921,12 +4151,12 @@
         } else {
           const username = document.getElementById('regUsername').value.trim();
           if (!username) { errEl.textContent = 'Username required'; btn.textContent = 'Create Account'; btn.disabled = false; return; }
-          
+
           pendingRegData = { username, email, password: pass };
-          
+
           // Request OTP instead of direct register
           const res = await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email, username }) });
-          
+
           document.getElementById('otpOverlay').style.display = 'flex';
           document.getElementById('otpErr').textContent = '';
           document.getElementById('otpInput').value = '';
@@ -3945,7 +4175,7 @@
       const errEl = document.getElementById('otpErr');
       const btn = document.getElementById('otpVerifyBtn');
       errEl.textContent = '';
-      if(!otp) { errEl.textContent = 'Enter the 6-digit code'; return; }
+      if (!otp) { errEl.textContent = 'Enter the 6-digit code'; return; }
 
       btn.disabled = true; btn.textContent = 'Verifying...';
       try {
@@ -3960,7 +4190,7 @@
     }
 
     async function resendOTP() {
-      if(!pendingRegData) return;
+      if (!pendingRegData) return;
       try {
         await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email: pendingRegData.email, username: pendingRegData.username }) });
         toast('📩 OTP Resent Successfully!');
@@ -3970,23 +4200,23 @@
     }
 
     function cancelOTP() {
-        pendingRegData = null;
-        document.getElementById('otpOverlay').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
+      pendingRegData = null;
+      document.getElementById('otpOverlay').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
     }
 
     function processAuthSuccess(data) {
-        authToken = data.token;
-        currentUser = data.user;
-        localStorage.setItem('s2l_token', authToken);
-        localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-        appBooted = true;
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem('s2l_token', authToken);
+      localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+      appBooted = true;
 
-        if (data.is_new || !currentUser.is_setup) {
-          showSetup();
-        } else {
-          showMainApp();
-        }
+      if (data.is_new || !currentUser.is_setup) {
+        showSetup();
+      } else {
+        showMainApp();
+      }
     }
 
     function showSetup() {
@@ -4089,10 +4319,10 @@
     async function editProfession() {
       const currentProf = currentUser?.profession || 'College';
       const prof = prompt("Enter your profession (School, College, or Working):", currentProf);
-      if(!prof) return;
+      if (!prof) return;
       const valid = ['School', 'College', 'Working'];
       const normalized = valid.find(v => v.toLowerCase() === prof.toLowerCase().trim());
-      if(!normalized) {
+      if (!normalized) {
         toast('⚠️ Please enter exactly: School, College, or Working');
         return;
       }
@@ -4107,7 +4337,7 @@
           localStorage.setItem('s2l_user', JSON.stringify(currentUser));
           toast('✅ Profession updated to ' + normalized);
         }
-      } catch(e) {
+      } catch (e) {
         toast('⚠️ Failed to update profession');
       }
     }
@@ -4133,10 +4363,10 @@
       // Show/hide admin tab
       const adminTab = document.getElementById('adminNavBtn');
       if (adminTab) adminTab.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
-      
+
       const adminRadial = document.getElementById('adminRadialItem');
       if (adminRadial) adminRadial.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
-      
+
       initRadialItems(); // Adjust radial layout dynamically for admin item
 
       // ── CRITICAL: reset feed state BEFORE setting up observer
@@ -4357,7 +4587,7 @@
         data.posts.forEach(post => {
           const card = post.type === 'reel' ? buildReelCard(post) : buildPostCard(post);
           container.appendChild(card);
-          
+
           // Observe video to auto-pause when scrolled out of view, and auto-play reels when visible
           const vid = card.querySelector('video');
           if (vid) {
@@ -4368,7 +4598,7 @@
                     e.target.pause();
                   } else if (e.target.hasAttribute('autoplay')) {
                     const playPromise = e.target.play();
-                    if (playPromise !== undefined) playPromise.catch(() => {});
+                    if (playPromise !== undefined) playPromise.catch(() => { });
                   }
                 });
               }, { threshold: 0.4 });
@@ -4565,9 +4795,9 @@
       const videos = document.querySelectorAll('#reelsContainer video');
       const obs = new IntersectionObserver(entries => {
         entries.forEach(e => {
-          if (e.isIntersecting) { 
-            e.target.play(); 
-          } else { 
+          if (e.isIntersecting) {
+            e.target.play();
+          } else {
             e.target.pause();
             e.target.currentTime = 0; // Reset audio position
           }
@@ -5346,11 +5576,11 @@
       const next = current === 'light' ? 'dark' : 'light';
       html.setAttribute('data-theme', next);
       localStorage.setItem('s2l_theme', next);
-      
+
       // Update toggle checkbox if it exists
       const toggle = document.getElementById('settingsThemeToggle');
       if (toggle) toggle.checked = (next === 'light');
-      
+
       updateThemeIcon(next);
     }
 
@@ -5378,23 +5608,23 @@
     ═══════════════════════════════════════════════════════ */
     const radialOverlay = document.getElementById('radialMenuOverlay');
     const radialWheel = document.getElementById('radialWheel');
-    
+
     let isRadialOpen = false;
     let radialRot = 0; // Current rotation
     let rotVelocity = 0;
     let angularFriction = 0.92; // Inertia decay
     let isSpinning = false;
-    
+
     let lastAngle = 0;
     let isDraggingRadial = false;
     let animFrame = null;
     let lastTime = 0;
-    
+
     // Setup variables (will be populated on init)
     let radialItems = [];
     let TOTAL_ITEMS = 0;
     let STEP_ANGLE = 0;
-    
+
     function initRadialItems() {
       // Only parse visible items to prevent gaps in the circle
       radialItems = Array.from(document.querySelectorAll('.radial-item')).filter(el => el.style.display !== 'none');
@@ -5403,9 +5633,9 @@
       STEP_ANGLE = 360 / TOTAL_ITEMS;
 
       radialItems.forEach((item, i) => {
-        const agl = i * STEP_ANGLE; 
+        const agl = i * STEP_ANGLE;
         item.style.setProperty('--angle', `${agl}deg`);
-        item.style.setProperty('--radius', `120px`); 
+        item.style.setProperty('--radius', `120px`);
       });
       updateRadialTransform();
     }
@@ -5416,7 +5646,7 @@
       if (!isRadialOpen) {
         radialOverlay.classList.add('open');
         // snap to closest on open
-        radialRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE; 
+        radialRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
         updateRadialTransform();
         isRadialOpen = true;
       } else {
@@ -5429,11 +5659,11 @@
       radialOverlay.classList.remove('open');
       cancelAnimationFrame(animFrame);
     }
-    
+
     function closeRadialMenu(e) {
       if (e && e.target === radialOverlay) closeRadialMenuInternal();
     }
-    
+
     // Touch vs mouse detection for radial menu
     let isTouchDevice = false;
     window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
@@ -5476,7 +5706,7 @@
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       // In atan2, top is usually -90 if 0 is right. We offset by 90 to make top=0.
       let ang = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
-      return ang + 90; 
+      return ang + 90;
     }
 
     function onDragStart(e) {
@@ -5490,18 +5720,18 @@
 
     function onDragMove(e) {
       if (!isDraggingRadial) return;
-      e.preventDefault(); 
+      e.preventDefault();
       const currentAngle = getAngleCenter(e);
       const currentTime = performance.now();
-      
+
       let diff = currentAngle - lastAngle;
       // Handle boundary wrap
       if (diff > 180) diff -= 360;
       if (diff < -180) diff += 360;
-      
+
       radialRot += diff;
       rotVelocity = diff; // track last diff as velocity
-      
+
       updateRadialTransform();
       lastAngle = currentAngle;
       lastTime = currentTime;
@@ -5515,25 +5745,25 @@
     }
 
     radialWheel.addEventListener('mousedown', onDragStart);
-    window.addEventListener('mousemove', onDragMove, {passive: false});
+    window.addEventListener('mousemove', onDragMove, { passive: false });
     window.addEventListener('mouseup', onDragEnd);
 
-    radialWheel.addEventListener('touchstart', onDragStart, {passive: false});
-    window.addEventListener('touchmove', onDragMove, {passive: false});
+    radialWheel.addEventListener('touchstart', onDragStart, { passive: false });
+    window.addEventListener('touchmove', onDragMove, { passive: false });
     window.addEventListener('touchend', onDragEnd);
 
     function spinLoop() {
       if (!isSpinning) return;
-      
+
       // Decay friction
       radialRot += rotVelocity;
       rotVelocity *= angularFriction;
-      
+
       // Snapping recoil behavior
       if (Math.abs(rotVelocity) < 1.0) {
         const targetRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
         const diff = targetRot - radialRot;
-        
+
         if (Math.abs(diff) < 0.2) {
           radialRot = targetRot;
           isSpinning = false;
@@ -5543,7 +5773,7 @@
           radialRot += rotVelocity;
         }
       }
-      
+
       updateRadialTransform();
       if (isSpinning) animFrame = requestAnimationFrame(spinLoop);
     }
@@ -5551,23 +5781,23 @@
     function updateRadialTransform() {
       // CSS custom property dynamically updates orientation inside css rule
       radialWheel.style.setProperty('--wheel-rot', `${radialRot}deg`);
-      
+
       // Handle clipping (only 3 visible items!)
       // Limit visibility to those near the top (absolute angle around 0)
       radialItems.forEach((item, i) => {
-          let absAngle = (i * STEP_ANGLE + radialRot) % 360;
-          if (absAngle > 180) absAngle -= 360;
-          if (absAngle < -180) absAngle += 360;
-          
-          // Show items within +/- roughly 70 degrees from top.
-          // Because Step is 51 deg. (0, +51, -51 will fit)
-          if (Math.abs(absAngle) <= 75) {
-             item.style.opacity = '1';
-             item.style.pointerEvents = 'auto';
-          } else {
-             item.style.opacity = '0';
-             item.style.pointerEvents = 'none';
-          }
+        let absAngle = (i * STEP_ANGLE + radialRot) % 360;
+        if (absAngle > 180) absAngle -= 360;
+        if (absAngle < -180) absAngle += 360;
+
+        // Show items within +/- roughly 70 degrees from top.
+        // Because Step is 51 deg. (0, +51, -51 will fit)
+        if (Math.abs(absAngle) <= 75) {
+          item.style.opacity = '1';
+          item.style.pointerEvents = 'auto';
+        } else {
+          item.style.opacity = '0';
+          item.style.pointerEvents = 'none';
+        }
       });
     }
 
@@ -5575,11 +5805,11 @@
     document.addEventListener('keydown', (e) => {
       // ESC bindings
       if (e.key === 'Escape') {
-         if (isRadialOpen) closeRadialMenuInternal();
-         if (document.getElementById('notifPanel').classList.contains('show')) closeNotif();
-         if (document.getElementById('aiModalOverlay').style.display === 'flex') closeAI();
+        if (isRadialOpen) closeRadialMenuInternal();
+        if (document.getElementById('notifPanel').classList.contains('show')) closeNotif();
+        if (document.getElementById('aiModalOverlay').style.display === 'flex') closeAI();
       }
-      
+
       // Arrow Up/Down & Enter bindings
       const feedContainer = document.getElementById('feedContainer');
       const reelsScreen = document.getElementById('reelsScreen');
@@ -5605,12 +5835,12 @@
               return rect.top >= -100 && rect.top <= 100;
             });
             if (currentPostIdx === -1) {
-               // Fallback: finding the one closest to top
-               currentPostIdx = posts.reduce((prev, curr, idx) => {
-                 const prevRect = posts[prev].getBoundingClientRect();
-                 const currRect = curr.getBoundingClientRect();
-                 return Math.abs(currRect.top) < Math.abs(prevRect.top) ? idx : prev;
-               }, 0);
+              // Fallback: finding the one closest to top
+              currentPostIdx = posts.reduce((prev, curr, idx) => {
+                const prevRect = posts[prev].getBoundingClientRect();
+                const currRect = curr.getBoundingClientRect();
+                return Math.abs(currRect.top) < Math.abs(prevRect.top) ? idx : prev;
+              }, 0);
             }
             const nextIdx = e.key === 'ArrowDown' ? Math.min(posts.length - 1, currentPostIdx + 1) : Math.max(0, currentPostIdx - 1);
             posts[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -5619,19 +5849,19 @@
       }
 
       if (e.key === 'Enter') {
-         const isReels = reelsScreen && reelsScreen.classList.contains('active');
-         if (isReels) {
-            const currentVideo = document.querySelector('.reel-full video:not([style*="display: none"])'); // Simplification
-            // Actually find the video in the active reel
-            const rc = document.getElementById('reelsContainer');
-            const h = window.innerHeight;
-            const idx = Math.round(rc.scrollTop / h);
-            const videos = rc.querySelectorAll('video');
-            if (videos[idx]) {
-               if (videos[idx].paused) videos[idx].play();
-               else videos[idx].pause();
-            }
-         }
+        const isReels = reelsScreen && reelsScreen.classList.contains('active');
+        if (isReels) {
+          const currentVideo = document.querySelector('.reel-full video:not([style*="display: none"])'); // Simplification
+          // Actually find the video in the active reel
+          const rc = document.getElementById('reelsContainer');
+          const h = window.innerHeight;
+          const idx = Math.round(rc.scrollTop / h);
+          const videos = rc.querySelectorAll('video');
+          if (videos[idx]) {
+            if (videos[idx].paused) videos[idx].play();
+            else videos[idx].pause();
+          }
+        }
       }
     });
 
@@ -5639,3 +5869,11 @@
 </body>
 
 </html>
+<script>
+  fetch("https://scroll2learn.onrender.com/")
+    .then(res => res.text())
+    .then(data => {
+      console.log("Backend response:", data);
+    })
+    .catch(err => console.error(err));
+</script>
