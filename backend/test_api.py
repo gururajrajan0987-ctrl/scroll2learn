@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://localhost:5000/ai/chat"
+url = "https://scroll2learn.onrender.com/ai/chat"
 headers = {"Authorization": "Bearer any-token"} # Backend mock check might fail but it will log
 data = {
     "message": "Explain insects",
