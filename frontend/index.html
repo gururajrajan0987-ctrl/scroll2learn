@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Scroll2Learn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
@@ -27,10 +27,11 @@
       --grad: linear-gradient(135deg, #00F0FF, #7000FF);
       --grad2: linear-gradient(135deg, #FF3366, #00F0FF);
       --story-ring: linear-gradient(45deg, #00F0FF, #FF3366, #7000FF);
-      --nav-h: 72px;
-      --top-h: 60px;
+      --nav-h: 74px;
+      --top-h: 64px;
       --radius: 18px;
-      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 12px);
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       font-family: 'DM Sans', sans-serif;
     }
@@ -639,13 +640,13 @@
    TOP BAR
 ═══════════════════════════════════════════════════════ */
     .topbar {
-      height: calc(var(--top-h) + env(safe-area-inset-top));
+      height: calc(var(--top-h) + var(--safe-top));
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      padding-top: env(safe-area-inset-top);
+      padding-top: var(--safe-top);
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       position: relative;
@@ -824,7 +825,7 @@
       inset: 0;
       overflow-y: auto;
       display: none;
-      padding-bottom: calc(var(--nav-h) + 40px + var(--safe-bottom));
+      padding-bottom: calc(var(--nav-h) + 60px + var(--safe-bottom));
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
     }
@@ -1658,7 +1659,7 @@
       -webkit-backdrop-filter: blur(15px);
       border-top: 1px solid var(--border);
       position: fixed;
-      bottom: 0;
+      bottom: 0px;
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
@@ -5607,31 +5608,33 @@
     });
 
     /* ═══════════════════════════════════════════════════════
-       EXIT MECHANISM & NAVIGATION
+       EXIT MECHANISM & NAVIGATION Flow
     ═══════════════════════════════════════════════════════ */
-    // Initialize history state on load
-    history.replaceState({ page: 'home' }, '');
+    // Initialize history state on load to intercept first back button
+    if (history.state?.page !== 'home') {
+      history.pushState({ page: 'home' }, '');
+    }
 
     window.onpopstate = function (event) {
       const homeScreen = document.getElementById('homeScreen');
-      if (!homeScreen.classList.contains('active')) {
+      if (!homeScreen || !homeScreen.classList.contains('active')) {
         // If not on home, back button takes us home first
         navigate('home');
         history.pushState({ page: 'home' }, '');
         return;
       }
 
-      // If already on home, handle double back to exit
+      // If already on home, check double back
       exitClickCount++;
       if (exitClickCount === 1) {
         toast('👋 Press back again to exit Scroll2Learn');
-        // Re-push state so next back triggers this again
+        // Push state again so next back triggers popstate again
         history.pushState({ page: 'home' }, '');
         clearTimeout(exitTimer);
         exitTimer = setTimeout(() => { exitClickCount = 0; }, 2000);
       } else {
-        // Exit for real: clear state and let browser go back
-        history.back();
+        // For real exit, we need to go back in history past our initial push
+        history.go(-2);
       }
     };
   </script>
