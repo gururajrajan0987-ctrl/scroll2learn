@@ -141,13 +141,14 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS otp_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, otp TEXT NOT NULL,
         expires_at TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS stories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-        media_url TEXT NOT NULL, caption TEXT DEFAULT '',
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP, expires_at TEXT NOT NULL)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS story_views (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, story_id INTEGER NOT NULL, user_id INTEGER NOT NULL,
-        viewed_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(story_id, user_id))''')
+
+    # Cleanup: Remove old story tables if they exist
+    try:
+        c.execute("DROP TABLE IF EXISTS stories")
+        c.execute("DROP TABLE IF EXISTS story_views")
+    except:
+        pass
+
     # Create/update admin user
     existing = c.execute("SELECT id FROM users WHERE username=?", (ADMIN_USERNAME,)).fetchone()
     if existing:
@@ -287,8 +288,11 @@ def setup_profile():
     if 'avatar' in request.files:
         f = request.files['avatar']
         if f and allowed_file(f.filename):
-            result = cloudinary.uploader.upload(f, resource_type="auto")
-            avatar_url = result.get('secure_url')
+            try:
+                result = cloudinary.uploader.upload(f, resource_type="auto")
+                avatar_url = result.get('secure_url')
+            except Exception as e:
+                return jsonify({'error': f'Cloudinary upload failed: {str(e)}'}), 500
     conn = get_db()
     conn.execute('UPDATE users SET full_name=?,bio=?,website=?,avatar=?,interests=?,profession=?,is_setup=1 WHERE id=?',
                  (full_name,bio,website,avatar_url,interests,profession,user['id']))
@@ -380,8 +384,11 @@ def create_post():
     f = request.files.get('media')
     if not f or not allowed_file(f.filename): return jsonify({'error':'Valid media file required'}),400
     
-    result = cloudinary.uploader.upload(f, resource_type="auto")
-    media_url = result.get('secure_url')
+    try:
+        result = cloudinary.uploader.upload(f, resource_type="auto")
+        media_url = result.get('secure_url')
+    except Exception as e:
+        return jsonify({'error': f'Cloudinary upload failed: {str(e)}'}), 500
     
     is_approved = 1 if user.get('is_admin') else 0  # Only admin posts auto-approved
     conn = get_db()
@@ -550,48 +557,6 @@ def admin_stats():
         'comments':conn.execute("SELECT COUNT(*) FROM comments").fetchone()[0],
     }
     conn.close(); return jsonify(stats)
-
-# STORIES
-@app.route('/stories', methods=['GET'])
-def get_stories():
-    user=get_current_user(request)
-    conn=get_db(); now=datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    rows=conn.execute("SELECT s.*,u.username,u.avatar,u.full_name FROM stories s JOIN users u ON s.user_id=u.id WHERE s.expires_at>? ORDER BY s.created_at DESC",(now,)).fetchall()
-    grouped={}
-    for r in rows:
-        uid=r['user_id']
-        if uid not in grouped:
-            grouped[uid]={'user_id':uid,'username':r['username'],'avatar':r['avatar'] or '','full_name':r['full_name'] or r['username'],'stories':[],'has_unseen':False}
-        viewed=False
-        if user: viewed=bool(conn.execute('SELECT 1 FROM story_views WHERE story_id=? AND user_id=?',(r['id'],user['id'])).fetchone())
-        if not viewed: grouped[uid]['has_unseen']=True
-        grouped[uid]['stories'].append({'id':r['id'],'media_url':r['media_url'],'caption':r['caption'],'time':time_ago(r['created_at']),'viewed':viewed})
-    conn.close(); return jsonify(list(grouped.values()))
-
-@app.route('/stories', methods=['POST'])
-def create_story():
-    user=get_current_user(request)
-    if not user: return jsonify({'error':'Unauthorized'}),401
-    caption=request.form.get('caption','')
-    f=request.files.get('media')
-    if not f or not allowed_file(f.filename): return jsonify({'error':'Media required'}),400
-    
-    result = cloudinary.uploader.upload(f, resource_type="auto")
-    media_url = result.get('secure_url')
-    
-    expires=( datetime.utcnow()+timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
-    conn=get_db(); conn.execute('INSERT INTO stories (user_id,media_url,caption,expires_at) VALUES (?,?,?,?)',(user['id'],media_url,caption,expires)); conn.commit(); conn.close()
-    return jsonify({'message':'ok'}),201
-
-@app.route('/stories/<int:sid>/view', methods=['POST'])
-def view_story(sid):
-    user=get_current_user(request)
-    if user:
-        conn=get_db()
-        try: conn.execute('INSERT OR IGNORE INTO story_views (story_id,user_id) VALUES (?,?)',(sid,user['id'])); conn.commit()
-        except: pass
-        conn.close()
-    return jsonify({'ok':True})
 
 # SEARCH
 @app.route('/search', methods=['GET'])

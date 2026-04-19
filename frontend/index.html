@@ -27,9 +27,10 @@
       --grad: linear-gradient(135deg, #00F0FF, #7000FF);
       --grad2: linear-gradient(135deg, #FF3366, #00F0FF);
       --story-ring: linear-gradient(45deg, #00F0FF, #FF3366, #7000FF);
-      --nav-h: 64px;
-      --top-h: 56px;
+      --nav-h: 72px;
+      --top-h: 60px;
       --radius: 18px;
+      --safe-bottom: env(safe-area-inset-bottom);
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       font-family: 'DM Sans', sans-serif;
     }
@@ -638,12 +639,13 @@
    TOP BAR
 ═══════════════════════════════════════════════════════ */
     .topbar {
-      height: var(--top-h);
+      height: calc(var(--top-h) + env(safe-area-inset-top));
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
+      padding-top: env(safe-area-inset-top);
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       position: relative;
@@ -822,99 +824,16 @@
       inset: 0;
       overflow-y: auto;
       display: none;
+      padding-bottom: calc(var(--nav-h) + 40px + var(--safe-bottom));
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .screen.active {
       display: block;
     }
 
-    /* ═══════════════════════════════════════════════════════
-   STORIES
-═══════════════════════════════════════════════════════ */
-    .stories-row {
-      display: flex;
-      gap: 14px;
-      padding: 14px 16px;
-      overflow-x: auto;
-      flex-shrink: 0;
-    }
-
-    .story-bubble {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .story-ring {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      padding: 2.5px;
-      background: var(--story-ring);
-      transition: transform .2s;
-    }
-
-    .story-ring.seen {
-      background: var(--surface2);
-    }
-
-    .story-ring:active {
-      transform: scale(.92);
-    }
-
-    .story-ring-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 2.5px solid var(--bg);
-      overflow: hidden;
-      background: var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .story-ring-inner img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .story-add-inner {
-      background: var(--surface2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .story-add-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--grad);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
-
-    .story-add-btn .material-icons-round {
-      font-size: 18px;
-    }
-
-    .story-name {
-      font-size: 11px;
-      color: var(--sub);
-      max-width: 64px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-align: center;
-      font-weight: 500;
-    }
+    /* Removed Stories Section */
 
     /* ═══════════════════════════════════════════════════════
    POST CARD
@@ -1730,14 +1649,22 @@
    BOTTOM NAV
 ═══════════════════════════════════════════════════════ */
     .bottom-nav {
-      height: var(--nav-h);
+      height: calc(var(--nav-h) + var(--safe-bottom));
       flex-shrink: 0;
       display: flex;
       align-items: center;
       background: var(--bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border-top: 1px solid var(--border);
-      position: relative;
-      z-index: 50;
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 1000;
+      padding-bottom: var(--safe-bottom);
     }
 
     .nav-btn {
@@ -1799,74 +1726,7 @@
     /* ═══════════════════════════════════════════════════════
    STORY VIEWER
 ═══════════════════════════════════════════════════════ */
-    .story-viewer {
-      position: fixed;
-      inset: 0;
-      z-index: 900;
-      background: #000;
-      display: none;
-      flex-direction: column;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .story-viewer.show {
-      display: flex;
-    }
-
-    .story-viewer-bg {
-      position: absolute;
-      inset: 0;
-    }
-
-    .story-viewer-bg img,
-    .story-viewer-bg video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .story-viewer-top {
-      position: relative;
-      z-index: 2;
-      padding: 14px 14px 0;
-    }
-
-    .story-bars {
-      display: flex;
-      gap: 4px;
-    }
-
-    .story-bar {
-      flex: 1;
-      height: 2.5px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, .3);
-      overflow: hidden;
-    }
-
-    .story-bar-fill {
-      height: 100%;
-      background: #fff;
-      width: 0%;
-    }
-
-    .story-viewer-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-      color: #fff;
-    }
-
-    .sv-av {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #fff;
-      background: #333;
-    }
+    /* Removed Story Viewer CSS */
 
     .sv-name {
       font-size: 14px;
@@ -3717,43 +3577,7 @@
     </div>
   </div>
 
-  <!-- Story Upload Sheet -->
-  <div class="overlay-bg" id="storyOverlay" onclick="closeStoryUpload()"></div>
-  <div class="bottom-sheet" id="storySheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Add Story</div>
-    <div style="padding:16px;overflow-y:auto">
-      <div class="upload-zone" onclick="document.getElementById('storyFile').click()" style="margin-bottom:14px">
-        <span class="material-icons-round">add_photo_alternate</span>
-        <p>Tap to add photo or video</p>
-      </div>
-      <input type="file" id="storyFile" class="hidden" accept="image/*,video/*" onchange="previewStory(this)">
-      <div id="storyPreviewWrap" class="hidden upload-preview" style="margin-bottom:14px"></div>
-      <input class="form-inp" id="storyCaption" placeholder="Add a caption..." style="margin-bottom:14px">
-      <button type="button" class="pub-btn" onclick="submitStory()">Share Story ⚡</button>
-    </div>
-  </div>
-
-  <!-- Story Viewer -->
-  <div class="story-viewer" id="storyViewer">
-    <div class="story-viewer-bg" id="storyViewerBg"></div>
-    <div class="story-viewer-top">
-      <div class="story-bars" id="storyBars"></div>
-      <div class="story-viewer-user">
-        <img class="sv-av" id="svAvatar" src="">
-        <span class="sv-name" id="svName"></span>
-        <span style="color:rgba(255,255,255,.6);font-size:12px" id="svTime"></span>
-        <button type="button" class="sv-close" onclick="closeStoryViewer()">
-          <span class="material-icons-round">close</span>
-        </button>
-      </div>
-    </div>
-    <div class="story-viewer-tap-areas">
-      <div class="sv-tap-prev" onclick="prevStory()"></div>
-      <div class="sv-tap-next" onclick="nextStory()"></div>
-    </div>
-    <div class="story-caption" id="storyViewerCaption"></div>
-  </div>
+  <!-- Story blocks removed -->
 
   <!-- Notif Panel -->
   <div class="notif-panel" id="notifPanel">
@@ -3917,14 +3741,13 @@
     let appBooted = false;              // prevent double-boot on init
     let currentPostId = null;
     let currentAIPostTitle = '';
-    let currentStoryGroup = null;
-    let currentStoryIdx = 0;
-    let storyTimer = null;
-    let storyType = 'post';
     let selectedHtags = [];
+    let selectedProfTags = []; // Profession tags for filtering/targetting
     let currentCategory = 'All';
     let reelsData = [];
     let isMuted = true; // Global muted state for reels
+    let exitClickCount = 0;
+    let exitTimer = null;
 
     /* UI HELPERS */
     function toggleGlobalMute(e, btn) {
@@ -4111,10 +3934,24 @@
       const headers = { 'Content-Type': 'application/json', ...opts.headers };
       if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
       if (opts.body instanceof FormData) delete headers['Content-Type'];
-      const res = await fetch(API + path, { ...opts, headers });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
-      return data;
+      try {
+        const res = await fetch(API + path, { ...opts, headers });
+        if (res.status === 401) {
+          // Verify if token is indeed stale before force-logout
+          localStorage.removeItem('s2l_token');
+          localStorage.removeItem('s2l_user');
+          window.location.reload(); 
+          throw new Error('Session expired - Logging out');
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      } catch (e) {
+        if (e.message.includes('Unexpected token') || e.message.includes('JSON')) {
+          throw new Error('Server error - our AI is sleeping');
+        }
+        throw e;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -4376,7 +4213,6 @@
 
       updateProfileUI();
       initInfiniteScroll();   // observer will trigger loadFeed() automatically
-      loadStories();
       loadReels();
       // ⚠️  Do NOT call loadFeed() here — the IntersectionObserver handles it
       // Calling it here + observer = double call = the loop bug
@@ -4440,130 +4276,13 @@
       document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
       // Re-init infinite scroll (which triggers loadFeed)
       initInfiniteScroll();
-      // Also refresh stories
-      loadStories();
-      toast('🔄 Feed refreshed!');
+      toast('🚀 Feed refreshed!');
     }
 
     /* ═══════════════════════════════════════════════════════
        STORIES
     ═══════════════════════════════════════════════════════ */
-    async function loadStories() {
-      try {
-        const stories = await api('/stories');
-        const row = document.getElementById('storiesRow');
-        // Keep "Your Story" bubble
-        const addBubble = row.children[0];
-        row.innerHTML = '';
-        row.appendChild(addBubble);
-        // Update your story ring based on whether you've posted
-        stories.forEach(group => {
-          const av = group.avatar ? API + group.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(group.username)}&background=333&color=fff&size=64`;
-          const isYours = currentUser && group.user_id === currentUser.id;
-          const bubble = document.createElement('div');
-          bubble.className = 'story-bubble';
-          bubble.innerHTML = `
-        <div class="story-ring${group.has_unseen ? '' : ' seen'}">
-          <div class="story-ring-inner">
-            <img src="${av}" alt="${group.username}" onerror="this.src='https://ui-avatars.com/api/?name=${group.username}&background=333&color=fff&size=64'">
-          </div>
-        </div>
-        <span class="story-name">${isYours ? 'Your Story' : group.username}</span>`;
-          bubble.onclick = () => openStoryViewer(group);
-          row.appendChild(bubble);
-        });
-      } catch (e) { console.warn('Stories error:', e); }
-    }
-
-    function openStoryViewer(group) {
-      currentStoryGroup = group;
-      currentStoryIdx = 0;
-      document.getElementById('storyViewer').classList.add('show');
-      renderStory();
-    }
-
-    function renderStory() {
-      const story = currentStoryGroup.stories[currentStoryIdx];
-      const group = currentStoryGroup;
-      const av = group.avatar ? API + group.avatar : `https://ui-avatars.com/api/?name=${group.username}&background=333&color=fff&size=36`;
-      document.getElementById('svAvatar').src = av;
-      document.getElementById('svName').textContent = group.username;
-      document.getElementById('svTime').textContent = story.time;
-      document.getElementById('storyViewerCaption').textContent = story.caption || '';
-
-      const bg = document.getElementById('storyViewerBg');
-      const isVideo = story.media_url.match(/\.(mp4|webm|mov)$/i);
-      const url = story.media_url.startsWith('http') ? story.media_url : API + story.media_url;
-      bg.innerHTML = isVideo
-        ? `<video src="${url}" autoplay muted loop style="width:100%;height:100%;object-fit:contain;background:#000"></video>`
-        : `<img src="${url}" style="width:100%;height:100%;object-fit:contain;background:#000">`;
-
-      // Progress bars
-      const barsEl = document.getElementById('storyBars');
-      barsEl.innerHTML = currentStoryGroup.stories.map((s, i) => `
-    <div class="story-bar">
-      <div class="story-bar-fill" id="sbar${i}" style="width:${i < currentStoryIdx ? '100%' : '0%'}"></div>
-    </div>`).join('');
-
-      clearInterval(storyTimer);
-      const fill = document.getElementById(`sbar${currentStoryIdx}`);
-      let w = 0;
-      storyTimer = setInterval(() => {
-        w += 1; fill.style.width = w + '%';
-        if (w >= 100) { clearInterval(storyTimer); nextStory(); }
-      }, 50); // 5 seconds total
-
-      // Mark as viewed
-      api(`/stories/${story.id}/view`, { method: 'POST' }).catch(() => { });
-    }
-
-    function nextStory() {
-      if (!currentStoryGroup) return;
-      if (currentStoryIdx < currentStoryGroup.stories.length - 1) {
-        currentStoryIdx++;
-        renderStory();
-      } else { closeStoryViewer(); }
-    }
-
-    function prevStory() {
-      if (!currentStoryGroup) return;
-      if (currentStoryIdx > 0) { currentStoryIdx--; renderStory(); }
-    }
-
-    function closeStoryViewer() {
-      clearInterval(storyTimer);
-      document.getElementById('storyViewer').classList.remove('show');
-      currentStoryGroup = null;
-    }
-
-    function openStoryUpload() { showSheet('storySheet', 'storyOverlay'); }
-    function closeStoryUpload() { hideSheet('storySheet', 'storyOverlay'); }
-
-    function previewStory(input) {
-      if (!input.files[0]) return;
-      const wrap = document.getElementById('storyPreviewWrap');
-      const url = URL.createObjectURL(input.files[0]);
-      const isVideo = input.files[0].type.startsWith('video');
-      wrap.innerHTML = isVideo ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
-      wrap.classList.remove('hidden');
-    }
-
-    async function submitStory() {
-      const file = document.getElementById('storyFile').files[0];
-      if (!file) { toast('⚠️ Select a photo or video'); return; }
-      const fd = new FormData();
-      fd.append('media', file);
-      fd.append('caption', document.getElementById('storyCaption').value.trim());
-      try {
-        await api('/stories', { method: 'POST', body: fd });
-        closeStoryUpload();
-        toast('⚡ Story shared!');
-        loadStories();
-        document.getElementById('storyCaption').value = '';
-        document.getElementById('storyPreviewWrap').classList.add('hidden');
-        document.getElementById('storyFile').value = '';
-      } catch (e) { toast('⚠️ ' + e.message); }
-    }
+    /* Story functions removed */
 
     /* ═══════════════════════════════════════════════════════
        FEED
@@ -4929,13 +4648,11 @@
     /* ═══════════════════════════════════════════════════════
        CREATE POST
     ═══════════════════════════════════════════════════════ */
+    let currentUploadType = 'post';
     function selectType(type, btn) {
-      storyType = type;
+      currentUploadType = type;
       document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
-      const isStory = type === 'story';
-      document.getElementById('postFieldsWrap').style.display = isStory ? 'none' : 'block';
-      document.getElementById('storyCaptionWrap').style.display = isStory ? 'block' : 'none';
     }
 
     let selectedProfTags = ['School', 'College', 'Working'];
@@ -4968,30 +4685,6 @@
       if (!file) { toast('⚠️ Select media to publish'); return; }
       if (!authToken) { toast('Please login first'); return; }
 
-      // If story type, route to /stories endpoint instead
-      if (storyType === 'story') {
-        const fd = new FormData();
-        fd.append('media', file);
-        fd.append('caption', document.getElementById('storyDescription').value.trim());
-        const btn = document.querySelector('.pub-btn');
-        btn.textContent = 'Sharing...'; btn.disabled = true;
-        try {
-          await api('/stories', { method: 'POST', body: fd });
-          toast('⚡ Story shared!');
-          addNotif('✨ You shared a new story!');
-          document.getElementById('postTitle').value = '';
-          document.getElementById('postDesc').value = '';
-          document.getElementById('postFile').value = '';
-          document.getElementById('storyDescription').value = '';
-          document.getElementById('uploadPreview').classList.add('hidden');
-          document.getElementById('uploadZone').style.display = 'flex';
-          navigate('home');
-          loadStories();
-        } catch (e) { toast('⚠️ ' + e.message); }
-        btn.textContent = 'Publish 🚀'; btn.disabled = false;
-        return;
-      }
-
       const title = document.getElementById('postTitle').value.trim();
       const description = document.getElementById('postDesc').value.trim();
       const domain = document.getElementById('postDomain').value;
@@ -5002,7 +4695,7 @@
       }
 
       const fd = new FormData();
-      fd.append('type', storyType);
+      fd.append('type', currentUploadType);
       fd.append('title', title);
       fd.append('description', description);
       fd.append('hashtags', JSON.stringify(selectedHtags));
@@ -5016,7 +4709,7 @@
       try {
         const data = await api('/posts', { method: 'POST', body: fd });
         toast('🚀 Published successfully!');
-        addNotif(`✨ You published a new ${storyType}!`);
+        addNotif(`✨ You published a new ${currentUploadType}!`);
         // Reset form
         document.getElementById('postTitle').value = '';
         document.getElementById('postDesc').value = '';
@@ -5865,6 +5558,34 @@
       }
     });
 
+    /* ═══════════════════════════════════════════════════════
+       EXIT MECHANISM & NAVIGATION
+    ═══════════════════════════════════════════════════════ */
+    // Initialize history state on load
+    history.replaceState({ page: 'home' }, '');
+
+    window.onpopstate = function (event) {
+      const homeScreen = document.getElementById('homeScreen');
+      if (!homeScreen.classList.contains('active')) {
+        // If not on home, back button takes us home first
+        navigate('home');
+        history.pushState({ page: 'home' }, '');
+        return;
+      }
+
+      // If already on home, handle double back to exit
+      exitClickCount++;
+      if (exitClickCount === 1) {
+        toast('👋 Press back again to exit Scroll2Learn');
+        // Re-push state so next back triggers this again
+        history.pushState({ page: 'home' }, '');
+        clearTimeout(exitTimer);
+        exitTimer = setTimeout(() => { exitClickCount = 0; }, 2000);
+      } else {
+        // Exit for real: clear state and let browser go back
+        history.back();
+      }
+    };
   </script>
 </body>
 
