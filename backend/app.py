@@ -897,4 +897,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"\n>>> Scroll2Learn API running on port {port}")
     print(f">>> Admin login: username={ADMIN_USERNAME}  password={ADMIN_PASSWORD}\n")
-    app.run(debug=False, port=port, host='0.0.0.0', use_reloader=False)
+    socketio.run(app, debug=False, port=port, host="0.0.0.0", use_reloader=False)
