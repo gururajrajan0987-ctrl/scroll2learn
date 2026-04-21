@@ -706,6 +706,54 @@ def search():
     conn.close()
     return jsonify({'users': [dict(u) for u in users], 'posts': [dict(p) for p in posts]})
 
+@app.route('/chat/recent', methods=['GET'])
+def get_recent_chats():
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}), 401
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    # Recently messaged users
+    curr.execute("""
+        SELECT u.id, u.username, u.full_name, u.avatar, MAX(m.created_at) as last_msg
+        FROM users u
+        JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
+        WHERE (m.sender_id = %s OR m.receiver_id = %s) AND u.id != %s
+        GROUP BY u.id, u.username, u.full_name, u.avatar
+        ORDER BY last_msg DESC
+        LIMIT 20
+    """, (user['id'], user['id'], user['id']))
+    users = curr.fetchall()
+    conn.close()
+    return jsonify({'users': [dict(u) for u in users]})
+
+@app.route('/users/suggested', methods=['GET'])
+def get_suggested_users():
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}), 401
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    # Random users excluding self and those already messaged
+    curr.execute("""
+        SELECT id, username, full_name, avatar 
+        FROM users 
+        WHERE id != %s 
+        AND id NOT IN (
+            SELECT DISTINCT CASE 
+                WHEN sender_id = %s THEN receiver_id 
+                ELSE sender_id 
+            END 
+            FROM messages 
+            WHERE sender_id = %s OR receiver_id = %s
+        )
+        ORDER BY RANDOM() 
+        LIMIT 10
+    """, (user['id'], user['id'], user['id'], user['id']))
+    users = curr.fetchall()
+    conn.close()
+    return jsonify({'users': [dict(u) for u in users]})
+
 @app.route('/chat/users', methods=['GET'])
 def get_chat_users():
     user = get_current_user(request)

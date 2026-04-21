@@ -1145,15 +1145,18 @@
     .reel-full-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, .8) 0%, transparent 50%);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.3) 100%);
+      pointer-events: none;
     }
 
     .reel-full-info {
       position: absolute;
-      bottom: 90px;
+      bottom: 24px;
       left: 16px;
-      right: 80px;
+      right: 70px;
       color: #fff;
+      z-index: 5;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
     }
 
     .reel-full-info .rfa {
@@ -1185,12 +1188,13 @@
 
     .reel-full-acts {
       position: absolute;
-      bottom: 90px;
+      bottom: 30px;
       right: 12px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 18px;
       align-items: center;
+      z-index: 5;
     }
 
     .rfab {
@@ -1435,6 +1439,19 @@
       color: var(--sub);
     }
 
+    .chat-section {
+      margin-top: 16px;
+    }
+
+    .chat-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 0 16px 12px;
+    }
+
     .tag-chips {
       display: flex;
       flex-wrap: wrap;
@@ -1657,16 +1674,25 @@
       flex-shrink: 0;
       display: flex;
       align-items: center;
+      justify-content: space-evenly;
       background: var(--bg);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1.5px solid var(--border);
       position: fixed;
-      bottom: var(--safe-bottom);
-      left: 14px;
-      right: 14px;
-      border-radius: 24px;
+      bottom: calc(var(--safe-bottom) + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 450px;
+      border-radius: 30px;
       z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bottom-nav.nav-hidden {
+      transform: translate(-50%, 150%);
     }
 
     .nav-btn {
@@ -1684,7 +1710,12 @@
     }
 
     .nav-btn .material-icons-round {
-      font-size: 24px;
+      font-size: 26px;
+      transition: transform .2s;
+    }
+
+    .nav-btn:active .material-icons-round {
+      transform: scale(0.9);
     }
 
     .nav-btn small {
@@ -2540,8 +2571,7 @@
       transform: scale(1.1);
       width: 58px;
       height: 58px;
-      margin-top: -10px;
-      /* Slight bump up but still anchored inside */
+      margin-top: -12px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent2), var(--accent));
       display: flex;
@@ -2555,7 +2585,6 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       border: 3px solid var(--surface);
-      /* blends with nav */
     }
 
     .nav-btn-emoji:active {
@@ -3279,13 +3308,24 @@
 
       <!-- CHAT SCREEN -->
       <div class="screen" id="chatScreen">
-        <div style="padding: 16px; border-bottom: 1px solid var(--border)">
-          <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">Messages 💬</h2>
-          <p style="font-size:13px;color:var(--sub);margin-top:4px">Tap a user to slide into their DMs</p>
+        <div style="padding: 16px 16px 8px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10;">
+          <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px">Messages 💬</h2>
+          <div class="search-bar" style="margin-bottom: 8px;">
+            <span class="material-icons-round">search</span>
+            <input class="search-inp" id="chatSearchInp" placeholder="Search username..." oninput="handleChatSearch(this.value)">
+          </div>
         </div>
-        <div id="chatUsersList" style="padding:16px">
-          <div class="empty-state">
-            <div class="spinner"></div>
+        <div id="chatContent" style="padding-bottom: 80px;">
+          <div id="chatSearchResults" class="hidden" style="padding: 10px 16px;"></div>
+          <div id="chatDefaultSections">
+            <div class="chat-section">
+              <div class="chat-section-title">Recent Chats</div>
+              <div id="chatRecentList" style="padding: 0 16px;"></div>
+            </div>
+            <div class="chat-section">
+              <div class="chat-section-title">Suggested Users</div>
+              <div id="chatSuggestedList" style="padding: 0 16px;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -3881,42 +3921,80 @@
     }
 
     async function loadChatUsers() {
+      fetchRecentChats();
+      fetchSuggestedUsers();
+    }
+
+    async function fetchRecentChats() {
+      const list = document.getElementById('chatRecentList');
+      list.innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
       try {
-        const data = await api('/chat/users');
-        const list = document.getElementById('chatUsersList');
-        list.innerHTML = '';
-        if (!data.users || data.users.length === 0) {
-          list.innerHTML = '<div class="empty-state"><span class="material-icons-round" style="font-size:48px; opacity:0.3; margin-bottom:8px;">people</span><p>No users found on the platform yet.</p></div>';
-          return;
-        }
-        data.users.forEach(u => {
-          const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${u.username}&background=C44DFF&color=fff`;
-          const div = document.createElement('div');
-          div.className = 'search-card';
-          div.onclick = () => openDirectMessage(u.id, u.username, av);
-          div.innerHTML = `
-            <div class="search-card-icon" style="position:relative">
-              <img src="${av}">
-              <div style="position:absolute; bottom:-2px; right:-2px; width:12px; height:12px; background:#4ade80; border:2px solid var(--surface); border-radius:50%"></div>
-            </div>
-            <div class="search-card-text" style="flex:1">
-              <h4 style="display:flex; justify-content:space-between; align-items:center">${u.full_name || u.username} <span style="font-size:10px; color:var(--sub); font-weight:500">Active now</span></h4>
-              <p>@${u.username}</p>
-            </div>
-            <span class="material-icons-round" style="color:var(--sub)">chevron_right</span>
-          `;
-          list.appendChild(div);
-        });
-      } catch (e) { 
-        console.error('User list load failed:', e);
-        const list = document.getElementById('chatUsersList');
-        list.innerHTML = `
-          <div class="empty-state">
-            <p>Error loading conversations.</p>
-            <button onclick="loadChatUsers()" class="auth-btn" style="width:auto; padding:8px 20px; font-size:12px; margin-top:10px">Retry</button>
-          </div>
-        `;
+        const data = await api('/chat/recent');
+        renderUserList(data.users, list, 'Search a user to start chatting');
+      } catch (e) {
+        list.innerHTML = '<div class="empty-state"><p>Error loading recent chats</p></div>';
       }
+    }
+
+    async function fetchSuggestedUsers() {
+      const list = document.getElementById('chatSuggestedList');
+      list.innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+      try {
+        const data = await api('/users/suggested');
+        renderUserList(data.users, list, 'No suggestions available');
+      } catch (e) {
+        list.innerHTML = '<div class="empty-state"><p>Error loading suggestions</p></div>';
+      }
+    }
+
+    function renderUserList(users, container, emptyMsg) {
+      container.innerHTML = '';
+      if (!users || users.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>${emptyMsg}</p></div>`;
+        return;
+      }
+      users.forEach(u => {
+        const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${u.username}&background=C44DFF&color=fff`;
+        const div = document.createElement('div');
+        div.className = 'search-card';
+        div.onclick = () => openDirectMessage(u.id, u.username, av);
+        div.innerHTML = `
+          <div class="search-card-icon" style="position:relative">
+            <img src="${av}">
+            <div style="position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; background:#4ade80; border:1.5px solid var(--surface); border-radius:50%"></div>
+          </div>
+          <div class="search-card-text" style="flex:1">
+            <h4 style="display:flex; justify-content:space-between; align-items:center">${u.full_name || u.username}</h4>
+            <p>@${u.username}</p>
+          </div>
+          <span class="material-icons-round" style="color:var(--sub); font-size:18px">chevron_right</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    let chatSearchTimeout = null;
+    function handleChatSearch(q) {
+      const results = document.getElementById('chatSearchResults');
+      const defaults = document.getElementById('chatDefaultSections');
+      const query = q.trim();
+      if (!query) {
+        results.classList.add('hidden');
+        defaults.classList.remove('hidden');
+        return;
+      }
+      results.classList.remove('hidden');
+      defaults.classList.add('hidden');
+      results.innerHTML = '<div class="feed-spinner" style="margin-top:20px"><div class="spinner"></div></div>';
+      clearTimeout(chatSearchTimeout);
+      chatSearchTimeout = setTimeout(async () => {
+        try {
+          const data = await api('/search?q=' + encodeURIComponent(query));
+          renderUserList(data.users.filter(u => u.id !== currentUser.id), results, `No users found matching "${query}"`);
+        } catch (e) {
+          results.innerHTML = '<div class="empty-state"><p>Search failed</p></div>';
+        }
+      }, 400);
     }
 
     let currentChatUserId = null;
@@ -3932,6 +4010,7 @@
     function closeDirectMessage() {
       hideSheet('chatDMSheet', 'chatDMOverlay');
       currentChatUserId = null;
+      setOverlayActive(false);
     }
 
     async function refreshChatMsgs() {
@@ -4651,8 +4730,8 @@
           <small>Save</small>
         </div>
       </div>
-      <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)" style="bottom: 80px; right: 20px;">
-        <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
+      <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)" style="bottom: 110px; right: 12px;">
+        <span class="material-icons-round" style="font-size:22px">${isMuted ? 'volume_off' : 'volume_up'}</span>
       </div>`;
         container.appendChild(el);
       });
@@ -4722,6 +4801,8 @@
     async function openComment(postId) {
       currentPostId = postId;
       showSheet('commentSheet', 'commentOverlay');
+      const inp = document.getElementById('commInput');
+      if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 300); }
       document.getElementById('commentList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
       try {
         const comments = await api(`/posts/${postId}/comments`);
@@ -5113,10 +5194,16 @@
        NOTIFICATIONS
     ═══════════════════════════════════════════════════════ */
     function toggleNotif() {
-      document.getElementById('notifPanel').classList.toggle('show');
+      const panel = document.getElementById('notifPanel');
+      panel.classList.toggle('show');
       document.getElementById('notifDot').style.display = 'none';
+      if (panel.classList.contains('show')) setOverlayActive(true);
+      else setOverlayActive(false);
     }
-    function closeNotif() { document.getElementById('notifPanel').classList.remove('show'); }
+    function closeNotif() {
+      document.getElementById('notifPanel').classList.remove('show');
+      setOverlayActive(false);
+    }
     function addNotif(msg) {
       const item = document.createElement('div');
       item.className = 'notif-item';
@@ -5125,16 +5212,65 @@
       document.getElementById('notifDot').style.display = 'block';
     }
 
+    /* Navigation Hiding Logic */
+    let lastScrollY = 0;
+    let isNavHidden = false;
+    let isOverlayActive = false;
+
+    function hideNav() {
+      if (isNavHidden) return;
+      document.getElementById('bottomNav').classList.add('nav-hidden');
+      isNavHidden = true;
+    }
+
+    function showNav() {
+      if (!isNavHidden || isOverlayActive) return;
+      document.getElementById('bottomNav').classList.remove('nav-hidden');
+      isNavHidden = false;
+    }
+
+    function handleScroll(e) {
+      if (isOverlayActive) return;
+      const currentScrollY = e.target.scrollTop;
+      // Hide on scroll down, show on scroll up
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        hideNav();
+      } else if (currentScrollY < lastScrollY) {
+        showNav();
+      }
+      lastScrollY = currentScrollY;
+    }
+
+    // Attach scroll listeners to all screens
+    document.querySelectorAll('.screen, .reels-container').forEach(el => {
+      let scrollTimer;
+      el.addEventListener('scroll', (e) => {
+        if (scrollTimer) return;
+        scrollTimer = setTimeout(() => {
+          handleScroll(e);
+          scrollTimer = null;
+        }, 100);
+      }, { passive: true });
+    });
+
+    function setOverlayActive(active) {
+      isOverlayActive = active;
+      if (active) hideNav();
+      else showNav();
+    }
+
     /* ═══════════════════════════════════════════════════════
        SHEET HELPERS
     ═══════════════════════════════════════════════════════ */
     function showSheet(sheetId, overlayId) {
+      setOverlayActive(true);
       document.getElementById(overlayId).classList.add('show');
       setTimeout(() => document.getElementById(sheetId).classList.add('show'), 10);
     }
     function hideSheet(sheetId, overlayId) {
       document.getElementById(sheetId).classList.remove('show');
       document.getElementById(overlayId).classList.remove('show');
+      setTimeout(() => setOverlayActive(false), 300);
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -5182,6 +5318,7 @@
     let aiHistory = [];
 
     function openAI(topic) {
+      setOverlayActive(true);
       aiHistory = [];
       document.getElementById('aiTopicLabel').textContent = topic;
       document.getElementById('aiMessages').innerHTML = '';
@@ -5257,7 +5394,10 @@
         .replace(/\n/g, '<br>');
     }
 
-    function closeAI() { document.getElementById('aiModalOverlay').classList.remove('show'); }
+    function closeAI() {
+      document.getElementById('aiModalOverlay').classList.remove('show');
+      setOverlayActive(false);
+    }
 
     /* ═══════════════════════════════════════════════════════
        ADMIN DASHBOARD
