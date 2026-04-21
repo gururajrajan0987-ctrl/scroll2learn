@@ -3,4 +3,9 @@ flask-cors
 cloudinary
 gunicorn
 python-dotenv
-werkzeug
+werkzeug
+psycopg2-binary
+flask-socketio
+gevent
+simple-websocket
+gevent-websocket

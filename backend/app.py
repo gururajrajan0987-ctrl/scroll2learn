@@ -1,7 +1,10 @@
 # ── Imports ────────────────────────────────────────────────────────────────
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-import sqlite3, os, hashlib, secrets, time, json, random, smtplib
+import os, hashlib, secrets, time, json, random, smtplib
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
@@ -37,11 +40,16 @@ except Exception as e:
     GEMINI_OK = False
     print(f'⚠️  Gemini AI not available: {e}')
 
-# ── Flask app ───────────────────────────────────────────────────────────────
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-DATABASE = 'scroll2learn.db'
+# ── WebSocket configuration ──────────────────────────────────────────────────
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+SECRET_KEY = os.getenv('SECRET_KEY', 'scroll2learn_secret_key')
+app.config['SECRET_KEY'] = SECRET_KEY
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'mov'}
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'guru')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', '2005')
@@ -49,10 +57,12 @@ ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', '2005')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 
 def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    return conn
+    try:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        return conn
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        return None
 
 def hash_password(p): return hashlib.sha256(p.encode()).hexdigest()
 def generate_token(): return secrets.token_hex(32)
@@ -75,7 +85,10 @@ def get_current_user(req):
     if not auth.startswith('Bearer '): return None
     token = auth[7:]
     conn = get_db()
-    row = conn.execute('SELECT u.* FROM users u JOIN sessions s ON u.id=s.user_id WHERE s.token=?', (token,)).fetchone()
+    if not conn: return None
+    curr = conn.cursor()
+    curr.execute('SELECT u.* FROM users u JOIN sessions s ON u.id=s.user_id WHERE s.token=%s', (token,))
+    row = curr.fetchone()
     conn.close()
     return dict(row) if row else None
 
@@ -102,62 +115,93 @@ def format_post(d, liked=False, saved=False):
 
 def init_db():
     conn = get_db()
+    if not conn: return
     c = conn.cursor()
+    # Create Tables
     c.execute('''CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL,
-        email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL,
-        full_name TEXT DEFAULT '', bio TEXT DEFAULT '', avatar TEXT DEFAULT '',
-        website TEXT DEFAULT '', is_setup INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    for col in [('is_admin', 'INTEGER DEFAULT 0'), ('interests', "TEXT DEFAULT '[]'"), ('profession', "TEXT DEFAULT 'College'")]:
-        try: c.execute(f"ALTER TABLE users ADD COLUMN {col[0]} {col[1]}"); conn.commit()
-        except: pass
-    c.execute('''CREATE TABLE IF NOT EXISTS sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-        token TEXT UNIQUE NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,
-        type TEXT NOT NULL DEFAULT 'post', title TEXT DEFAULT '',
-        description TEXT DEFAULT '', media_url TEXT NOT NULL, hashtags TEXT DEFAULT '[]',
-        likes_count INTEGER DEFAULT 0, comments_count INTEGER DEFAULT 0,
-        is_approved INTEGER DEFAULT 0, rejection_reason TEXT DEFAULT '',
-        domain TEXT DEFAULT '',
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    for col, typ, dflt in [('is_approved','INTEGER','0'), ('rejection_reason','TEXT',"''"), ('domain','TEXT',"''"), ('target_profession','TEXT',"'[\"School\", \"College\", \"Working\"]'")]:
-        try: c.execute(f"ALTER TABLE posts ADD COLUMN {col} {typ} DEFAULT {dflt}"); conn.commit()
-        except: pass
-    c.execute('''CREATE TABLE IF NOT EXISTS likes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, post_id INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, post_id))''')
-    c.execute('''CREATE TABLE IF NOT EXISTS comments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, post_id INTEGER NOT NULL,
-        text TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS saves (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, post_id INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, post_id))''')
-    c.execute('''CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL,
-        text TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS otp_requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, otp TEXT NOT NULL,
-        expires_at TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
+        id SERIAL PRIMARY KEY, 
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL, 
+        password_hash TEXT NOT NULL,
+        full_name TEXT DEFAULT '', 
+        bio TEXT DEFAULT '', 
+        avatar TEXT DEFAULT '',
+        website TEXT DEFAULT '', 
+        is_setup INTEGER DEFAULT 0, 
+        is_admin INTEGER DEFAULT 0,
+        interests TEXT DEFAULT '[]',
+        profession TEXT DEFAULT 'College',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
-    # Cleanup: Remove old story tables if they exist
-    try:
-        c.execute("DROP TABLE IF EXISTS stories")
-        c.execute("DROP TABLE IF EXISTS story_views")
-    except:
-        pass
+    c.execute('''CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY, 
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT UNIQUE NOT NULL, 
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS posts (
+        id SERIAL PRIMARY KEY, 
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL DEFAULT 'post', 
+        title TEXT DEFAULT '',
+        description TEXT DEFAULT '', 
+        media_url TEXT NOT NULL, 
+        hashtags TEXT DEFAULT '[]',
+        likes_count INTEGER DEFAULT 0, 
+        comments_count INTEGER DEFAULT 0,
+        is_approved INTEGER DEFAULT 0, 
+        rejection_reason TEXT DEFAULT '',
+        domain TEXT DEFAULT '',
+        target_profession TEXT DEFAULT '["School", "College", "Working"]',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS likes (
+        id SERIAL PRIMARY KEY, 
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+        UNIQUE(user_id, post_id))''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+        id SERIAL PRIMARY KEY, 
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        text TEXT NOT NULL, 
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS saves (
+        id SERIAL PRIMARY KEY, 
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+        post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+        UNIQUE(user_id, post_id))''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY, 
+        sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+        receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        text TEXT NOT NULL, 
+        is_read INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS otp_requests (
+        id SERIAL PRIMARY KEY, 
+        email TEXT NOT NULL, 
+        otp TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL, 
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
     # Create/update admin user
-    existing = c.execute("SELECT id FROM users WHERE username=?", (ADMIN_USERNAME,)).fetchone()
+    c.execute("SELECT id FROM users WHERE username=%s", (ADMIN_USERNAME,))
+    existing = c.fetchone()
+    pass_hash = hash_password(ADMIN_PASSWORD)
     if existing:
-        c.execute("UPDATE users SET password_hash=?,is_admin=1,is_setup=1,full_name='Admin Guru' WHERE username=?",
-                  (hash_password(ADMIN_PASSWORD), ADMIN_USERNAME))
+        c.execute("UPDATE users SET password_hash=%s, is_admin=1, is_setup=1, full_name='Admin Guru' WHERE username=%s",
+                  (pass_hash, ADMIN_USERNAME))
     else:
         try:
-            c.execute("INSERT INTO users (username,email,password_hash,full_name,is_admin,is_setup) VALUES (?,?,?,?,1,1)",
-                      (ADMIN_USERNAME,'admin@scroll2learn.com',hash_password(ADMIN_PASSWORD),'Admin Guru'))
+            c.execute("INSERT INTO users (username,email,password_hash,full_name,is_admin,is_setup) VALUES (%s,%s,%s,%s,1,1)",
+                      (ADMIN_USERNAME, 'admin@scroll2learn.com', pass_hash, 'Admin Guru'))
         except: pass
     conn.commit()
     conn.close()
@@ -192,7 +236,9 @@ def request_otp():
     if not email or not username: return jsonify({'error': 'Email and username required'}), 400
     
     conn = get_db()
-    existing = conn.execute("SELECT id FROM users WHERE email=? OR username=?", (email, username)).fetchone()
+    curr = conn.cursor()
+    curr.execute("SELECT id FROM users WHERE email=%s OR username=%s", (email, username))
+    existing = curr.fetchone()
     if existing:
         conn.close()
         return jsonify({'error': 'Username or email already taken'}), 409
@@ -201,16 +247,15 @@ def request_otp():
     expires_at = (datetime.now() + timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')
     
     # cleanup old otps for this email
-    conn.execute("DELETE FROM otp_requests WHERE email=?", (email,))
-    conn.execute("INSERT INTO otp_requests (email, otp, expires_at) VALUES (?, ?, ?)", (email, otp, expires_at))
+    curr = conn.cursor()
+    curr.execute("DELETE FROM otp_requests WHERE email=%s", (email,))
+    curr.execute("INSERT INTO otp_requests (email, otp, expires_at) VALUES (%s, %s, %s)", (email, otp, expires_at))
     conn.commit()
     conn.close()
     
     success = send_otp_email(email, otp)
     if not success:
         print(f"Warning: Failed to send real email. The OTP for {email} is {otp}")
-        # In development if missing credentials, we might still want to proceed, but if they want real email:
-        # return jsonify({'error': 'Failed to send OTP email. Please check server logs or SMTP config.'}), 500
 
     return jsonify({'message': 'OTP sent successfully'})
 
@@ -228,23 +273,27 @@ def register():
     if username==ADMIN_USERNAME: return jsonify({'error':'Username not available'}),409
     
     conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
     now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    otp_record = conn.execute("SELECT * FROM otp_requests WHERE email=? AND otp=? AND expires_at > ?", (email, otp, now_str)).fetchone()
+    curr = conn.cursor()
+    curr.execute("SELECT * FROM otp_requests WHERE email=%s AND otp=%s AND expires_at > %s", (email, otp, now_str))
+    otp_record = curr.fetchone()
     
     if not otp_record:
         conn.close()
         return jsonify({'error': 'Invalid or expired OTP'}), 400
 
     try:
-        conn.execute('INSERT INTO users (username,email,password_hash) VALUES (?,?,?)',(username,email,hash_password(password)))
-        conn.execute('DELETE FROM otp_requests WHERE email=?', (email,)) # Clear OTP
+        curr.execute('INSERT INTO users (username,email,password_hash) VALUES (%s,%s,%s)',(username,email,hash_password(password)))
+        curr.execute('DELETE FROM otp_requests WHERE email=%s', (email,)) # Clear OTP
         conn.commit()
-        user = conn.execute('SELECT * FROM users WHERE username=?',(username,)).fetchone()
+        curr.execute('SELECT * FROM users WHERE username=%s',(username,))
+        user = curr.fetchone()
         token = generate_token()
-        conn.execute('INSERT INTO sessions (user_id,token) VALUES (?,?)',(user['id'],token))
+        curr.execute('INSERT INTO sessions (user_id,token) VALUES (%s,%s)',(user['id'],token))
         conn.commit(); conn.close()
         return jsonify({'token':token,'user':serialize_user(dict(user)),'is_new':True})
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         conn.close(); return jsonify({'error':'Username or email already taken'}),409
 
 @app.route('/auth/login', methods=['POST'])
@@ -253,11 +302,14 @@ def login():
     identifier = d.get('identifier','').strip().lower()
     password = d.get('password','')
     conn = get_db()
-    user = conn.execute('SELECT * FROM users WHERE (username=? OR email=?) AND password_hash=?',
-                        (identifier,identifier,hash_password(password))).fetchone()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('SELECT * FROM users WHERE (username=%s OR email=%s) AND password_hash=%s',
+                        (identifier,identifier,hash_password(password)))
+    user = curr.fetchone()
     if not user: conn.close(); return jsonify({'error':'Invalid username or password'}),401
     token = generate_token()
-    conn.execute('INSERT INTO sessions (user_id,token) VALUES (?,?)',(user['id'],token))
+    curr.execute('INSERT INTO sessions (user_id,token) VALUES (%s,%s)',(user['id'],token))
     conn.commit(); conn.close()
     return jsonify({'token':token,'user':serialize_user(dict(user)),'is_new':not user['is_setup']})
 
@@ -271,7 +323,11 @@ def me():
 def logout():
     auth = request.headers.get('Authorization','')
     if auth.startswith('Bearer '):
-        conn = get_db(); conn.execute('DELETE FROM sessions WHERE token=?',(auth[7:],)); conn.commit(); conn.close()
+        conn = get_db()
+        if conn:
+            curr = conn.cursor()
+            curr.execute('DELETE FROM sessions WHERE token=%s',(auth[7:],))
+            conn.commit(); conn.close()
     return jsonify({'message':'ok'})
 
 # PROFILE
@@ -294,10 +350,13 @@ def setup_profile():
             except Exception as e:
                 return jsonify({'error': f'Cloudinary upload failed: {str(e)}'}), 500
     conn = get_db()
-    conn.execute('UPDATE users SET full_name=?,bio=?,website=?,avatar=?,interests=?,profession=?,is_setup=1 WHERE id=?',
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('UPDATE users SET full_name=%s,bio=%s,website=%s,avatar=%s,interests=%s,profession=%s,is_setup=1 WHERE id=%s',
                  (full_name,bio,website,avatar_url,interests,profession,user['id']))
     conn.commit()
-    updated = conn.execute('SELECT * FROM users WHERE id=?',(user['id'],)).fetchone()
+    curr.execute('SELECT * FROM users WHERE id=%s',(user['id'],))
+    updated = curr.fetchone()
     conn.close(); return jsonify({'user':serialize_user(dict(updated))})
 
 @app.route('/profile/profession', methods=['PUT'])
@@ -307,9 +366,12 @@ def update_profession():
     data = request.json or {}
     prof = data.get('profession', 'College').strip()
     conn = get_db()
-    conn.execute('UPDATE users SET profession=? WHERE id=?', (prof, user['id']))
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('UPDATE users SET profession=%s WHERE id=%s', (prof, user['id']))
     conn.commit()
-    updated = conn.execute('SELECT * FROM users WHERE id=?',(user['id'],)).fetchone()
+    curr.execute('SELECT * FROM users WHERE id=%s',(user['id'],))
+    updated = curr.fetchone()
     conn.close(); return jsonify({'user':serialize_user(dict(updated))})
 
 @app.route('/profile/stats', methods=['GET'])
@@ -317,11 +379,18 @@ def profile_stats():
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    posts   = conn.execute("SELECT COUNT(*) FROM posts WHERE user_id=? AND type='post'",(user['id'],)).fetchone()[0]
-    reels   = conn.execute("SELECT COUNT(*) FROM posts WHERE user_id=? AND type='reel'",(user['id'],)).fetchone()[0]
-    likes   = conn.execute("SELECT COALESCE(SUM(likes_count),0) FROM posts WHERE user_id=?",(user['id'],)).fetchone()[0]
-    saved   = conn.execute("SELECT COUNT(*) FROM saves WHERE user_id=?",(user['id'],)).fetchone()[0]
-    pending = conn.execute("SELECT COUNT(*) FROM posts WHERE user_id=? AND is_approved=0 AND rejection_reason=''",(user['id'],)).fetchone()[0]
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT COUNT(*) FROM posts WHERE user_id=%s AND type='post'",(user['id'],))
+    posts = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE user_id=%s AND type='reel'",(user['id'],))
+    reels = curr.fetchone()['count']
+    curr.execute("SELECT COALESCE(SUM(likes_count),0) FROM posts WHERE user_id=%s",(user['id'],))
+    likes = curr.fetchone()['coalesce']
+    curr.execute("SELECT COUNT(*) FROM saves WHERE user_id=%s",(user['id'],))
+    saved = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE user_id=%s AND is_approved=0 AND rejection_reason=''",(user['id'],))
+    pending = curr.fetchone()['count']
     conn.close(); return jsonify({'posts':posts,'reels':reels,'likes':likes,'saved':saved,'pending':pending})
 
 # FEED
@@ -332,39 +401,47 @@ def get_feed():
     per_page = min(20,int(request.args.get('per_page',10)))
     offset = (page-1)*per_page
     conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
     if user:
         user_interests = json.loads(user.get('interests') or '[]')
         user_prof = user.get('profession') or 'College'
         prof_arg = f'"{user_prof}"'
         
         if user_interests:
-            placeholders = ','.join('?' for _ in user_interests)
+            placeholders = ','.join('%s' for _ in user_interests)
             query = f'''SELECT p.*,u.username,u.full_name,u.avatar,
                 CASE 
-                    WHEN p.target_profession LIKE '%' || ? || '%' THEN 0 
+                    WHEN p.target_profession LIKE '%%' || %s || '%%' THEN 0 
                     WHEN p.domain IN ({placeholders}) THEN 1 
                     ELSE 2 
                 END AS priority
                 FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-                ORDER BY priority ASC, p.created_at DESC LIMIT ? OFFSET ?'''
-            rows = conn.execute(query, (prof_arg, *user_interests, per_page, offset)).fetchall()
+                ORDER BY priority ASC, p.created_at DESC LIMIT %s OFFSET %s'''
+            curr.execute(query, (prof_arg, *user_interests, per_page, offset))
+            rows = curr.fetchall()
         else:
             query = '''SELECT p.*,u.username,u.full_name,u.avatar,
-                CASE WHEN p.target_profession LIKE '%' || ? || '%' THEN 0 ELSE 1 END AS priority
+                CASE WHEN p.target_profession LIKE '%%' || %s || '%%' THEN 0 ELSE 1 END AS priority
                 FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-                ORDER BY priority ASC, p.created_at DESC LIMIT ? OFFSET ?'''
-            rows = conn.execute(query, (prof_arg, per_page, offset)).fetchall()
+                ORDER BY priority ASC, p.created_at DESC LIMIT %s OFFSET %s'''
+            curr.execute(query, (prof_arg, per_page, offset))
+            rows = curr.fetchall()
     else:
-        rows = conn.execute('''SELECT p.*,u.username,u.full_name,u.avatar FROM posts p
+        curr.execute('''SELECT p.*,u.username,u.full_name,u.avatar FROM posts p
             JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-            ORDER BY p.created_at DESC LIMIT ? OFFSET ?''',(per_page,offset)).fetchall()
-    total = conn.execute('SELECT COUNT(*) FROM posts WHERE is_approved=1').fetchone()[0]
+            ORDER BY p.created_at DESC LIMIT %s OFFSET %s''',(per_page,offset))
+        rows = curr.fetchall()
+    curr.execute('SELECT COUNT(*) FROM posts WHERE is_approved=1')
+    total = curr.fetchone()['count']
     result = []
     for row in rows:
         d = dict(row); liked=saved=False
         if user:
-            liked = bool(conn.execute('SELECT 1 FROM likes WHERE user_id=? AND post_id=?',(user['id'],d['id'])).fetchone())
-            saved = bool(conn.execute('SELECT 1 FROM saves WHERE user_id=? AND post_id=?',(user['id'],d['id'])).fetchone())
+            curr.execute('SELECT 1 FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+            liked = bool(curr.fetchone())
+            curr.execute('SELECT 1 FROM saves WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+            saved = bool(curr.fetchone())
         result.append(format_post(d,liked,saved))
     conn.close()
     return jsonify({'posts':result,'page':page,'has_more':offset+per_page<total,'total':total})
@@ -392,10 +469,14 @@ def create_post():
     
     is_approved = 1 if user.get('is_admin') else 0  # Only admin posts auto-approved
     conn = get_db()
-    c = conn.execute('INSERT INTO posts (user_id,type,title,description,media_url,hashtags,is_approved,domain,target_profession) VALUES (?,?,?,?,?,?,?,?,?)',
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('INSERT INTO posts (user_id,type,title,description,media_url,hashtags,is_approved,domain,target_profession) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
                      (user['id'],post_type,title,description,media_url,hashtags,is_approved,domain,target_profession))
+    post_id = curr.fetchone()['id']
     conn.commit()
-    row = conn.execute('SELECT p.*,u.username,u.full_name,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.id=?',(c.lastrowid,)).fetchone()
+    curr.execute('SELECT p.*,u.username,u.full_name,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.id=%s',(post_id,))
+    row = curr.fetchone()
     conn.close()
     return jsonify({'post':format_post(dict(row)),'pending':not bool(is_approved)}),201
 
@@ -404,15 +485,19 @@ def toggle_like(pid):
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    exists = conn.execute('SELECT 1 FROM likes WHERE user_id=? AND post_id=?',(user['id'],pid)).fetchone()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('SELECT 1 FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],pid))
+    exists = curr.fetchone()
     if exists:
-        conn.execute('DELETE FROM likes WHERE user_id=? AND post_id=?',(user['id'],pid))
-        conn.execute('UPDATE posts SET likes_count=MAX(0,likes_count-1) WHERE id=?',(pid,)); liked=False
+        curr.execute('DELETE FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],pid))
+        curr.execute('UPDATE posts SET likes_count=MAX(0,likes_count-1) WHERE id=%s',(pid,)); liked=False
     else:
-        conn.execute('INSERT INTO likes (user_id,post_id) VALUES (?,?)',(user['id'],pid))
-        conn.execute('UPDATE posts SET likes_count=likes_count+1 WHERE id=?',(pid,)); liked=True
+        curr.execute('INSERT INTO likes (user_id,post_id) VALUES (%s,%s)',(user['id'],pid))
+        curr.execute('UPDATE posts SET likes_count=likes_count+1 WHERE id=%s',(pid,)); liked=True
     conn.commit()
-    count = conn.execute('SELECT likes_count FROM posts WHERE id=?',(pid,)).fetchone()[0]
+    curr.execute('SELECT likes_count FROM posts WHERE id=%s',(pid,))
+    count = curr.fetchone()['likes_count']
     conn.close(); return jsonify({'liked':liked,'likes_count':count})
 
 @app.route('/posts/<int:pid>/save', methods=['POST'])
@@ -420,17 +505,25 @@ def toggle_save(pid):
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    exists = conn.execute('SELECT 1 FROM saves WHERE user_id=? AND post_id=?',(user['id'],pid)).fetchone()
-    if exists: conn.execute('DELETE FROM saves WHERE user_id=? AND post_id=?',(user['id'],pid)); saved=False
-    else: conn.execute('INSERT INTO saves (user_id,post_id) VALUES (?,?)',(user['id'],pid)); saved=True
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('SELECT 1 FROM saves WHERE user_id=%s AND post_id=%s',(user['id'],pid))
+    exists = curr.fetchone()
+    if exists: 
+        curr.execute('DELETE FROM saves WHERE user_id=%s AND post_id=%s',(user['id'],pid)); saved=False
+    else: 
+        curr.execute('INSERT INTO saves (user_id,post_id) VALUES (%s,%s)',(user['id'],pid)); saved=True
     conn.commit(); conn.close(); return jsonify({'saved':saved})
 
 @app.route('/posts/<int:pid>/comments', methods=['GET'])
 def get_comments(pid):
     conn = get_db()
-    rows = conn.execute('SELECT c.*,u.username,u.avatar FROM comments c JOIN users u ON c.user_id=u.id WHERE c.post_id=? ORDER BY c.created_at DESC',(pid,)).fetchall()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('SELECT c.*,u.username,u.avatar FROM comments c JOIN users u ON c.user_id=u.id WHERE c.post_id=%s ORDER BY c.created_at DESC',(pid,))
+    rows = curr.fetchall()
     conn.close()
-    return jsonify([{'id':r['id'],'text':r['text'],'username':r['username'],'avatar':r['avatar'] or '','time':time_ago(r['created_at'])} for r in rows])
+    return jsonify([{'id':r['id'],'text':r['text'],'username':r['username'],'avatar':r['avatar'] or '','time':time_ago(str(r['created_at']))} for r in rows])
 
 @app.route('/posts/<int:pid>/comments', methods=['POST'])
 def add_comment(pid):
@@ -439,8 +532,10 @@ def add_comment(pid):
     text = (request.get_json() or {}).get('text','').strip()
     if not text: return jsonify({'error':'Empty'}),400
     conn = get_db()
-    conn.execute('INSERT INTO comments (user_id,post_id,text) VALUES (?,?,?)',(user['id'],pid,text))
-    conn.execute('UPDATE posts SET comments_count=comments_count+1 WHERE id=?',(pid,))
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('INSERT INTO comments (user_id,post_id,text) VALUES (%s,%s,%s)',(user['id'],pid,text))
+    curr.execute('UPDATE posts SET comments_count=comments_count+1 WHERE id=%s',(pid,))
     conn.commit(); conn.close()
     return jsonify({'message':'ok','username':user['username']}),201
 
@@ -449,14 +544,17 @@ def delete_post(pid):
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    post = conn.execute('SELECT * FROM posts WHERE id=?',(pid,)).fetchone()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('SELECT * FROM posts WHERE id=%s',(pid,))
+    post = curr.fetchone()
     if not post: conn.close(); return jsonify({'error':'Post not found'}),404
     if post['user_id'] != user['id'] and not user.get('is_admin'):
         conn.close(); return jsonify({'error':'Not allowed'}),403
-    conn.execute('DELETE FROM likes WHERE post_id=?',(pid,))
-    conn.execute('DELETE FROM comments WHERE post_id=?',(pid,))
-    conn.execute('DELETE FROM saves WHERE post_id=?',(pid,))
-    conn.execute('DELETE FROM posts WHERE id=?',(pid,))
+    curr.execute('DELETE FROM likes WHERE post_id=%s',(pid,))
+    curr.execute('DELETE FROM comments WHERE post_id=%s',(pid,))
+    curr.execute('DELETE FROM saves WHERE post_id=%s',(pid,))
+    curr.execute('DELETE FROM posts WHERE id=%s',(pid,))
     conn.commit(); conn.close()
     return jsonify({'message':'Deleted'})
 
@@ -465,13 +563,18 @@ def user_posts():
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    rows = conn.execute('''SELECT p.*,u.username,u.full_name,u.avatar FROM posts p
-        JOIN users u ON p.user_id=u.id WHERE p.user_id=? ORDER BY p.created_at DESC''',(user['id'],)).fetchall()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('''SELECT p.*,u.username,u.full_name,u.avatar FROM posts p
+        JOIN users u ON p.user_id=u.id WHERE p.user_id=%s ORDER BY p.created_at DESC''',(user['id'],))
+    rows = curr.fetchall()
     result = []
     for row in rows:
         d = dict(row)
-        liked = bool(conn.execute('SELECT 1 FROM likes WHERE user_id=? AND post_id=?',(user['id'],d['id'])).fetchone())
-        saved = bool(conn.execute('SELECT 1 FROM saves WHERE user_id=? AND post_id=?',(user['id'],d['id'])).fetchone())
+        curr.execute('SELECT 1 FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+        liked = bool(curr.fetchone())
+        curr.execute('SELECT 1 FROM saves WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+        saved = bool(curr.fetchone())
         result.append(format_post(d,liked,saved))
     conn.close()
     return jsonify({'posts':result})
@@ -486,21 +589,32 @@ def admin_pending():
     if not require_admin(request): return jsonify({'error':'Admin only'}),403
     page=max(1,int(request.args.get('page',1))); per_page=20; offset=(page-1)*per_page
     conn=get_db()
-    rows=conn.execute("SELECT p.*,u.username,u.full_name,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=0 AND p.rejection_reason='' ORDER BY p.created_at ASC LIMIT ? OFFSET ?",(per_page,offset)).fetchall()
-    total=conn.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason=''"  ).fetchone()[0]
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT p.*,u.username,u.full_name,u.avatar FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=0 AND p.rejection_reason='' ORDER BY p.created_at ASC LIMIT %s OFFSET %s",(per_page,offset))
+    rows = curr.fetchall()
+    curr.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason=''"  )
+    total = curr.fetchone()['count']
     conn.close(); return jsonify({'posts':[format_post(dict(r)) for r in rows],'total':total})
 
 @app.route('/admin/posts/<int:pid>/approve', methods=['POST'])
 def admin_approve(pid):
     if not require_admin(request): return jsonify({'error':'Admin only'}),403
-    conn=get_db(); conn.execute("UPDATE posts SET is_approved=1,rejection_reason='' WHERE id=?",(pid,)); conn.commit(); conn.close()
+    conn=get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("UPDATE posts SET is_approved=1,rejection_reason='' WHERE id=%s",(pid,))
+    conn.commit(); conn.close()
     return jsonify({'message':'Approved'})
 
 @app.route('/admin/posts/<int:pid>/reject', methods=['POST'])
 def admin_reject(pid):
     if not require_admin(request): return jsonify({'error':'Admin only'}),403
     reason=(request.get_json() or {}).get('reason','Does not meet guidelines')
-    conn=get_db();    conn.execute('UPDATE posts SET is_approved=0, rejection_reason=? WHERE id=?', (reason, pid))
+    conn=get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('UPDATE posts SET is_approved=0, rejection_reason=%s WHERE id=%s', (reason, pid))
     conn.commit(); conn.close()
     return jsonify({'message':'rejected'})
 
@@ -509,7 +623,10 @@ def admin_users():
     user = get_current_user(request)
     if not user or not user.get('is_admin'): return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    u_list = conn.execute("SELECT id, username, email, full_name, is_admin, created_at FROM users ORDER BY created_at DESC").fetchall()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT id, username, email, full_name, is_admin, created_at FROM users ORDER BY created_at DESC")
+    u_list = curr.fetchall()
     conn.close()
     return jsonify({'users': [dict(u) for u in u_list]})
 
@@ -518,11 +635,13 @@ def admin_delete_user(uid):
     user = get_current_user(request)
     if not user or not user.get('is_admin'): return jsonify({'error':'Unauthorized'}),401
     conn = get_db()
-    conn.execute('DELETE FROM users WHERE id=?', (uid,))
-    conn.execute('DELETE FROM posts WHERE user_id=?', (uid,))
-    conn.execute('DELETE FROM comments WHERE user_id=?', (uid,))
-    conn.execute('DELETE FROM likes WHERE user_id=?', (uid,))
-    conn.execute('DELETE FROM sessions WHERE user_id=?', (uid,))
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('DELETE FROM users WHERE id=%s', (uid,))
+    curr.execute('DELETE FROM posts WHERE user_id=%s', (uid,))
+    curr.execute('DELETE FROM comments WHERE user_id=%s', (uid,))
+    curr.execute('DELETE FROM likes WHERE user_id=%s', (uid,))
+    curr.execute('DELETE FROM sessions WHERE user_id=%s', (uid,))
     conn.commit(); conn.close()
     return jsonify({'success':True})
 
@@ -537,7 +656,9 @@ def admin_edit_post(pid):
         return jsonify({'error':'Title, description, and domain cannot be empty'}),400
     
     conn = get_db()
-    conn.execute("UPDATE posts SET title=?, description=?, domain=? WHERE id=?", (title, description, domain, pid))
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("UPDATE posts SET title=%s, description=%s, domain=%s WHERE id=%s", (title, description, domain, pid))
     conn.commit()
     conn.close()
     return jsonify({'ok':True})
@@ -546,15 +667,26 @@ def admin_edit_post(pid):
 def admin_stats():
     if not require_admin(request): return jsonify({'error':'Admin only'}),403
     conn=get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT COUNT(*) FROM posts WHERE type='post'"); p_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE type='reel'"); r_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason=''"); pen_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE is_approved=1"); app_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason!=''"); rej_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM users WHERE is_admin=0"); u_count = curr.fetchone()['count']
+    curr.execute("SELECT COALESCE(SUM(likes_count),0) FROM posts"); l_count = curr.fetchone()['coalesce']
+    curr.execute("SELECT COUNT(*) FROM comments"); c_count = curr.fetchone()['count']
+    
     stats={
-        'posts':conn.execute("SELECT COUNT(*) FROM posts WHERE type='post'").fetchone()[0],
-        'reels':conn.execute("SELECT COUNT(*) FROM posts WHERE type='reel'").fetchone()[0],
-        'pending':conn.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason=''").fetchone()[0],
-        'approved':conn.execute("SELECT COUNT(*) FROM posts WHERE is_approved=1").fetchone()[0],
-        'rejected':conn.execute("SELECT COUNT(*) FROM posts WHERE is_approved=0 AND rejection_reason!=''").fetchone()[0],
-        'users':conn.execute("SELECT COUNT(*) FROM users WHERE is_admin=0").fetchone()[0],
-        'likes':conn.execute("SELECT COALESCE(SUM(likes_count),0) FROM posts").fetchone()[0],
-        'comments':conn.execute("SELECT COUNT(*) FROM comments").fetchone()[0],
+        'posts': p_count,
+        'reels': r_count,
+        'pending': pen_count,
+        'approved': app_count,
+        'rejected': rej_count,
+        'users': u_count,
+        'likes': l_count,
+        'comments': c_count,
     }
     conn.close(); return jsonify(stats)
 
@@ -564,9 +696,13 @@ def search():
     q = request.args.get('q','').strip()
     if not q: return jsonify({'posts':[], 'users':[]})
     conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
     qq = f"%{q}%"
-    users = conn.execute("SELECT id, username, full_name, avatar FROM users WHERE username LIKE ? OR full_name LIKE ? LIMIT 15", (qq, qq)).fetchall()
-    posts = conn.execute("SELECT p.id, p.title, p.description, p.media_url, u.username as author, p.created_at as time FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 AND (p.title LIKE ? OR p.description LIKE ? OR p.hashtags LIKE ? OR u.username LIKE ?) LIMIT 20", (qq, qq, qq, qq)).fetchall()
+    curr.execute("SELECT id, username, full_name, avatar FROM users WHERE username LIKE %s OR full_name LIKE %s LIMIT 15", (qq, qq))
+    users = curr.fetchall()
+    curr.execute("SELECT p.id, p.title, p.description, p.media_url, u.username as author, p.created_at as time FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 AND (p.title LIKE %s OR p.description LIKE %s OR p.hashtags LIKE %s OR u.username LIKE %s) LIMIT 20", (qq, qq, qq, qq))
+    posts = curr.fetchall()
     conn.close()
     return jsonify({'users': [dict(u) for u in users], 'posts': [dict(p) for p in posts]})
 
@@ -575,7 +711,10 @@ def get_chat_users():
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}), 401
     conn = get_db()
-    users = conn.execute("SELECT id, username, full_name, avatar FROM users WHERE id != ? ORDER BY id DESC", (user['id'],)).fetchall()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT id, username, full_name, avatar FROM users WHERE id != %s ORDER BY id DESC", (user['id'],))
+    users = curr.fetchall()
     conn.close()
     return jsonify({'users': [dict(u) for u in users]})
 
@@ -584,9 +723,18 @@ def get_chat_messages(uid):
     user = get_current_user(request)
     if not user: return jsonify({'error':'Unauthorized'}), 401
     conn = get_db()
-    msgs = conn.execute("SELECT * FROM messages WHERE (sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?) ORDER BY created_at ASC", (user['id'], uid, uid, user['id'])).fetchall()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT * FROM messages WHERE (sender_id=%s AND receiver_id=%s) OR (sender_id=%s AND receiver_id=%s) ORDER BY created_at ASC", (user['id'], uid, uid, user['id']))
+    msgs = curr.fetchall()
     conn.close()
-    return jsonify({'messages': [dict(m) for m in msgs]})
+    # Serialize datetime objects for JSON
+    messages_list = []
+    for m in msgs:
+        md = dict(m)
+        md['created_at'] = str(md['created_at'])
+        messages_list.append(md)
+    return jsonify({'messages': messages_list})
 
 @app.route('/chat/<int:uid>', methods=['POST'])
 def send_chat_message(uid):
@@ -595,9 +743,38 @@ def send_chat_message(uid):
     text = request.get_json().get('text','').strip()
     if not text: return jsonify({'error':'Text required'}), 400
     conn = get_db()
-    conn.execute("INSERT INTO messages (sender_id, receiver_id, text) VALUES (?,?,?)", (user['id'], uid, text))
+    curr = conn.cursor()
+    curr.execute("INSERT INTO messages (sender_id, receiver_id, text) VALUES (%s,%s,%s) RETURNING id, created_at", (user['id'], uid, text))
+    msg_data = curr.fetchone()
     conn.commit(); conn.close()
-    return jsonify({'success': True})
+    
+    # WebSocket: Emit to both sender and receiver rooms
+    msg_obj = {
+        'id': msg_data['id'],
+        'sender_id': user['id'],
+        'receiver_id': uid,
+        'text': text,
+        'created_at': str(msg_data['created_at'])
+    }
+    socketio.emit('new_message', msg_obj, room=f"user_{uid}")
+    socketio.emit('new_message', msg_obj, room=f"user_{user['id']}")
+    
+    return jsonify({'success': True, 'message': msg_obj})
+
+# ── SocketIO Events ──────────────────────────────────────────────────────────
+@socketio.on('join')
+def on_join(data):
+    user_id = data.get('user_id')
+    if user_id:
+        join_room(f"user_{user_id}")
+        print(f"User {user_id} joined room")
+
+@socketio.on('typing')
+def on_typing(data):
+    recipient_id = data.get('recipient_id')
+    sender_id = data.get('sender_id')
+    if recipient_id:
+        emit('typing', {'sender_id': sender_id}, room=f"user_{recipient_id}")
 
 # AI CHAT
 @app.route('/ai/chat', methods=['POST'])

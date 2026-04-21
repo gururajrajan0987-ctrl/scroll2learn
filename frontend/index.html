@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <style>
     /* ═══════════════════════════════════════════════════════
    ROOT VARIABLES & RESET
@@ -3247,6 +3248,9 @@
         </div>
         <input type="file" id="postFile" class="hidden" onchange="previewUpload(this)">
         <div id="uploadPreview" class="upload-preview hidden" style="object-fit:cover"></div>
+        <div id="uploadProgressContainer" style="display:none; margin-top:16px; width:100%; background:var(--surface2); border-radius:8px; height:6px; overflow:hidden;">
+          <div id="uploadProgressBar" style="width:0%; height:100%; background:var(--grad); transition:width 0.2s linear;"></div>
+        </div>
         <button type="button" class="pub-btn" onclick="publishPost()">Publish 🚀</button>
       </div>
 
@@ -3750,14 +3754,8 @@
   </div>
 
   <script>
-    /* ═══════════════════════════════════════════════════════
-       CONFIG & STATE
-    ═══════════════════════════════════════════════════════ */
-    // --- DEPLOYMENT CONFIGURATION ---
-    // If you are deploying the frontend on Netlify or another host, replace the
-    // localhost URL below with your backend URL provided by Render.
-    // Example: const API = 'https://scroll2learn-backend.onrender.com';
-    const API = 'https://scroll2learn.onrender.com'; // PLACEHOLDER
+    const API = 'https://scroll2learn.onrender.com';
+    let socket = null;
     let authToken = localStorage.getItem('s2l_token') || '';
     let currentUser = JSON.parse(localStorage.getItem('s2l_user') || 'null');
     let feedPage = 1;
@@ -3801,15 +3799,53 @@
       // Prevent Enter key in auth inputs from submitting anything
       document.querySelectorAll('.auth-input, .setup-input').forEach(inp => {
         inp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); }
+          if (e.key === 'Enter') { e.preventDefault(); handleAuth(); }
         });
       });
 
-      if (authToken && currentUser && !appBooted) {
-        appBooted = true;
-        showMainApp();
-      }
+      initApp();
     });
+
+    async function initApp() {
+      if (authToken && !appBooted) {
+        try {
+          // Verify token and get fresh user data
+          const data = await api('/auth/me');
+          currentUser = data.user;
+          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          appBooted = true;
+          initSocket();
+          showMainApp();
+        } catch (e) {
+          console.log('Login expired');
+          logoutUser(true);
+        }
+      } else {
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    }
+
+    function initSocket() {
+      if (!currentUser || socket) return;
+      socket = io(API);
+      socket.emit('join', { user_id: currentUser.id });
+
+      socket.on('new_message', (msg) => {
+        if (currentChatUserId === msg.sender_id || currentChatUserId === msg.receiver_id) {
+          appendMessageToUI(msg);
+        } else {
+          // Notify for other chats
+          toast(`💬 New message from @${msg.sender_id}`);
+          document.getElementById('notifDot').style.display = 'block';
+        }
+      });
+
+      socket.on('typing', (data) => {
+        if (currentChatUserId === data.sender_id) {
+          showTypingIndicator();
+        }
+      });
+    }
 
     /* ═══════════════════════════════════════════════════════
        INFINITE SCROLL — one observer, never duplicated
@@ -3850,7 +3886,7 @@
         const list = document.getElementById('chatUsersList');
         list.innerHTML = '';
         if (!data.users || data.users.length === 0) {
-          list.innerHTML = '<div class="empty-state"><p>No users found on the platform yet.</p></div>';
+          list.innerHTML = '<div class="empty-state"><span class="material-icons-round" style="font-size:48px; opacity:0.3; margin-bottom:8px;">people</span><p>No users found on the platform yet.</p></div>';
           return;
         }
         data.users.forEach(u => {
@@ -3859,16 +3895,28 @@
           div.className = 'search-card';
           div.onclick = () => openDirectMessage(u.id, u.username, av);
           div.innerHTML = `
-            <div class="search-card-icon"><img src="${av}"></div>
-            <div class="search-card-text">
-              <h4>${u.full_name || u.username}</h4>
+            <div class="search-card-icon" style="position:relative">
+              <img src="${av}">
+              <div style="position:absolute; bottom:-2px; right:-2px; width:12px; height:12px; background:#4ade80; border:2px solid var(--surface); border-radius:50%"></div>
+            </div>
+            <div class="search-card-text" style="flex:1">
+              <h4 style="display:flex; justify-content:space-between; align-items:center">${u.full_name || u.username} <span style="font-size:10px; color:var(--sub); font-weight:500">Active now</span></h4>
               <p>@${u.username}</p>
             </div>
             <span class="material-icons-round" style="color:var(--sub)">chevron_right</span>
           `;
           list.appendChild(div);
         });
-      } catch (e) { toast('⚠️ Error loading users'); }
+      } catch (e) { 
+        console.error('User list load failed:', e);
+        const list = document.getElementById('chatUsersList');
+        list.innerHTML = `
+          <div class="empty-state">
+            <p>Error loading conversations.</p>
+            <button onclick="loadChatUsers()" class="auth-btn" style="width:auto; padding:8px 20px; font-size:12px; margin-top:10px">Retry</button>
+          </div>
+        `;
+      }
     }
 
     let currentChatUserId = null;
@@ -3891,40 +3939,56 @@
       try {
         const data = await api('/chat/' + currentChatUserId);
         const list = document.getElementById('dmMsgList');
+        list.innerHTML = '';
         if (!data.messages || data.messages.length === 0) {
           list.innerHTML = '<div class="empty-state" style="padding:40px 0;opacity:0.5"><span class="material-icons-round" style="font-size:32px">waving_hand</span><p>Say hi!</p></div>';
           return;
         }
-        list.innerHTML = '';
-        data.messages.forEach(m => {
-          const isMe = m.sender_id === currentUser.id;
-          const row = document.createElement('div');
-          row.style.display = 'flex';
-          row.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
-          row.style.marginBottom = '12px';
-          const bubble = document.createElement('div');
-          bubble.textContent = m.text;
-          bubble.style.maxWidth = '80%';
-          bubble.style.padding = '10px 14px';
-          bubble.style.borderRadius = '16px';
-          bubble.style.fontSize = '14px';
-          bubble.style.lineHeight = '1.4';
-          if (isMe) {
-            bubble.style.background = 'var(--grad2)';
-            bubble.style.color = '#fff';
-            bubble.style.borderBottomRightRadius = '4px';
-          } else {
-            bubble.style.background = 'var(--surface2)';
-            bubble.style.color = 'var(--text)';
-            bubble.style.borderBottomLeftRadius = '4px';
-          }
-          row.appendChild(bubble);
-          list.appendChild(row);
-        });
-        setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50);
-      } catch (e) {
-        console.error('Chat refresh failed', e);
-      }
+        data.messages.forEach(m => appendMessageToUI(m, false));
+        scrollToBottom();
+      } catch (e) { console.error('Chat refresh failed', e); }
+    }
+
+    function appendMessageToUI(m, scroll = true) {
+      if (!currentChatUserId || (m.sender_id !== currentChatUserId && m.sender_id !== currentUser.id)) return;
+      
+      const list = document.getElementById('dmMsgList');
+      // Remove any existing waving hand empty state
+      if (list.querySelector('.empty-state')) list.innerHTML = '';
+      
+      const isMe = m.sender_id === currentUser.id;
+      const row = document.createElement('div');
+      row.className = 'chat-msg-row';
+      row.style.cssText = `display:flex; justify-content:${isMe?'flex-end':'flex-start'}; margin-bottom:12px;`;
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.style.cssText = `max-width:80%; padding:10px 14px; border-radius:18px; font-size:14px; line-height:1.4; position:relative; 
+        background:${isMe?'var(--grad2)':'var(--surface2)'}; color:${isMe?'#fff':'var(--text)'}; 
+        border-bottom-${isMe?'right':'left'}-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1);`;
+      
+      bubble.innerHTML = `
+        <div>${m.text}</div>
+        <div style="font-size:9px; opacity:0.6; margin-top:4px; text-align:right">${formatChatTime(m.created_at)}</div>
+      `;
+      
+      row.appendChild(bubble);
+      list.appendChild(row);
+      if (scroll) scrollToBottom();
+      hideTypingIndicator();
+    }
+
+    function formatChatTime(ts) {
+      if (!ts) return '';
+      try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch(e) { return ''; }
+    }
+
+    function scrollToBottom() {
+      const list = document.getElementById('dmMsgList');
+      list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
     }
 
     async function sendDirectMsg() {
@@ -3934,8 +3998,31 @@
       inp.value = '';
       try {
         await api('/chat/' + currentChatUserId, { method: 'POST', body: JSON.stringify({ text }) });
-        refreshChatMsgs();
+        // Message will be appended via SocketIO listener
       } catch (e) { toast('⚠️ ' + e.message); }
+    }
+
+    function showTypingIndicator() {
+      const list = document.getElementById('dmMsgList');
+      if (document.getElementById('typingInfo')) return;
+      const div = document.createElement('div');
+      div.id = 'typingInfo';
+      div.className = 'typing-indicator';
+      div.style.cssText = 'font-size:11px; color:var(--sub); padding:4px 16px; font-style:italic';
+      div.textContent = 'Typing...';
+      list.appendChild(div);
+      scrollToBottom();
+      setTimeout(hideTypingIndicator, 3000);
+    }
+
+    function hideTypingIndicator() {
+      const exist = document.getElementById('typingInfo');
+      if (exist) exist.remove();
+    }
+
+    function emitTyping() {
+      if (!socket || !currentChatUserId) return;
+      socket.emit('typing', { sender_id: currentUser.id, recipient_id: currentChatUserId });
     }
 
     // Silently refresh user data without triggering any reloads
@@ -3962,14 +4049,13 @@
       if (opts.body instanceof FormData) delete headers['Content-Type'];
       try {
         const res = await fetch(API + path, { ...opts, headers });
-        if (res.status === 401) {
-          // Verify if token is indeed stale before force-logout
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401 && !path.includes('/auth/login')) {
           localStorage.removeItem('s2l_token');
           localStorage.removeItem('s2l_user');
           window.location.reload(); 
           throw new Error('Session expired - Logging out');
         }
-        const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Request failed');
         return data;
       } catch (e) {
@@ -4074,12 +4160,23 @@
       localStorage.setItem('s2l_token', authToken);
       localStorage.setItem('s2l_user', JSON.stringify(currentUser));
       appBooted = true;
+      initSocket();
 
-      if (data.is_new || !currentUser.is_setup) {
+      if (!currentUser.is_setup) {
         showSetup();
       } else {
         showMainApp();
       }
+    }
+
+    async function logoutUser(silent = false) {
+      try { if (!silent) await api('/auth/logout', { method: 'POST' }); } catch (e) { }
+      localStorage.removeItem('s2l_token');
+      localStorage.removeItem('s2l_user');
+      authToken = '';
+      currentUser = null;
+      if (socket) { socket.disconnect(); socket = null; }
+      window.location.reload();
     }
 
     function showSetup() {
@@ -4254,20 +4351,19 @@
       // Pause all videos globally to prevent audio bleed
       document.querySelectorAll('video').forEach(v => v.pause());
 
-      // ── Double-tap Home to refresh ──
       if (section === 'home') {
-        const now = Date.now();
         const isAlreadyHome = document.getElementById('homeScreen').classList.contains('active');
-        if (isAlreadyHome && (now - homeLastTap) < HOME_DOUBLE_TAP_DELAY) {
-          // Double-tap detected → refresh feed
-          homeLastTap = 0;
+        if (isAlreadyHome) {
           refreshHomeFeed();
           return;
         }
-        homeLastTap = now;
-        if (isAlreadyHome) {
-          // Single tap while already on home — just scroll to top, don't navigate
-          document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      if (section === 'reels') {
+        const isAlreadyReels = document.getElementById('reelsScreen').classList.contains('active');
+        if (isAlreadyReels) {
+          document.getElementById('reelsScreen').scrollTo({ top: 0, behavior: 'smooth' });
+          loadReels();
           return;
         }
       }
@@ -4382,11 +4478,15 @@
         }
         feedPage++;
       } catch (e) {
-        // Backend offline — show demo content ONCE, don't set feedDone permanently
+        console.error('Feed load failed:', e);
         if (feedPage === 1) {
-          renderDemoPosts();
-          feedDone = true;   // stop observer — no backend to call
-          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+          container.innerHTML = `
+            <div class="empty-state" style="margin-top:40px">
+              <span class="material-icons-round" style="color:var(--accent2)">error_outline</span>
+              <p>Couldn't load feed. Please check your connection.</p>
+              <button onclick="refreshHomeFeed()" class="auth-btn" style="width:auto; padding:10px 24px; margin-top:16px; background:var(--surface2); border:1px solid var(--border)">Retry 🔄</button>
+            </div>
+          `;
         }
       }
 
@@ -4754,39 +4854,73 @@
 
       const btn = document.querySelector('.pub-btn');
       btn.textContent = 'Publishing...'; btn.disabled = true;
+      
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
 
-      try {
-        const data = await api('/posts', { method: 'POST', body: fd });
-        toast('🚀 Published successfully!');
-        addNotif(`✨ You published a new ${currentUploadType}!`);
-        // Reset form
-        document.getElementById('postTitle').value = '';
-        document.getElementById('postDesc').value = '';
-        document.getElementById('postFile').value = '';
-        document.getElementById('postDomain').value = '';
-        document.getElementById('uploadPreview').classList.add('hidden');
-        document.getElementById('uploadZone').style.display = 'flex';
-        document.querySelectorAll('.htag').forEach(h => h.classList.remove('sel'));
-        selectedHtags = [];
-        // Go to home and reload
-        feedPage = 1; feedDone = false; feedLoading = false;
-        document.getElementById('feedContainer').innerHTML = '';
-        document.getElementById('feedEnd').classList.add('hidden');
-        navigate('home');
-        // Reinitialize the infinite scroll observer so feed loads
-        initInfiniteScroll();
-        // Always reload reels data
-        loadReels();
-        // Show pending notice if not admin
-        if (data.pending) {
-          toast('⏳ Submitted for admin review!');
-          addNotif('⏳ Your post is pending admin approval before it appears in the feed.');
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', API + '/posts', true);
+      xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          progressBar.style.width = percentComplete + '%';
         }
+      };
 
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-      }
-      btn.textContent = 'Publish 🚀'; btn.disabled = false;
+      xhr.onload = function() {
+        btn.textContent = 'Publish 🚀'; 
+        btn.disabled = false;
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
+
+        if (xhr.status === 200 || xhr.status === 201) {
+          const data = JSON.parse(xhr.responseText);
+          toast('🚀 Published successfully!');
+          addNotif(`✨ You published a new ${currentUploadType}!`);
+          // Reset form
+          document.getElementById('postTitle').value = '';
+          document.getElementById('postDesc').value = '';
+          document.getElementById('postFile').value = '';
+          document.getElementById('postDomain').value = '';
+          document.getElementById('uploadPreview').classList.add('hidden');
+          document.getElementById('uploadZone').style.display = 'flex';
+          document.querySelectorAll('.htag').forEach(h => h.classList.remove('sel'));
+          selectedHtags = [];
+          
+          feedPage = 1; feedDone = false; feedLoading = false;
+          document.getElementById('feedContainer').innerHTML = '';
+          document.getElementById('feedEnd').classList.add('hidden');
+          navigate('home');
+          initInfiniteScroll();
+          loadReels();
+
+          if (data.pending) {
+            toast('⏳ Submitted for admin review!');
+            addNotif('⏳ Your post is pending admin approval before it appears in the feed.');
+          }
+        } else {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            toast('⚠️ ' + (data.error || 'Upload failed'));
+          } catch(e) {
+            toast('⚠️ Upload failed');
+          }
+        }
+      };
+
+      xhr.onerror = function() {
+        btn.textContent = 'Publish 🚀'; 
+        btn.disabled = false;
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
+        toast('⚠️ Network Error');
+      };
+
+      xhr.send(fd);
     }
 
     /* ═══════════════════════════════════════════════════════
