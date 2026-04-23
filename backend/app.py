@@ -41,10 +41,20 @@ except Exception as e:
     print(f'⚠️  Gemini AI not available: {e}')
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=[
+    'https://scroll2learn.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+])
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+socketio = SocketIO(app, cors_allowed_origins=[
+    'https://scroll2learn.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+], async_mode='gevent')
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 SECRET_KEY = os.getenv('SECRET_KEY', 'scroll2learn_secret_key')
@@ -70,15 +80,30 @@ def allowed_file(f): return '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_
 
 def time_ago(ts):
     try:
-        dt = datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
+        if isinstance(ts, datetime):
+            dt = ts
+        elif isinstance(ts, str):
+            # Try multiple formats for robustness
+            for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S'):
+                try:
+                    dt = datetime.strptime(ts, fmt)
+                    break
+                except ValueError:
+                    continue
+            else:
+                return 'recently'
+        else:
+            return 'recently'
         diff = datetime.utcnow() - dt
         secs = int(diff.total_seconds())
+        if secs < 0: return 'just now'  # future timestamps from timezone drift
         if secs < 60: return 'just now'
         if secs < 3600: return f'{secs//60}m ago'
         if diff.days < 1: return f'{secs//3600}h ago'
         if diff.days < 7: return f'{diff.days}d ago'
         return dt.strftime('%b %d')
-    except: return 'recently'
+    except Exception:
+        return 'recently'
 
 def get_current_user(req):
     auth = req.headers.get('Authorization', '')
@@ -97,6 +122,7 @@ def serialize_user(u):
             'full_name': u.get('full_name') or '', 'bio': u.get('bio') or '',
             'avatar': u.get('avatar') or '', 'website': u.get('website') or '',
             'is_setup': bool(u.get('is_setup')), 'is_admin': bool(u.get('is_admin', 0)),
+            'profession': u.get('profession') or 'College',
             'interests': json.loads(u.get('interests') or '[]')}
 
 def format_post(d, liked=False, saved=False):
@@ -491,7 +517,7 @@ def toggle_like(pid):
     exists = curr.fetchone()
     if exists:
         curr.execute('DELETE FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],pid))
-        curr.execute('UPDATE posts SET likes_count=MAX(0,likes_count-1) WHERE id=%s',(pid,)); liked=False
+        curr.execute('UPDATE posts SET likes_count=GREATEST(0,likes_count-1) WHERE id=%s',(pid,)); liked=False
     else:
         curr.execute('INSERT INTO likes (user_id,post_id) VALUES (%s,%s)',(user['id'],pid))
         curr.execute('UPDATE posts SET likes_count=likes_count+1 WHERE id=%s',(pid,)); liked=True
@@ -637,11 +663,9 @@ def admin_delete_user(uid):
     conn = get_db()
     if not conn: return jsonify({'error': 'DB Error'}), 500
     curr = conn.cursor()
-    curr.execute('DELETE FROM users WHERE id=%s', (uid,))
-    curr.execute('DELETE FROM posts WHERE user_id=%s', (uid,))
-    curr.execute('DELETE FROM comments WHERE user_id=%s', (uid,))
-    curr.execute('DELETE FROM likes WHERE user_id=%s', (uid,))
+    # CASCADE on foreign keys handles related records automatically
     curr.execute('DELETE FROM sessions WHERE user_id=%s', (uid,))
+    curr.execute('DELETE FROM users WHERE id=%s', (uid,))
     conn.commit(); conn.close()
     return jsonify({'success':True})
 
@@ -699,9 +723,9 @@ def search():
     if not conn: return jsonify({'error': 'DB Error'}), 500
     curr = conn.cursor()
     qq = f"%{q}%"
-    curr.execute("SELECT id, username, full_name, avatar FROM users WHERE username LIKE %s OR full_name LIKE %s LIMIT 15", (qq, qq))
+    curr.execute("SELECT id, username, full_name, avatar FROM users WHERE username ILIKE %s OR full_name ILIKE %s LIMIT 15", (qq, qq))
     users = curr.fetchall()
-    curr.execute("SELECT p.id, p.title, p.description, p.media_url, u.username as author, p.created_at as time FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 AND (p.title LIKE %s OR p.description LIKE %s OR p.hashtags LIKE %s OR u.username LIKE %s) LIMIT 20", (qq, qq, qq, qq))
+    curr.execute("SELECT p.id, p.title, p.description, p.media_url, u.username as author, p.created_at as time FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 AND (p.title ILIKE %s OR p.description ILIKE %s OR p.hashtags ILIKE %s OR u.username ILIKE %s) LIMIT 20", (qq, qq, qq, qq))
     posts = curr.fetchall()
     conn.close()
     return jsonify({'users': [dict(u) for u in users], 'posts': [dict(p) for p in posts]})

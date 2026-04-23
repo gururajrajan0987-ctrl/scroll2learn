@@ -3697,7 +3697,7 @@
     <div id="dmMsgList" style="flex:1;overflow-y:auto;padding:16px;background:var(--bg)"></div>
     <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;background:var(--surface)">
       <input class="comm-inp" id="dmInput" placeholder="Type a message..." style="margin-bottom:0"
-        onkeypress="if(event.key==='Enter')sendDirectMsg()">
+        oninput="emitTyping()" onkeypress="if(event.key==='Enter')sendDirectMsg()">
       <button type="button" class="comm-send" onclick="sendDirectMsg()"><span
           class="material-icons-round">send</span></button>
     </div>
@@ -3848,19 +3848,27 @@
 
     async function initApp() {
       if (authToken && !appBooted) {
+        // Show a loading indicator while verifying token
+        document.getElementById('authScreen').style.display = 'none';
+        const loadEl = document.getElementById('loading');
+        if (loadEl) loadEl.style.display = 'flex';
         try {
           // Verify token and get fresh user data
           const data = await api('/auth/me');
           currentUser = data.user;
           localStorage.setItem('s2l_user', JSON.stringify(currentUser));
           appBooted = true;
+          if (loadEl) loadEl.style.display = 'none';
           initSocket();
           showMainApp();
         } catch (e) {
           console.log('Login expired');
+          if (loadEl) loadEl.style.display = 'none';
           logoutUser(true);
         }
       } else {
+        const loadEl = document.getElementById('loading');
+        if (loadEl) loadEl.style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
       }
     }
@@ -4122,7 +4130,7 @@
     /* ═══════════════════════════════════════════════════════
        API HELPER
     ═══════════════════════════════════════════════════════ */
-    async function api(path, opts = {}) {
+    async function api(path, opts = {}, _retried = false) {
       const headers = { 'Content-Type': 'application/json', ...opts.headers };
       if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
       if (opts.body instanceof FormData) delete headers['Content-Type'];
@@ -4130,16 +4138,23 @@
         const res = await fetch(API + path, { ...opts, headers });
         const data = await res.json().catch(() => ({}));
         if (res.status === 401 && !path.includes('/auth/login')) {
+          // Don't force reload — just clean up and show auth screen
           localStorage.removeItem('s2l_token');
           localStorage.removeItem('s2l_user');
-          window.location.reload(); 
-          throw new Error('Session expired - Logging out');
+          authToken = '';
+          currentUser = null;
+          throw new Error('Session expired');
         }
         if (!res.ok) throw new Error(data.error || 'Request failed');
         return data;
       } catch (e) {
+        // Retry once on network/fetch failures (not on known API errors)
+        if (!_retried && (e.name === 'TypeError' || e.message === 'Failed to fetch')) {
+          await new Promise(r => setTimeout(r, 1500));
+          return api(path, opts, true);
+        }
         if (e.message.includes('Unexpected token') || e.message.includes('JSON')) {
-          throw new Error('Server error - our AI is sleeping');
+          throw new Error('Server temporarily unavailable');
         }
         throw e;
       }
@@ -4170,7 +4185,9 @@
       if (!email || !pass) { errEl.textContent = 'Please fill all fields'; return; }
 
       const btn = document.getElementById('authSubmit');
-      btn.textContent = '...'; btn.disabled = true;
+      const origText = btn.textContent;
+      btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div>';
+      btn.disabled = true;
 
       try {
         if (authMode === 'login') {
@@ -4178,7 +4195,7 @@
           processAuthSuccess(data);
         } else {
           const username = document.getElementById('regUsername').value.trim();
-          if (!username) { errEl.textContent = 'Username required'; btn.textContent = 'Create Account'; btn.disabled = false; return; }
+          if (!username) { errEl.textContent = 'Username required'; btn.textContent = origText; btn.disabled = false; return; }
 
           pendingRegData = { username, email, password: pass };
 
@@ -4254,8 +4271,16 @@
       localStorage.removeItem('s2l_user');
       authToken = '';
       currentUser = null;
+      appBooted = false;
       if (socket) { socket.disconnect(); socket = null; }
-      window.location.reload();
+      // Kill feed observer
+      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+      // Hide app shell, show auth
+      document.getElementById('topbar').style.display = 'none';
+      document.getElementById('mainArea').style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+      if (!silent) toast('👋 Logged out successfully');
     }
 
     function showSetup() {
@@ -4852,28 +4877,7 @@
       else toast('Sharing via ' + type + '...');
     }
 
-    /* ═══════════════════════════════════════════════════════
-       LOGOUT
-    ═══════════════════════════════════════════════════════ */
-    async function logoutUser() {
-      try {
-        await api('/auth/logout', { method: 'POST' });
-      } catch (e) { /* ignore errors on logout */ }
-      localStorage.removeItem('s2l_token');
-      localStorage.removeItem('s2l_user');
-      authToken = '';
-      currentUser = null;
-      appBooted = false;
-      // Kill feed observer
-      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
-      // Hide app shell
-      document.getElementById('topbar').style.display = 'none';
-      document.getElementById('mainArea').style.display = 'none';
-      document.getElementById('bottomNav').style.display = 'none';
-      // Show auth screen
-      document.getElementById('authScreen').style.display = 'flex';
-      toast('👋 Logged out successfully');
-    }
+
 
     /* ═══════════════════════════════════════════════════════
        CREATE POST
