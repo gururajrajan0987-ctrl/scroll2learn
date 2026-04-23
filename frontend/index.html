@@ -3091,9 +3091,11 @@
       </div>
     </div>
 
-    <!-- ═══ SETUP SCREEN ═══ -->
     <div id="setupScreen">
-      <div class="setup-header">
+      <div class="setup-header" style="position:relative">
+        <button type="button" onclick="skipSetup()" style="position:absolute;left:16px;top:16px;background:none;border:none;color:var(--sub);font-size:28px;cursor:pointer;padding:4px;line-height:1">
+          <span class="material-icons-round">arrow_back</span>
+        </button>
         <h2>Set Up Your Profile 👋</h2>
         <p>Tell the community a little about yourself</p>
       </div>
@@ -3860,7 +3862,11 @@
           appBooted = true;
           if (loadEl) loadEl.style.display = 'none';
           initSocket();
-          showMainApp();
+          if (!currentUser.is_setup) {
+            showSetup();
+          } else {
+            showMainApp();
+          }
         } catch (e) {
           console.log('Login expired');
           if (loadEl) loadEl.style.display = 'none';
@@ -3875,16 +3881,21 @@
 
     function initSocket() {
       if (!currentUser || socket) return;
-      socket = io(API);
+      socket = io(API, {
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+        timeout: 10000
+      });
       socket.emit('join', { user_id: currentUser.id });
 
       socket.on('new_message', (msg) => {
         if (currentChatUserId === msg.sender_id || currentChatUserId === msg.receiver_id) {
           appendMessageToUI(msg);
         } else {
-          // Notify for other chats
-          toast(`💬 New message from @${msg.sender_id}`);
-          document.getElementById('notifDot').style.display = 'block';
+          toast(`💬 New message`);
+          const dot = document.getElementById('notifDot');
+          if (dot) dot.style.display = 'block';
         }
       });
 
@@ -3892,6 +3903,15 @@
         if (currentChatUserId === data.sender_id) {
           showTypingIndicator();
         }
+      });
+
+      socket.on('connect_error', () => {
+        console.warn('Socket connection failed, will retry...');
+      });
+
+      socket.on('reconnect_failed', () => {
+        console.warn('Socket reconnection exhausted. Chat will use polling.');
+        socket = null;
       });
     }
 
@@ -4173,7 +4193,6 @@
       document.getElementById('authErr').textContent = '';
     }
 
-    // OTP Handlers
     let pendingRegData = null;
 
     async function handleAuth() {
@@ -4205,7 +4224,7 @@
           document.getElementById('otpOverlay').style.display = 'flex';
           document.getElementById('otpErr').textContent = '';
           document.getElementById('otpInput').value = '';
-          document.getElementById('authScreen').style.display = 'none'; // hide main auth
+          document.getElementById('authScreen').style.display = 'none';
           toast('📩 OTP Sent to your email');
         }
       } catch (e) {
@@ -4289,7 +4308,10 @@
       s.style.display = 'flex';
       const name = currentUser.full_name || currentUser.username || '';
       document.getElementById('setupName').value = name;
-      document.getElementById('setupAvatarImg').src = currentUser.avatar ? API + currentUser.avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=FF6B6B&color=fff&size=100`;
+      // Cloudinary URLs are already absolute; only prefix API for relative paths
+      const av = currentUser.avatar;
+      const avSrc = av ? (av.startsWith('http') ? av : API + av) : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=FF6B6B&color=fff&size=100`;
+      document.getElementById('setupAvatarImg').src = avSrc;
     }
 
     function previewSetupAvatar(input) {
@@ -4354,9 +4376,13 @@
     }
 
     async function submitSetup() {
+      const btn = document.querySelector('#setupScreen .auth-btn');
+      const origText = btn ? btn.textContent : "Let's Go! 🚀";
       try {
-        const btn = document.querySelector('#setupScreen .auth-btn');
-        if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+        if (btn) {
+          btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div> Saving...';
+          btn.disabled = true;
+        }
         const fd = new FormData();
         fd.append('full_name', document.getElementById('setupName')?.value.trim() || '');
         fd.append('bio', document.getElementById('setupBio')?.value.trim() || '');
@@ -4366,17 +4392,50 @@
         const avatarFile = document.getElementById('setupAvatarInput')?.files[0];
         if (avatarFile) fd.append('avatar', avatarFile);
 
-        const data = await api('/profile/setup', { method: 'PUT', body: fd });
-        if (data && data.user) {
-          currentUser = data.user;
-          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+        // Use XHR for upload progress when avatar is present
+        if (avatarFile) {
+          const data = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', API + '/profile/setup', true);
+            xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+            xhr.timeout = 60000; // 60s timeout for large avatars
+
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable && btn) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                btn.textContent = `Uploading... ${pct}%`;
+              }
+            };
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(JSON.parse(xhr.responseText));
+              } else {
+                try { reject(new Error(JSON.parse(xhr.responseText).error)); }
+                catch { reject(new Error('Setup failed')); }
+              }
+            };
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.ontimeout = () => reject(new Error('Upload timed out — try a smaller image'));
+            xhr.send(fd);
+          });
+          if (data && data.user) {
+            currentUser = data.user;
+            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          }
+        } else {
+          const data = await api('/profile/setup', { method: 'PUT', body: fd });
+          if (data && data.user) {
+            currentUser = data.user;
+            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          }
         }
+        toast('✨ Profile set up!');
         showMainApp();
       } catch (e) {
         console.error('Setup Error:', e);
         toast('⚠️ ' + e.message);
-        const btn = document.querySelector('#setupScreen .auth-btn');
-        if (btn) { btn.textContent = "Let's Go! 🚀"; btn.disabled = false; }
+      } finally {
+        if (btn) { btn.textContent = origText; btn.disabled = false; }
       }
     }
 
@@ -4456,20 +4515,14 @@
       document.querySelectorAll('video').forEach(v => v.pause());
 
       if (section === 'home') {
-        const isAlreadyHome = document.getElementById('homeScreen').classList.contains('active');
-        if (isAlreadyHome) {
-          refreshHomeFeed();
-          return;
-        }
+        refreshHomeFeed();
+        if (document.getElementById('homeScreen').classList.contains('active')) return;
       }
 
       if (section === 'reels') {
-        const isAlreadyReels = document.getElementById('reelsScreen').classList.contains('active');
-        if (isAlreadyReels) {
-          document.getElementById('reelsScreen').scrollTo({ top: 0, behavior: 'smooth' });
-          loadReels();
-          return;
-        }
+        document.getElementById('reelsScreen').scrollTo({ top: 0 });
+        loadReels();
+        if (document.getElementById('reelsScreen').classList.contains('active')) return;
       }
 
       // Hide all screens
@@ -5681,7 +5734,7 @@
     }
 
     function closeRadialMenu(e) {
-      if (e && e.target === radialOverlay) closeRadialMenuInternal();
+      if (e && (e.target === radialOverlay || e.target.id === 'radialMenuWrapper')) closeRadialMenuInternal();
     }
 
     // Touch vs mouse detection for radial menu
