@@ -41,13 +41,22 @@ except Exception as e:
     print(f'⚠️  Gemini AI not available: {e}')
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=[
-    'https://scroll2learn.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'https://scroll2learn.vercel.app'
-])
+
+CORS(
+    app,
+    resources={r"/*": {
+        "origins": [
+            "https://scroll2learn.netlify.app",
+            "https://scroll2learn.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500"
+        ]
+    }},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
 # Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
