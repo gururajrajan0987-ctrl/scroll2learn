@@ -41,40 +41,25 @@ except Exception as e:
     print(f'⚠️  Gemini AI not available: {e}')
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True, origins=[
+    'https://scroll2learn.netlify.app',
+    'https://scroll2learn.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+])
 
-CORS(
-    app,
-    resources={r"/*": {
-        "origins": [
-            "https://scroll2learn.netlify.app",
-            "https://scroll2learn.vercel.app",
-            "http://localhost:3000",
-            "http://localhost:5500",
-            "http://127.0.0.1:5500"
-        ]
-    }},
-    supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-)
-@app.after_request
-def after_request(response):
-    origin = request.headers.get("Origin")
-    if origin in ALLOWED_ORIGINS:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    return response
 # ── WebSocket configuration ──────────────────────────────────────────────────
 # Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
-socketio = SocketIO(
-    app,
+socketio = SocketIO(app, 
     cors_allowed_origins=[
-        "https://scroll2learn.netlify.app",
-        "https://scroll2learn.vercel.app"
+        'https://scroll2learn.netlify.app',
+        'https://scroll2learn.vercel.app',
+        'http://localhost:3000',
+        'http://localhost:5500',
+        'http://127.0.0.1:5500'
     ],
-    async_mode="gevent",
+    async_mode='gevent',
     logger=True, 
     engineio_logger=True,
     ping_timeout=60,
@@ -370,10 +355,8 @@ def register():
     except psycopg2.IntegrityError:
         conn.close(); return jsonify({'error':'Username or email already taken'}),409
 
-@app.route('/auth/login', methods=['POST', 'OPTIONS'])
+@app.route('/auth/login', methods=['POST'])
 def login():
-    if request.method == "OPTIONS":
-        return jsonify({"ok": True}), 200
     d = request.get_json()
     identifier = d.get('identifier','').strip().lower()
     password = d.get('password','')
