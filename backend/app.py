@@ -49,12 +49,15 @@ CORS(app, supports_credentials=True, origins=[
 ])
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
-socketio = SocketIO(app, cors_allowed_origins=[
-    'https://scroll2learn.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500'
-], async_mode='gevent')
+# Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
+socketio = SocketIO(app, 
+    cors_allowed_origins="*", 
+    async_mode='gevent',
+    logger=True, 
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25
+)
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -76,7 +79,9 @@ def get_db():
         conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
         return conn
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        print(f"❌ DATABASE CONNECTION ERROR: {e}")
+        if not DATABASE_URL:
+            print("⚠️  CRITICAL: DATABASE_URL is MISSING! Using non-persistent DB fallback.")
         return None
 
 def hash_password(p): return hashlib.sha256(p.encode()).hexdigest()
@@ -129,7 +134,9 @@ def serialize_user(u):
             'is_setup': bool(u.get('is_setup')), 'is_admin': bool(u.get('is_admin', 0)),
             'profession': u.get('profession') or 'College',
             'online': u['id'] in online_users,
-            'interests': json.loads(u.get('interests') or '[]')}
+            'interests': json.loads(u.get('interests') or '[]'),
+            'followers_count': u.get('followers_count', 0),
+            'following_count': u.get('following_count', 0)}
 
 def format_post(d, liked=False, saved=False):
     media = d.get('media_url', '')
@@ -139,6 +146,8 @@ def format_post(d, liked=False, saved=False):
             'hashtags': json.loads(d.get('hashtags', '[]')) if isinstance(d.get('hashtags'), str) else [],
             'likes_count': d.get('likes_count', 0), 'comments_count': d.get('comments_count', 0),
             'liked': liked, 'saved': saved, 'author': d.get('username', ''),
+            'author_id': d.get('user_id'),
+            'is_following': bool(d.get('is_following', 0)),
             'full_name': d.get('full_name', '') or d.get('username', ''),
             'avatar': avatar, 'time': time_ago(d.get('created_at', '')),
             'is_approved': bool(d.get('is_approved', 0)),
@@ -222,6 +231,13 @@ def init_db():
         otp TEXT NOT NULL,
         expires_at TIMESTAMP NOT NULL, 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS followers (
+        id SERIAL PRIMARY KEY, 
+        follower_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+        following_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(follower_id, following_id))''')
 
     # Ensure columns exist (migrations)
     try:
@@ -427,7 +443,11 @@ def profile_stats():
     saved = curr.fetchone()['count']
     curr.execute("SELECT COUNT(*) FROM posts WHERE user_id=%s AND is_approved=0 AND rejection_reason=''",(user['id'],))
     pending = curr.fetchone()['count']
-    conn.close(); return jsonify({'posts':posts,'reels':reels,'likes':likes,'saved':saved,'pending':pending})
+    curr.execute("SELECT COUNT(*) FROM followers WHERE following_id=%s", (user['id'],))
+    followers_count = curr.fetchone()['count']
+    curr.execute("SELECT COUNT(*) FROM followers WHERE follower_id=%s", (user['id'],))
+    following_count = curr.fetchone()['count']
+    conn.close(); return jsonify({'posts':posts,'reels':reels,'likes':likes,'saved':saved,'pending':pending, 'followers': followers_count, 'following': following_count})
 
 # FEED
 @app.route('/feed', methods=['GET'])
@@ -439,35 +459,34 @@ def get_feed():
     conn = get_db()
     if not conn: return jsonify({'error': 'DB Error'}), 500
     curr = conn.cursor()
+    # Recommended feed priorities:
+    # 1. Users current user follows
+    # 2. Domains matching user's interests or liked domains
+    # 3. Overall popularity (likes/comments)
+    # 4. Recency
+    # Recommended feed priorities:
+    # 1. Users current user follows
+    # 2. Domains matching user's interests or liked domains
+    # 3. Overall popularity (likes/comments)
+    # 4. Recency
     if user:
         user_interests = json.loads(user.get('interests') or '[]')
-        user_prof = user.get('profession') or 'College'
-        prof_arg = f'"{user_prof}"'
-        
-        if user_interests:
-            placeholders = ','.join('%s' for _ in user_interests)
-            query = f'''SELECT p.*,u.username,u.full_name,u.avatar,
-                CASE 
-                    WHEN p.target_profession LIKE '%%' || %s || '%%' THEN 0 
-                    WHEN p.domain IN ({placeholders}) THEN 1 
-                    ELSE 2 
-                END AS priority
-                FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-                ORDER BY priority ASC, p.created_at DESC LIMIT %s OFFSET %s'''
-            curr.execute(query, (prof_arg, *user_interests, per_page, offset))
-            rows = curr.fetchall()
-        else:
-            query = '''SELECT p.*,u.username,u.full_name,u.avatar,
-                CASE WHEN p.target_profession LIKE '%%' || %s || '%%' THEN 0 ELSE 1 END AS priority
-                FROM posts p JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-                ORDER BY priority ASC, p.created_at DESC LIMIT %s OFFSET %s'''
-            curr.execute(query, (prof_arg, per_page, offset))
-            rows = curr.fetchall()
+        query = """
+            SELECT p.*, u.username, u.full_name, u.avatar,
+                   (CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END) as is_following,
+                   (CASE WHEN p.domain = ANY(%s) THEN 1 ELSE 0 END) as interest_priority
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            LEFT JOIN followers f ON (f.following_id = p.user_id AND f.follower_id = %s)
+            WHERE p.is_approved = 1
+            ORDER BY is_following DESC, interest_priority DESC, p.likes_count DESC, p.created_at DESC
+            LIMIT %s OFFSET %s
+        """
+        curr.execute(query, (user_interests, user['id'], per_page, offset))
     else:
-        curr.execute('''SELECT p.*,u.username,u.full_name,u.avatar FROM posts p
-            JOIN users u ON p.user_id=u.id WHERE p.is_approved=1
-            ORDER BY p.created_at DESC LIMIT %s OFFSET %s''',(per_page,offset))
-        rows = curr.fetchall()
+        curr.execute("SELECT p.*, u.username, u.full_name, u.avatar FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 ORDER BY p.created_at DESC LIMIT %s OFFSET %s", (per_page, offset))
+    
+    rows = curr.fetchall()
     curr.execute('SELECT COUNT(*) FROM posts WHERE is_approved=1')
     total = curr.fetchone()['count']
     result = []
@@ -721,7 +740,8 @@ def admin_stats():
         'users': u_count,
         'likes': l_count,
         'comments': c_count,
-        'db_type': 'postgres' if DATABASE_URL and 'postgresql' in DATABASE_URL else 'sqlite'
+        'db_type': 'postgres' if DATABASE_URL and 'postgresql' in DATABASE_URL else 'sqlite',
+        'ai_ok': GEMINI_OK
     }
     conn.close(); return jsonify(stats)
 
@@ -969,8 +989,44 @@ Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answer
     except Exception as e:
         return jsonify({'error': f'AI error: {str(e)}'}), 500
 
-@app.route('/')
-def index(): return jsonify({'status':'Scroll2Learn API v2.1 🚀'})
+
+# FOLLOW SYSTEM
+@app.route('/follow/<int:uid>', methods=['POST', 'DELETE'])
+def follow_user(uid):
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}),401
+    if user['id'] == uid: return jsonify({'error':'Cannot follow yourself'}),400
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    if request.method == 'POST':
+        try:
+            curr.execute("INSERT INTO followers (follower_id, following_id) VALUES (%s, %s)", (user['id'], uid))
+            conn.commit()
+            return jsonify({'message': 'Followed'})
+        except: return jsonify({'error': 'Already following'}), 400
+    else:
+        curr.execute("DELETE FROM followers WHERE follower_id=%s AND following_id=%s", (user['id'], uid))
+        conn.commit()
+        return jsonify({'message': 'Unfollowed'})
+
+@app.route('/followers/<int:uid>', methods=['GET'])
+def get_followers(uid):
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT u.id, u.username, u.full_name, u.avatar FROM users u JOIN followers f ON u.id = f.follower_id WHERE f.following_id = %s", (uid,))
+    users = curr.fetchall()
+    conn.close(); return jsonify({'users': [dict(u) for u in users]})
+
+@app.route('/following/<int:uid>', methods=['GET'])
+def get_following(uid):
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute("SELECT u.id, u.username, u.full_name, u.avatar FROM users u JOIN followers f ON u.id = f.following_id WHERE f.follower_id = %s", (uid,))
+    users = curr.fetchall()
+    conn.close(); return jsonify({'users': [dict(u) for u in users]})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

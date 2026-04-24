@@ -1132,6 +1132,7 @@
     #reelsScreen {
       background: #000;
       overflow: hidden;
+      padding-bottom: var(--nav-h) !important;
     }
 
     .reels-container {
@@ -3334,7 +3335,7 @@
                 style="padding:0 16px;border-radius:14px;background:var(--grad2);color:#fff;font-size:20px;font-weight:700;flex-shrink:0;height:47px">+</button>
             </div>
           </div>
-          <input class="form-inp" id="postTitle" placeholder="Title (optional)">
+          <input class="form-inp" id="postTitle" placeholder="Title (Must Be Included)">
           <textarea class="form-inp" id="postDesc" placeholder="Caption... what are you teaching today?"></textarea>
           <div id="targetProfessionSection">
             <div class="form-label" style="margin-bottom:10px; margin-top:8px">🎯 Target Audience <span
@@ -3452,17 +3453,17 @@
             <div class="pstat-num" id="statPosts">0</div>
             <div class="pstat-lbl">Posts</div>
           </div>
-          <div class="pstat">
-            <div class="pstat-num" id="statReels">0</div>
-            <div class="pstat-lbl">Reels</div>
+          <div class="pstat" onclick="openFollowList('followers', currentUser.id)" style="cursor:pointer">
+            <div class="pstat-num" id="statFollowers">0</div>
+            <div class="pstat-lbl">Followers</div>
+          </div>
+          <div class="pstat" onclick="openFollowList('following', currentUser.id)" style="cursor:pointer">
+            <div class="pstat-num" id="statFollowing">0</div>
+            <div class="pstat-lbl">Following</div>
           </div>
           <div class="pstat">
             <div class="pstat-num" id="statLikes">0</div>
             <div class="pstat-lbl">Likes</div>
-          </div>
-          <div class="pstat">
-            <div class="pstat-num" id="statSaved">0</div>
-            <div class="pstat-lbl">Saved</div>
           </div>
         </div>
         <div class="profile-badges" id="profileBadges"></div>
@@ -3747,7 +3748,13 @@
     </div>
   </div>
 
-  <!-- Story blocks removed -->
+  <!-- User List Sheet -->
+  <div class="overlay-bg" id="userListOverlay" onclick="closeSheet('userListSheet', 'userListOverlay')"></div>
+  <div class="bottom-sheet" id="userListSheet">
+    <div class="sheet-handle"></div>
+    <div id="userListTitle" class="sheet-title">Users</div>
+    <div id="userListContent" style="max-height: 60vh; overflow-y: auto; padding: 10px 0;"></div>
+  </div>
 
   <!-- Notif Panel -->
   <div class="notif-panel" id="notifPanel">
@@ -3981,6 +3988,8 @@
     function initSocket() {
       if (!currentUser || socket) return;
       socket = io(API, {
+        transports: ['websocket'],
+        upgrade: false,
         reconnectionAttempts: 5,
         reconnectionDelay: 2000,
         reconnectionDelayMax: 10000,
@@ -4635,46 +4644,64 @@
       // ⚠️  Do NOT call loadFeed() here — the IntersectionObserver handles it
       // Calling it here + observer = double call = the loop bug
 
-      // Silently verify token in background (no reload side-effects)
+      // Silently verify token in background
       refreshUserSilent();
+
+      // Deep Linking
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('user')) {
+        openUserProfile(params.get('user'));
+      } else if (params.has('reel')) {
+        navigate('reels');
+      } else {
+        navigate('home');
+      }
     }
 
     /* ═══════════════════════════════════════════════════════
        NAVIGATION
     ═══════════════════════════════════════════════════════ */
+    let lastReelsClick = 0;
     function navigate(section, btn) {
-      // Pause all videos globally to prevent audio bleed
+      // Pause all videos globally
       document.querySelectorAll('video').forEach(v => v.pause());
 
-      if (section === 'home') {
-        refreshHomeFeed();
-        if (document.getElementById('homeScreen').classList.contains('active')) return;
-      }
+      const isActive = document.getElementById(section + 'Screen')?.classList.contains('active');
 
       if (section === 'reels') {
-        document.getElementById('reelsScreen').scrollTo({ top: 0 });
-        loadReels();
-        if (document.getElementById('reelsScreen').classList.contains('active')) return;
+        const now = Date.now();
+        if (isActive && (now - lastReelsClick < 400)) {
+          refreshReelsFeed();
+        }
+        lastReelsClick = now;
       }
+
+      if (isActive && section !== 'home') return; // Don't reload if already active (except home which has its own logic)
+      if (isActive && section === 'home') return; // Prevent single-click refresh on home too
 
       // Hide all screens
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      // Deactivate all nav buttons
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
       const screenMap = { home: 'homeScreen', reels: 'reelsScreen', add: 'addScreen', search: 'searchScreen', profile: 'profileScreen', admin: 'adminScreen', settings: 'settingsScreen', chat: 'chatScreen' };
       const screen = document.getElementById(screenMap[section]);
       if (screen) screen.classList.add('active');
 
-      // Always find the correct nav button by data-section (avoids wrong-btn bugs)
       const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
       if (navBtn) navBtn.classList.add('active');
 
+      if (section === 'home') { if (!isActive) loadFeed(); }
+      if (section === 'reels') { document.getElementById('reelsScreen').scrollTo({ top: 0 }); setTimeout(activateReels, 100); }
       if (section === 'profile') { loadProfileStats(); updateProfileUI(); loadMyPosts(); }
-      if (section === 'reels') { setTimeout(activateReels, 100); }
       if (section === 'admin') { loadAdminScreen(); }
-      if (section === 'settings') { syncSettingsToggles(); }
       if (section === 'chat') { loadChatUsers(); }
+    }
+
+    function refreshReelsFeed() {
+      const rc = document.getElementById('reelsContainer');
+      rc.innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+      toast('🎬 Refreshing Reels...');
+      loadReels();
     }
 
     function refreshHomeFeed() {
@@ -4795,12 +4822,21 @@
 
       el.innerHTML = `
     <div class="post-head">
-      <img class="post-avatar" src="${av}" alt="${p.author}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=38'">
-      <div class="post-user">
-        <div class="post-author">${p.full_name || p.author} <span style="font-size:12px;color:var(--sub)">@${p.author}</span></div>
-        <div class="post-time">${p.time}</div>
+      <div class="ph-left" onclick="openUserProfile('${p.author}')" style="display:flex; align-items:center; gap:10px; cursor:pointer">
+        <img class="post-avatar" src="${av}" alt="${p.author}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=38'">
+        <div class="post-user">
+          <div class="post-author">${p.full_name || p.author} <span style="font-size:12px;color:var(--sub)">@${p.author}</span></div>
+          <div class="post-time">${p.time} • ${p.domain || 'Topic'}</div>
+        </div>
       </div>
-      <button type="button" class="icon-btn post-more" onclick="openPostMenu(${p.id}, '${p.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+      <div class="ph-right" style="display:flex; align-items:center; gap:8px">
+        ${(currentUser && currentUser.username !== p.author) ? `
+          <button type="button" class="follow-btn ${p.is_following ? 'following' : ''}" onclick="toggleFollow(this, ${p.author_id})">
+            ${p.is_following ? 'Following' : 'Follow'}
+          </button>
+        ` : ''}
+        <button type="button" class="icon-btn post-more" onclick="openPostMenu(${p.id}, '${p.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+      </div>
     </div>
     <div class="post-media">
       ${isVideo
@@ -4923,7 +4959,14 @@
         </div>
         <div class="rfc">${r.title || ''} ${r.description || ''}</div>
       </div>
-      <div class="reel-full-acts">
+        <div class="video-sound-toggle-btn rfab" onclick="toggleGlobalMute(event, this)">
+          <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
+          <small>Mute</small>
+        </div>
+        <div class="rfab ${r.is_following ? 'following' : ''}" onclick="toggleFollow(this, ${r.author_id})">
+          <span class="material-icons-round">${r.is_following ? 'person_remove' : 'person_add'}</span>
+          <small>${r.is_following ? 'Following' : 'Follow'}</small>
+        </div>
         <div class="rfab${r.liked ? ' liked' : ''}" onclick="toggleLike(this,${r.id})">
           <span class="material-icons-round">${r.liked ? 'favorite' : 'favorite_border'}</span>
           <small>${r.likes_count}</small>
@@ -4940,9 +4983,6 @@
           <span class="material-icons-round">${r.saved ? 'bookmark' : 'bookmark_border'}</span>
           <small>Save</small>
         </div>
-      </div>
-      <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)" style="bottom: 110px; right: 12px;">
-        <span class="material-icons-round" style="font-size:22px">${isMuted ? 'volume_off' : 'volume_up'}</span>
       </div>`;
         container.appendChild(el);
       });
@@ -5055,12 +5095,38 @@
     /* ═══════════════════════════════════════════════════════
        SHARE
     ═══════════════════════════════════════════════════════ */
-    function openShare(postId) { currentPostId = postId; showSheet('shareSheet', 'shareOverlay'); }
+    let currentShareData = null;
+    function openShare(type, id, title) {
+      currentShareData = { type, id, title };
+      showSheet('shareSheet', 'shareOverlay');
+    }
     function closeShare() { hideSheet('shareSheet', 'shareOverlay'); }
-    function shareAction(type) {
+
+    async function shareAction(platform) {
+      if (!currentShareData) return;
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${baseUrl}?${currentShareData.type}=${currentShareData.id}`;
+      const shareText = `Check out this ${currentShareData.type} on Scroll2Learn: ${currentShareData.title || ''}`;
+
+      if (platform === 'more' && navigator.share) {
+        try {
+          await navigator.share({ title: 'Scroll2Learn', text: shareText, url: shareUrl });
+          return;
+        } catch (e) { console.warn('Share failed', e); }
+      }
+
+      // Fallback for Copy / Platforms
+      if (platform === 'copy') {
+        navigator.clipboard.writeText(shareUrl);
+        toast('🔗 Link copied to clipboard!');
+      } else {
+        let url = '';
+        if (platform === 'whatsapp') url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+        if (platform === 'twitter') url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        if (platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        if (url) window.open(url, '_blank');
+      }
       closeShare();
-      if (type === 'copy') { navigator.clipboard.writeText(window.location.href).then(() => toast('🔗 Link copied!')); }
-      else toast('Sharing via ' + type + '...');
     }
 
 
@@ -5369,16 +5435,17 @@
       try {
         const stats = await api('/profile/stats');
         document.getElementById('statPosts').textContent = stats.posts;
-        document.getElementById('statReels').textContent = stats.reels;
         document.getElementById('statLikes').textContent = stats.likes;
-        document.getElementById('statSaved').textContent = stats.saved;
+        if (document.getElementById('statFollowers')) document.getElementById('statFollowers').textContent = stats.followers;
+        if (document.getElementById('statFollowing')) document.getElementById('statFollowing').textContent = stats.following;
 
         // Stats for UI
         document.getElementById('adm-likes').textContent = stats.likes;
         document.getElementById('adm-comments').textContent = stats.comments;
 
-        // Log DB status for debugging persistence
+        // Log Backend status for debugging persistence & AI
         console.log('Backend Status:', stats.db_type === 'postgres' ? '✅ Persistent PG' : '⚠️ Temporary DB');
+        console.log('AI Status:', stats.ai_ok ? '✅ Gemini OK' : '⚠️ AI Not Loaded');
       } catch (e) {
         console.error('Stats loading error:', e);
       }
@@ -6018,11 +6085,68 @@
       lastTime = currentTime;
     }
 
-    function onDragEnd() {
-      if (!isDraggingRadial) return;
-      isDraggingRadial = false;
-      isSpinning = true;
-      spinLoop();
+    async function toggleFollow(btn, targetUid) {
+      if (!authToken) { toast('Login to follow users'); return; }
+      const isFollowing = btn.classList.contains('following');
+      const method = isFollowing ? 'DELETE' : 'POST';
+
+      // Optimistic UI
+      btn.classList.toggle('following');
+      if (btn.tagName === 'BUTTON') {
+        btn.textContent = isFollowing ? 'Follow' : 'Following';
+      } else {
+        // For Reels (rfab)
+        const icon = btn.querySelector('.material-icons-round');
+        const label = btn.querySelector('small');
+        icon.textContent = isFollowing ? 'person_add' : 'person_remove';
+        label.textContent = isFollowing ? 'Follow' : 'Following';
+      }
+
+      try {
+        await api(`/follow/${targetUid}`, { method });
+        // Update stats if we are on profile
+        if (document.getElementById('profileScreen').classList.contains('active')) loadProfileStats();
+      } catch (e) {
+        toast('⚠️ ' + e.message);
+        // Rollback
+        btn.classList.toggle('following');
+        if (btn.tagName === 'BUTTON') {
+          btn.textContent = isFollowing ? 'Following' : 'Follow';
+        }
+      }
+    }
+
+    async function openFollowList(type, uid) {
+      const title = type === 'followers' ? 'Followers' : 'Following';
+      const container = document.getElementById('userListContent'); // Assume we have a generic user list sheet
+      if (!container) return;
+
+      container.innerHTML = '<div class="spinner"></div>';
+      showSheet('userListSheet', 'userListOverlay');
+
+      try {
+        const data = await api(`/${type}/${uid}`);
+        if (!data.users || data.users.length === 0) {
+          container.innerHTML = `<div class="empty-state"><p>No ${type} yet</p></div>`;
+          return;
+        }
+        container.innerHTML = data.users.map(u => `
+          <div class="user-row" onclick="closeSheet('userListSheet', 'userListOverlay'); openUserProfile('${u.username}')">
+            <img class="ph-av" src="${getAvatarUrl(u.avatar, u.username)}">
+            <div class="ph-info">
+              <div class="ph-name">@${u.username}</div>
+              <div style="font-size:12px; color:var(--sub)">${u.full_name || ''}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="empty-state"><p>Error loading users</p></div>`;
+      }
+    }
+    if (!isDraggingRadial) return;
+    isDraggingRadial = false;
+    isSpinning = true;
+    spinLoop();
     }
 
     radialWheel.addEventListener('mousedown', onDragStart);
