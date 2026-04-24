@@ -6143,10 +6143,11 @@
         container.innerHTML = `<div class="empty-state"><p>Error loading users</p></div>`;
       }
     }
-    if (!isDraggingRadial) return;
-    isDraggingRadial = false;
-    isSpinning = true;
-    spinLoop();
+    function onDragEnd() {
+      if (!isDraggingRadial) return;
+      isDraggingRadial = false;
+      isSpinning = true;
+      spinLoop();
     }
 
     radialWheel.addEventListener('mousedown', onDragStart);
