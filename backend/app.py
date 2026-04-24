@@ -57,7 +57,12 @@ socketio = SocketIO(app, cors_allowed_origins=[
 ], async_mode='gevent')
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'scroll2learn_secret_key')
+online_users = set()
+
 app.config['SECRET_KEY'] = SECRET_KEY
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'mov'}
@@ -123,6 +128,7 @@ def serialize_user(u):
             'avatar': u.get('avatar') or '', 'website': u.get('website') or '',
             'is_setup': bool(u.get('is_setup')), 'is_admin': bool(u.get('is_admin', 0)),
             'profession': u.get('profession') or 'College',
+            'online': u['id'] in online_users,
             'interests': json.loads(u.get('interests') or '[]')}
 
 def format_post(d, liked=False, saved=False):
@@ -217,7 +223,11 @@ def init_db():
         expires_at TIMESTAMP NOT NULL, 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
-    # Create/update admin user
+    # Ensure columns exist (migrations)
+    try:
+        c.execute("ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_read INTEGER DEFAULT 0")
+    except: pass
+
     c.execute("SELECT id FROM users WHERE username=%s", (ADMIN_USERNAME,))
     existing = c.fetchone()
     pass_hash = hash_password(ADMIN_PASSWORD)
@@ -711,6 +721,7 @@ def admin_stats():
         'users': u_count,
         'likes': l_count,
         'comments': c_count,
+        'db_type': 'postgres' if DATABASE_URL and 'postgresql' in DATABASE_URL else 'sqlite'
     }
     conn.close(); return jsonify(stats)
 
@@ -737,19 +748,29 @@ def get_recent_chats():
     conn = get_db()
     if not conn: return jsonify({'error': 'DB Error'}), 500
     curr = conn.cursor()
-    # Recently messaged users
+    # Recently messaged users with unread counts
     curr.execute("""
-        SELECT u.id, u.username, u.full_name, u.avatar, MAX(m.created_at) as last_msg
+        SELECT u.id, u.username, u.full_name, u.avatar, MAX(m.created_at) as last_msg,
+               COUNT(m.id) FILTER (WHERE m.receiver_id = %s AND m.is_read = 0) as unread_count
         FROM users u
         JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
         WHERE (m.sender_id = %s OR m.receiver_id = %s) AND u.id != %s
         GROUP BY u.id, u.username, u.full_name, u.avatar
         ORDER BY last_msg DESC
-        LIMIT 20
-    """, (user['id'], user['id'], user['id']))
+        LIMIT 30
+    """, (user['id'], user['id'], user['id'], user['id']))
     users = curr.fetchall()
     conn.close()
-    return jsonify({'users': [dict(u) for u in users]})
+    
+    formatted = []
+    for u in users:
+        d = dict(u)
+        d['online'] = d['id'] in online_users
+        d['unread_count'] = int(d.get('unread_count', 0))
+        d['last_msg'] = str(d.get('last_msg', ''))
+        formatted.append(d)
+        
+    return jsonify({'users': formatted})
 
 @app.route('/users/suggested', methods=['GET'])
 def get_suggested_users():
@@ -776,7 +797,15 @@ def get_suggested_users():
     """, (user['id'], user['id'], user['id'], user['id']))
     users = curr.fetchall()
     conn.close()
-    return jsonify({'users': [dict(u) for u in users]})
+    
+    formatted = []
+    for u in users:
+        d = dict(u)
+        d['online'] = d['id'] in online_users
+        d['unread_count'] = 0
+        formatted.append(d)
+        
+    return jsonify({'users': formatted})
 
 @app.route('/chat/users', methods=['GET'])
 def get_chat_users():
@@ -833,13 +862,39 @@ def send_chat_message(uid):
     
     return jsonify({'success': True, 'message': msg_obj})
 
+@app.route('/chat/<int:uid>/read', methods=['POST'])
+def mark_read(uid):
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}), 401
+    conn = get_db()
+    curr = conn.cursor()
+    curr.execute("UPDATE messages SET is_read = 1 WHERE sender_id = %s AND receiver_id = %s AND is_read = 0", (uid, user['id']))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
 # ── SocketIO Events ──────────────────────────────────────────────────────────
 @socketio.on('join')
 def on_join(data):
     user_id = data.get('user_id')
     if user_id:
         join_room(f"user_{user_id}")
+        online_users.add(user_id)
+        emit('user_status', {'user_id': user_id, 'status': 'online'}, broadcast=True)
         print(f"User {user_id} joined room")
+
+@socketio.on('disconnect')
+def on_disconnect():
+    # We don't have user_id here directly, but we can manage it via session or by tracking sids
+    # For now, we'll use a simple approach: if user explicitly leaves or on disconnect we cleanup
+    pass
+
+@socketio.on('leave')
+def on_leave(data):
+    user_id = data.get('user_id')
+    if user_id in online_users:
+        online_users.remove(user_id)
+        emit('user_status', {'user_id': user_id, 'status': 'offline'}, broadcast=True)
 
 @socketio.on('typing')
 def on_typing(data):

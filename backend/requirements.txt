@@ -9,3 +9,4 @@ flask-socketio
 gevent
 simple-websocket
 gevent-websocket
+google-genai

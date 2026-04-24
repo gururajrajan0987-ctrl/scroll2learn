@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Scroll2Learn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
@@ -1106,6 +1107,18 @@
       animation: spin .8s linear infinite;
     }
 
+    .unread-badge {
+      background: #ff4d4d;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+      display: inline-block;
+    }
+
     .end-msg {
       text-align: center;
       padding: 24px;
@@ -1145,7 +1158,7 @@
     .reel-full-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.3) 100%);
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, transparent 40%, transparent 60%, rgba(0, 0, 0, 0.3) 100%);
       pointer-events: none;
     }
 
@@ -1156,7 +1169,7 @@
       right: 70px;
       color: #fff;
       z-index: 5;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     }
 
     .reel-full-info .rfa {
@@ -1687,7 +1700,7 @@
       max-width: 450px;
       border-radius: 30px;
       z-index: 1000;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -2436,9 +2449,11 @@
       padding: 0 16px 12px;
       color: var(--text);
     }
+
     .admin-users-list {
       padding: 0 16px 20px;
     }
+
     .admin-table {
       width: 100%;
       border-collapse: collapse;
@@ -2447,23 +2462,26 @@
       overflow: hidden;
       font-size: 14px;
     }
+
     .admin-table th {
       text-align: left;
       padding: 12px 16px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       font-weight: 600;
       color: var(--sub);
       font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
     .admin-table td {
       padding: 12px 16px;
       border-top: 1px solid var(--border);
       vertical-align: middle;
     }
+
     .admin-table tr:hover {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
     }
 
 
@@ -3062,27 +3080,72 @@
        SKELETON LOADING
     ═══════════════════════════════════════════════════════ */
     @keyframes skeletonPulse {
-      0% { opacity: 0.5; background-color: var(--surface2); }
-      50% { opacity: 0.8; background-color: var(--border); }
-      100% { opacity: 0.5; background-color: var(--surface2); }
+      0% {
+        opacity: 0.5;
+        background-color: var(--surface2);
+      }
+
+      50% {
+        opacity: 0.8;
+        background-color: var(--border);
+      }
+
+      100% {
+        opacity: 0.5;
+        background-color: var(--surface2);
+      }
     }
+
     .skeleton {
       animation: skeletonPulse 1.5s ease-in-out infinite;
       border-radius: 8px;
     }
+
     .skeleton-card {
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       padding: 14px;
       margin-bottom: 0;
     }
-    .sk-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .sk-av { width: 38px; height: 38px; border-radius: 50%; }
-    .sk-user { flex: 1; }
-    .sk-line { height: 12px; border-radius: 4px; margin-bottom: 6px; width: 60%; }
-    .sk-media { width: 100%; height: 240px; border-radius: 12px; margin-bottom: 12px; }
-    .sk-caption { height: 10px; border-radius: 4px; width: 90%; margin-bottom: 6px; }
-    </style>
+
+    .sk-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .sk-av {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+    }
+
+    .sk-user {
+      flex: 1;
+    }
+
+    .sk-line {
+      height: 12px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      width: 60%;
+    }
+
+    .sk-media {
+      width: 100%;
+      height: 240px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .sk-caption {
+      height: 10px;
+      border-radius: 4px;
+      width: 90%;
+      margin-bottom: 6px;
+    }
+  </style>
 </head>
 
 <body>
@@ -3123,7 +3186,8 @@
 
     <div id="setupScreen">
       <div class="setup-header" style="position:relative">
-        <button type="button" onclick="skipSetup()" style="position:absolute;left:16px;top:16px;background:none;border:none;color:var(--sub);font-size:28px;cursor:pointer;padding:4px;line-height:1">
+        <button type="button" onclick="skipSetup()"
+          style="position:absolute;left:16px;top:16px;background:none;border:none;color:var(--sub);font-size:28px;cursor:pointer;padding:4px;line-height:1">
           <span class="material-icons-round">arrow_back</span>
         </button>
         <h2>Set Up Your Profile 👋</h2>
@@ -3309,8 +3373,10 @@
         </div>
         <input type="file" id="postFile" class="hidden" onchange="previewUpload(this)">
         <div id="uploadPreview" class="upload-preview hidden" style="object-fit:cover"></div>
-        <div id="uploadProgressContainer" style="display:none; margin-top:16px; width:100%; background:var(--surface2); border-radius:8px; height:6px; overflow:hidden;">
-          <div id="uploadProgressBar" style="width:0%; height:100%; background:var(--grad); transition:width 0.2s linear;"></div>
+        <div id="uploadProgressContainer"
+          style="display:none; margin-top:16px; width:100%; background:var(--surface2); border-radius:8px; height:6px; overflow:hidden;">
+          <div id="uploadProgressBar"
+            style="width:0%; height:100%; background:var(--grad); transition:width 0.2s linear;"></div>
         </div>
         <button type="button" class="pub-btn" onclick="publishPost()">Publish 🚀</button>
       </div>
@@ -3340,11 +3406,13 @@
 
       <!-- CHAT SCREEN -->
       <div class="screen" id="chatScreen">
-        <div style="padding: 16px 16px 8px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10;">
+        <div
+          style="padding: 16px 16px 8px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10;">
           <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px">Messages 💬</h2>
           <div class="search-bar" style="margin-bottom: 8px;">
             <span class="material-icons-round">search</span>
-            <input class="search-inp" id="chatSearchInp" placeholder="Search username..." oninput="handleChatSearch(this.value)">
+            <input class="search-inp" id="chatSearchInp" placeholder="Search username..."
+              oninput="handleChatSearch(this.value)">
           </div>
         </div>
         <div id="chatContent" style="padding-bottom: 80px;">
@@ -3459,7 +3527,9 @@
 
         <div class="admin-section-title" style="margin-top:24px">👥 Manage Users</div>
         <div id="adminUsersList" class="admin-users-list">
-          <div class="feed-spinner"><div class="spinner"></div></div>
+          <div class="feed-spinner">
+            <div class="spinner"></div>
+          </div>
         </div>
       </div>
 
@@ -3896,728 +3966,743 @@
             showMainApp();
           }
         } catch (e) {
-          console.log('Login expired');
           if (loadEl) loadEl.style.display = 'none';
-          logoutUser(true);
+          // Only log out on genuine 401 (bad token), NOT on server unavailable / network errors
+          if (e.message === 'Session expired') {
+            logoutUser(true);
+          } else {
+            // Server is waking up — keep the token, just show auth screen
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('authErr') && (document.getElementById('authErr').textContent = 'Server waking up, please try again in a moment...');
+          }
         }
-      } else {
-        const loadEl = document.getElementById('loading');
-        if (loadEl) loadEl.style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
-      }
-    }
 
-    function initSocket() {
-      if (!currentUser || socket) return;
-      socket = io(API, {
-        reconnectionAttempts: 5,
-        reconnectionDelay: 2000,
-        reconnectionDelayMax: 10000,
-        timeout: 10000
-      });
-      socket.emit('join', { user_id: currentUser.id });
+        function initSocket() {
+          if (!currentUser || socket) return;
+          socket = io(API, {
+            reconnectionAttempts: 5,
+            reconnectionDelay: 2000,
+            reconnectionDelayMax: 10000,
+            timeout: 10000
+          });
+          socket.emit('join', { user_id: currentUser.id });
 
-      socket.on('new_message', (msg) => {
-        if (currentChatUserId === msg.sender_id || currentChatUserId === msg.receiver_id) {
-          appendMessageToUI(msg);
-        } else {
-          toast(`💬 New message`);
-          const dot = document.getElementById('notifDot');
-          if (dot) dot.style.display = 'block';
+          socket.on('new_message', (msg) => {
+            if (currentChatUserId === msg.sender_id || currentChatUserId === msg.receiver_id) {
+              appendMessageToUI(msg);
+            } else {
+              toast(`💬 New message`);
+              const dot = document.getElementById('notifDot');
+              if (dot) dot.style.display = 'block';
+            }
+          });
+
+          socket.on('typing', (data) => {
+            if (currentChatUserId === data.sender_id) {
+              showTypingIndicator();
+            }
+          });
+
+          socket.on('user_status', (data) => {
+            const d = document.querySelector(`.status-dot[data-uid="${data.user_id}"]`);
+            if (d) d.style.background = data.status === 'online' ? '#4ade80' : 'var(--sub)';
+          });
+
+          socket.on('connect_error', () => {
+            console.warn('Socket connection failed, will retry...');
+          });
+
+          socket.on('reconnect_failed', () => {
+            console.warn('Socket reconnection exhausted. Chat will use polling.');
+            socket = null;
+          });
         }
-      });
 
-      socket.on('typing', (data) => {
-        if (currentChatUserId === data.sender_id) {
-          showTypingIndicator();
+        /* ═══════════════════════════════════════════════════════
+           INFINITE SCROLL — one observer, never duplicated
+        ═══════════════════════════════════════════════════════ */
+        function initInfiniteScroll() {
+          // Always kill the old observer first
+          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+          const old = document.getElementById('feedSentinel');
+          if (old) old.remove();
+
+          const sentinel = document.createElement('div');
+          sentinel.id = 'feedSentinel';
+          sentinel.style.cssText = 'height:4px;width:100%;flex-shrink:0;';
+
+          // Append at the END of homeScreen (after feedEnd), inside the scrollable container
+          document.getElementById('homeScreen').appendChild(sentinel);
+
+          scrollObserver = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !feedLoading && !feedDone) {
+              loadFeed();
+            }
+          }, {
+            root: document.getElementById('homeScreen'),  // scroll root = homeScreen
+            rootMargin: '0px 0px 80px 0px',
+            threshold: 0
+          });
+          scrollObserver.observe(sentinel);
         }
-      });
 
-      socket.on('connect_error', () => {
-        console.warn('Socket connection failed, will retry...');
-      });
-
-      socket.on('reconnect_failed', () => {
-        console.warn('Socket reconnection exhausted. Chat will use polling.');
-        socket = null;
-      });
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       INFINITE SCROLL — one observer, never duplicated
-    ═══════════════════════════════════════════════════════ */
-    function initInfiniteScroll() {
-      // Always kill the old observer first
-      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
-      const old = document.getElementById('feedSentinel');
-      if (old) old.remove();
-
-      const sentinel = document.createElement('div');
-      sentinel.id = 'feedSentinel';
-      sentinel.style.cssText = 'height:4px;width:100%;flex-shrink:0;';
-
-      // Append at the END of homeScreen (after feedEnd), inside the scrollable container
-      document.getElementById('homeScreen').appendChild(sentinel);
-
-      scrollObserver = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && !feedLoading && !feedDone) {
-          loadFeed();
+        async function openChat() {
+          navigate('chat', null);
+          loadChatUsers();
         }
-      }, {
-        root: document.getElementById('homeScreen'),  // scroll root = homeScreen
-        rootMargin: '0px 0px 80px 0px',
-        threshold: 0
-      });
-      scrollObserver.observe(sentinel);
-    }
 
-    async function openChat() {
-      navigate('chat', null);
-      loadChatUsers();
-    }
+        async function loadChatUsers() {
+          fetchRecentChats();
+          fetchSuggestedUsers();
+        }
 
-    async function loadChatUsers() {
-      fetchRecentChats();
-      fetchSuggestedUsers();
-    }
+        async function fetchRecentChats() {
+          const list = document.getElementById('chatRecentList');
+          try {
+            const data = await api('/chat/recent');
+            renderUserList(data.users, list, 'Search a user to start chatting');
+          } catch (e) {
+            console.error('Recent chats error details:', e);
+            list.innerHTML = `<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>Error: ${e.message}</p></div>`;
+          }
+        }
 
-    async function fetchRecentChats() {
-      const list = document.getElementById('chatRecentList');
-      try {
-        const data = await api('/chat/recent');
-        renderUserList(data.users, list, 'Search a user to start chatting');
-      } catch (e) {
-        console.error('Recent chats error:', e);
-        list.innerHTML = '<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>Error loading recent chats</p></div>';
-      }
-    }
+        async function fetchSuggestedUsers() {
+          const list = document.getElementById('chatSuggestedList');
+          try {
+            const data = await api('/users/suggested');
+            renderUserList(data.users, list, 'No suggestions available');
+          } catch (e) {
+            console.error('Suggestions error details:', e);
+            list.innerHTML = `<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>Error: ${e.message}</p></div>`;
+          }
+        }
 
-    async function fetchSuggestedUsers() {
-      const list = document.getElementById('chatSuggestedList');
-      try {
-        const data = await api('/users/suggested');
-        renderUserList(data.users, list, 'No suggestions available');
-      } catch (e) {
-        console.error('Suggestions error:', e);
-        list.innerHTML = '<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>Error loading suggestions</p></div>';
-      }
-    }
+        function renderUserList(users, container, emptyMsg) {
+          container.innerHTML = '';
+          if (!users || users.length === 0) {
+            container.innerHTML = `<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>${emptyMsg}</p></div>`;
+            return;
+          }
+          users.forEach(u => {
+            const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${u.username}&background=C44DFF&color=fff`;
+            const div = document.createElement('div');
+            div.className = 'search-card';
+            div.onclick = () => openDirectMessage(u.id, u.username, av);
 
-    function renderUserList(users, container, emptyMsg) {
-      container.innerHTML = '';
-      if (!users || users.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="padding: 20px 0; opacity: 0.6"><p>${emptyMsg}</p></div>`;
-        return;
-      }
-      users.forEach(u => {
-        const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${u.username}&background=C44DFF&color=fff`;
-        const div = document.createElement('div');
-        div.className = 'search-card';
-        div.onclick = () => openDirectMessage(u.id, u.username, av);
-        div.innerHTML = `
+            const statusColor = u.online ? '#4ade80' : 'var(--sub)';
+            const unreadBadge = u.unread_count > 0 ? `<div class="unread-badge">${u.unread_count}</div>` : '';
+
+            div.innerHTML = `
           <div class="search-card-icon" style="position:relative">
             <img src="${av}">
-            <div style="position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; background:#4ade80; border:1.5px solid var(--surface); border-radius:50%"></div>
+            <div class="status-dot" data-uid="${u.id}" style="position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; background:${statusColor}; border:1.5px solid var(--surface); border-radius:50%"></div>
           </div>
           <div class="search-card-text" style="flex:1">
-            <h4 style="display:flex; justify-content:space-between; align-items:center">${u.full_name || u.username}</h4>
+            <h4 style="display:flex; justify-content:space-between; align-items:center">
+              ${u.full_name || u.username}
+              ${unreadBadge}
+            </h4>
             <p>@${u.username}</p>
           </div>
           <span class="material-icons-round" style="color:var(--sub); font-size:18px">chevron_right</span>
         `;
-        container.appendChild(div);
-      });
-    }
-
-    let chatSearchTimeout = null;
-    function handleChatSearch(q) {
-      const results = document.getElementById('chatSearchResults');
-      const defaults = document.getElementById('chatDefaultSections');
-      const query = q.trim();
-      if (!query) {
-        results.classList.add('hidden');
-        defaults.classList.remove('hidden');
-        return;
-      }
-      results.classList.remove('hidden');
-      defaults.classList.add('hidden');
-      results.innerHTML = '<div class="feed-spinner" style="margin-top:20px"><div class="spinner"></div></div>';
-      clearTimeout(chatSearchTimeout);
-      chatSearchTimeout = setTimeout(async () => {
-        try {
-          const data = await api('/search?q=' + encodeURIComponent(query));
-          renderUserList(data.users.filter(u => u.id !== currentUser.id), results, `No users found matching "${query}"`);
-        } catch (e) {
-          results.innerHTML = '<div class="empty-state"><p>Search failed</p></div>';
+            container.appendChild(div);
+          });
         }
-      }, 400);
-    }
 
-    let chatPollInterval = null;
-    function openDirectMessage(uid, username, avatar) {
-      currentChatUserId = uid;
-      document.getElementById('dmRecipientName').textContent = '@' + username;
-      document.getElementById('dmRecipientAv').src = avatar;
-      document.getElementById('dmMsgList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
-      showSheet('chatDMSheet', 'chatDMOverlay');
-      refreshChatMsgs();
-      
-      // Polling fallback every 4 seconds
-      if (chatPollInterval) clearInterval(chatPollInterval);
-      chatPollInterval = setInterval(refreshChatMsgs, 4000);
-    }
-
-    function closeDirectMessage() {
-      hideSheet('chatDMSheet', 'chatDMOverlay');
-      currentChatUserId = null;
-      setOverlayActive(false);
-      if (chatPollInterval) clearInterval(chatPollInterval);
-      chatPollInterval = null;
-    }
-
-    async function refreshChatMsgs() {
-      if (!currentChatUserId) return;
-      try {
-        const data = await api('/chat/' + currentChatUserId);
-        const list = document.getElementById('dmMsgList');
-        list.innerHTML = '';
-        if (!data.messages || data.messages.length === 0) {
-          list.innerHTML = '<div class="empty-state" style="padding:40px 0;opacity:0.5"><span class="material-icons-round" style="font-size:32px">waving_hand</span><p>Say hi!</p></div>';
-          return;
+        let chatSearchTimeout = null;
+        function handleChatSearch(q) {
+          const results = document.getElementById('chatSearchResults');
+          const defaults = document.getElementById('chatDefaultSections');
+          const query = q.trim();
+          if (!query) {
+            results.classList.add('hidden');
+            defaults.classList.remove('hidden');
+            return;
+          }
+          results.classList.remove('hidden');
+          defaults.classList.add('hidden');
+          results.innerHTML = '<div class="feed-spinner" style="margin-top:20px"><div class="spinner"></div></div>';
+          clearTimeout(chatSearchTimeout);
+          chatSearchTimeout = setTimeout(async () => {
+            try {
+              const data = await api('/search?q=' + encodeURIComponent(query));
+              renderUserList(data.users.filter(u => u.id !== currentUser.id), results, `No users found matching "${query}"`);
+            } catch (e) {
+              results.innerHTML = '<div class="empty-state"><p>Search failed</p></div>';
+            }
+          }, 400);
         }
-        data.messages.forEach(m => appendMessageToUI(m, false));
-        scrollToBottom();
-      } catch (e) { console.error('Chat refresh failed', e); }
-    }
 
-    function appendMessageToUI(m, scroll = true) {
-      if (!currentChatUserId || (m.sender_id !== currentChatUserId && m.sender_id !== currentUser.id)) return;
-      
-      const list = document.getElementById('dmMsgList');
-      // Remove any existing waving hand empty state
-      if (list.querySelector('.empty-state')) list.innerHTML = '';
-      
-      const isMe = m.sender_id === currentUser.id;
-      const row = document.createElement('div');
-      row.className = 'chat-msg-row';
-      row.style.cssText = `display:flex; justify-content:${isMe?'flex-end':'flex-start'}; margin-bottom:12px;`;
-      
-      const bubble = document.createElement('div');
-      bubble.className = 'chat-bubble';
-      bubble.style.cssText = `max-width:80%; padding:10px 14px; border-radius:18px; font-size:14px; line-height:1.4; position:relative; 
-        background:${isMe?'var(--grad2)':'var(--surface2)'}; color:${isMe?'#fff':'var(--text)'}; 
-        border-bottom-${isMe?'right':'left'}-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1);`;
-      
-      bubble.innerHTML = `
+        let chatPollInterval = null;
+        async function openDirectMessage(uid, username, avatar) {
+          currentChatUserId = uid;
+          document.getElementById('dmRecipientName').textContent = '@' + username;
+          document.getElementById('dmRecipientAv').src = avatar;
+          document.getElementById('dmMsgList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+          showSheet('chatDMSheet', 'chatDMOverlay');
+          refreshChatMsgs();
+
+          // Mark as read
+          try { await api(`/chat/${uid}/read`, { method: 'POST' }); } catch (e) { }
+
+          // Polling fallback every 4 seconds
+          if (chatPollInterval) clearInterval(chatPollInterval);
+          chatPollInterval = setInterval(refreshChatMsgs, 4000);
+        }
+
+        function closeDirectMessage() {
+          hideSheet('chatDMSheet', 'chatDMOverlay');
+          currentChatUserId = null;
+          setOverlayActive(false);
+          if (chatPollInterval) clearInterval(chatPollInterval);
+          chatPollInterval = null;
+        }
+
+        async function refreshChatMsgs() {
+          if (!currentChatUserId) return;
+          try {
+            const data = await api('/chat/' + currentChatUserId);
+            const list = document.getElementById('dmMsgList');
+            list.innerHTML = '';
+            if (!data.messages || data.messages.length === 0) {
+              list.innerHTML = '<div class="empty-state" style="padding:40px 0;opacity:0.5"><span class="material-icons-round" style="font-size:32px">waving_hand</span><p>Say hi!</p></div>';
+              return;
+            }
+            data.messages.forEach(m => appendMessageToUI(m, false));
+            scrollToBottom();
+          } catch (e) { console.error('Chat refresh failed', e); }
+        }
+
+        function appendMessageToUI(m, scroll = true) {
+          if (!currentChatUserId || (m.sender_id !== currentChatUserId && m.sender_id !== currentUser.id)) return;
+
+          const list = document.getElementById('dmMsgList');
+          // Remove any existing waving hand empty state
+          if (list.querySelector('.empty-state')) list.innerHTML = '';
+
+          const isMe = m.sender_id === currentUser.id;
+          const row = document.createElement('div');
+          row.className = 'chat-msg-row';
+          row.style.cssText = `display:flex; justify-content:${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:12px;`;
+
+          const bubble = document.createElement('div');
+          bubble.className = 'chat-bubble';
+          bubble.style.cssText = `max-width:80%; padding:10px 14px; border-radius:18px; font-size:14px; line-height:1.4; position:relative; 
+        background:${isMe ? 'var(--grad2)' : 'var(--surface2)'}; color:${isMe ? '#fff' : 'var(--text)'}; 
+        border-bottom-${isMe ? 'right' : 'left'}-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1);`;
+
+          bubble.innerHTML = `
         <div>${m.text}</div>
         <div style="font-size:9px; opacity:0.6; margin-top:4px; text-align:right">${formatChatTime(m.created_at)}</div>
       `;
-      
-      row.appendChild(bubble);
-      list.appendChild(row);
-      if (scroll) scrollToBottom();
-      hideTypingIndicator();
-    }
 
-    function formatChatTime(ts) {
-      if (!ts) return '';
-      try {
-        const d = new Date(ts);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } catch(e) { return ''; }
-    }
-
-    function scrollToBottom() {
-      const list = document.getElementById('dmMsgList');
-      list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
-    }
-
-    async function sendDirectMsg() {
-      const inp = document.getElementById('dmInput');
-      const text = inp.value.trim();
-      if (!text || !currentChatUserId) return;
-      inp.value = '';
-      
-      // Optimistic Update: Append instantly for better UX
-      const tempMsg = {
-        sender_id: currentUser.id,
-        text: text,
-        created_at: new Date().toISOString()
-      };
-      appendMessageToUI(tempMsg);
-      
-      try {
-        await api('/chat/' + currentChatUserId, { method: 'POST', body: JSON.stringify({ text }) });
-        // Refresh recent list to move user to top
-        fetchRecentChats();
-      } catch (e) { toast('⚠️ ' + e.message); }
-    }
-
-    function showTypingIndicator() {
-      const list = document.getElementById('dmMsgList');
-      if (document.getElementById('typingInfo')) return;
-      const div = document.createElement('div');
-      div.id = 'typingInfo';
-      div.className = 'typing-indicator';
-      div.style.cssText = 'font-size:11px; color:var(--sub); padding:4px 16px; font-style:italic';
-      div.textContent = 'Typing...';
-      list.appendChild(div);
-      scrollToBottom();
-      setTimeout(hideTypingIndicator, 3000);
-    }
-
-    function hideTypingIndicator() {
-      const exist = document.getElementById('typingInfo');
-      if (exist) exist.remove();
-    }
-
-    function emitTyping() {
-      if (!socket || !currentChatUserId) return;
-      socket.emit('typing', { sender_id: currentUser.id, recipient_id: currentChatUserId });
-    }
-
-    // Silently refresh user data without triggering any reloads
-    async function refreshUserSilent() {
-      try {
-        const res = await api('/auth/me');
-        if (res.user) {
-          currentUser = res.user;
-          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-          updateProfileUI();
-          // Show admin tab if admin
-          const adminTab = document.getElementById('adminNavBtn');
-          if (adminTab) adminTab.style.display = currentUser.is_admin ? 'flex' : 'none';
+          row.appendChild(bubble);
+          list.appendChild(row);
+          if (scroll) scrollToBottom();
+          hideTypingIndicator();
         }
-      } catch { }
-    }
 
-    /* ═══════════════════════════════════════════════════════
-       API HELPER
-    ═══════════════════════════════════════════════════════ */
-    async function api(path, opts = {}, _retried = false) {
-      const headers = { 'Content-Type': 'application/json', ...opts.headers };
-      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-      if (opts.body instanceof FormData) delete headers['Content-Type'];
-      try {
-        const res = await fetch(API + path, { ...opts, headers });
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 401 && !path.includes('/auth/login')) {
-          // Don't force reload — just clean up and show auth screen
+        function formatChatTime(ts) {
+          if (!ts) return '';
+          try {
+            const d = new Date(ts);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } catch (e) { return ''; }
+        }
+
+        function scrollToBottom() {
+          const list = document.getElementById('dmMsgList');
+          list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function sendDirectMsg() {
+          const inp = document.getElementById('dmInput');
+          const text = inp.value.trim();
+          if (!text || !currentChatUserId) return;
+          inp.value = '';
+
+          // Optimistic Update: Append instantly for better UX
+          const tempMsg = {
+            sender_id: currentUser.id,
+            text: text,
+            created_at: new Date().toISOString()
+          };
+          appendMessageToUI(tempMsg);
+
+          try {
+            await api('/chat/' + currentChatUserId, { method: 'POST', body: JSON.stringify({ text }) });
+            // Refresh recent list to move user to top
+            fetchRecentChats();
+          } catch (e) { toast('⚠️ ' + e.message); }
+        }
+
+        function showTypingIndicator() {
+          const list = document.getElementById('dmMsgList');
+          if (document.getElementById('typingInfo')) return;
+          const div = document.createElement('div');
+          div.id = 'typingInfo';
+          div.className = 'typing-indicator';
+          div.style.cssText = 'font-size:11px; color:var(--sub); padding:4px 16px; font-style:italic';
+          div.textContent = 'Typing...';
+          list.appendChild(div);
+          scrollToBottom();
+          setTimeout(hideTypingIndicator, 3000);
+        }
+
+        function hideTypingIndicator() {
+          const exist = document.getElementById('typingInfo');
+          if (exist) exist.remove();
+        }
+
+        function emitTyping() {
+          if (!socket || !currentChatUserId) return;
+          socket.emit('typing', { sender_id: currentUser.id, recipient_id: currentChatUserId });
+        }
+
+        // Silently refresh user data without triggering any reloads
+        async function refreshUserSilent() {
+          try {
+            const res = await api('/auth/me');
+            if (res.user) {
+              currentUser = res.user;
+              localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+              updateProfileUI();
+              // Show admin tab if admin
+              const adminTab = document.getElementById('adminNavBtn');
+              if (adminTab) adminTab.style.display = currentUser.is_admin ? 'flex' : 'none';
+            }
+          } catch { }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           API HELPER
+        ═══════════════════════════════════════════════════════ */
+        async function api(path, opts = {}, _retried = false) {
+          const headers = { 'Content-Type': 'application/json', ...opts.headers };
+          if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+          if (opts.body instanceof FormData) delete headers['Content-Type'];
+          try {
+            const res = await fetch(API + path, { ...opts, headers });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401 && !path.includes('/auth/login')) {
+              // Don't force reload — just clean up and show auth screen
+              localStorage.removeItem('s2l_token');
+              localStorage.removeItem('s2l_user');
+              authToken = '';
+              currentUser = null;
+              throw new Error('Session expired');
+            }
+            if (!res.ok) throw new Error(data.error || 'Request failed');
+            return data;
+          } catch (e) {
+            // Retry once on network/fetch failures (not on known API errors)
+            if (!_retried && (e.name === 'TypeError' || e.message === 'Failed to fetch')) {
+              await new Promise(r => setTimeout(r, 1500));
+              return api(path, opts, true);
+            }
+            if (e.message.includes('Unexpected token') || e.message.includes('JSON')) {
+              throw new Error('Server temporarily unavailable');
+            }
+            throw e;
+          }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           AUTH
+        ═══════════════════════════════════════════════════════ */
+        let authMode = 'login';
+
+        function switchAuthTab(mode) {
+          authMode = mode;
+          document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (mode === 'login' && i === 0) || (mode === 'signup' && i === 1)));
+          document.getElementById('signupFields').classList.toggle('hidden', mode === 'login');
+          document.getElementById('authSubmit').textContent = mode === 'login' ? 'Log In' : 'Create Account';
+          document.getElementById('authErr').textContent = '';
+        }
+
+        let pendingRegData = null;
+
+        async function handleAuth() {
+          const email = document.getElementById('authEmail').value.trim();
+          const pass = document.getElementById('authPass').value;
+          const errEl = document.getElementById('authErr');
+          errEl.textContent = '';
+
+          if (!email || !pass) { errEl.textContent = 'Please fill all fields'; return; }
+
+          const btn = document.getElementById('authSubmit');
+          const origText = btn.textContent;
+          btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div>';
+          btn.disabled = true;
+
+          try {
+            if (authMode === 'login') {
+              const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ identifier: email, password: pass }) });
+              processAuthSuccess(data);
+            } else {
+              const username = document.getElementById('regUsername').value.trim();
+              if (!username) { errEl.textContent = 'Username required'; btn.textContent = origText; btn.disabled = false; return; }
+
+              pendingRegData = { username, email, password: pass };
+
+              // Request OTP instead of direct register
+              const res = await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email, username }) });
+
+              document.getElementById('otpOverlay').style.display = 'flex';
+              document.getElementById('otpErr').textContent = '';
+              document.getElementById('otpInput').value = '';
+              document.getElementById('authScreen').style.display = 'none';
+              toast('📩 OTP Sent to your email');
+            }
+          } catch (e) {
+            errEl.textContent = e.message;
+          }
+          btn.disabled = false;
+          btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
+        }
+
+        async function verifyOTP() {
+          const otp = document.getElementById('otpInput').value.trim();
+          const errEl = document.getElementById('otpErr');
+          const btn = document.getElementById('otpVerifyBtn');
+          errEl.textContent = '';
+          if (!otp) { errEl.textContent = 'Enter the 6-digit code'; return; }
+
+          btn.disabled = true; btn.textContent = 'Verifying...';
+          try {
+            const payload = { ...pendingRegData, otp };
+            const data = await api('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+            document.getElementById('otpOverlay').style.display = 'none';
+            processAuthSuccess(data);
+          } catch (e) {
+            errEl.textContent = e.message;
+          }
+          btn.disabled = false; btn.textContent = 'Verify OTP ✨';
+        }
+
+        async function resendOTP() {
+          if (!pendingRegData) return;
+          try {
+            await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email: pendingRegData.email, username: pendingRegData.username }) });
+            toast('📩 OTP Resent Successfully!');
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+          }
+        }
+
+        function cancelOTP() {
+          pendingRegData = null;
+          document.getElementById('otpOverlay').style.display = 'none';
+          document.getElementById('authScreen').style.display = 'flex';
+        }
+
+        function processAuthSuccess(data) {
+          authToken = data.token;
+          currentUser = data.user;
+          localStorage.setItem('s2l_token', authToken);
+          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          appBooted = true;
+          initSocket();
+
+          if (!currentUser.is_setup) {
+            showSetup();
+          } else {
+            showMainApp();
+          }
+        }
+
+        async function logoutUser(silent = false) {
+          try { if (!silent) await api('/auth/logout', { method: 'POST' }); } catch (e) { }
           localStorage.removeItem('s2l_token');
           localStorage.removeItem('s2l_user');
           authToken = '';
           currentUser = null;
-          throw new Error('Session expired');
+          appBooted = false;
+          if (socket) { socket.disconnect(); socket = null; }
+          // Kill feed observer
+          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+          // Hide app shell, show auth
+          document.getElementById('topbar').style.display = 'none';
+          document.getElementById('mainArea').style.display = 'none';
+          document.getElementById('bottomNav').style.display = 'none';
+          document.getElementById('authScreen').style.display = 'flex';
+          if (!silent) toast('👋 Logged out successfully');
         }
-        if (!res.ok) throw new Error(data.error || 'Request failed');
-        return data;
-      } catch (e) {
-        // Retry once on network/fetch failures (not on known API errors)
-        if (!_retried && (e.name === 'TypeError' || e.message === 'Failed to fetch')) {
-          await new Promise(r => setTimeout(r, 1500));
-          return api(path, opts, true);
-        }
-        if (e.message.includes('Unexpected token') || e.message.includes('JSON')) {
-          throw new Error('Server temporarily unavailable');
-        }
-        throw e;
-      }
-    }
 
-    /* ═══════════════════════════════════════════════════════
-       AUTH
-    ═══════════════════════════════════════════════════════ */
-    let authMode = 'login';
-
-    function switchAuthTab(mode) {
-      authMode = mode;
-      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (mode === 'login' && i === 0) || (mode === 'signup' && i === 1)));
-      document.getElementById('signupFields').classList.toggle('hidden', mode === 'login');
-      document.getElementById('authSubmit').textContent = mode === 'login' ? 'Log In' : 'Create Account';
-      document.getElementById('authErr').textContent = '';
-    }
-
-    let pendingRegData = null;
-
-    async function handleAuth() {
-      const email = document.getElementById('authEmail').value.trim();
-      const pass = document.getElementById('authPass').value;
-      const errEl = document.getElementById('authErr');
-      errEl.textContent = '';
-
-      if (!email || !pass) { errEl.textContent = 'Please fill all fields'; return; }
-
-      const btn = document.getElementById('authSubmit');
-      const origText = btn.textContent;
-      btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div>';
-      btn.disabled = true;
-
-      try {
-        if (authMode === 'login') {
-          const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ identifier: email, password: pass }) });
-          processAuthSuccess(data);
-        } else {
-          const username = document.getElementById('regUsername').value.trim();
-          if (!username) { errEl.textContent = 'Username required'; btn.textContent = origText; btn.disabled = false; return; }
-
-          pendingRegData = { username, email, password: pass };
-
-          // Request OTP instead of direct register
-          const res = await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email, username }) });
-
-          document.getElementById('otpOverlay').style.display = 'flex';
-          document.getElementById('otpErr').textContent = '';
-          document.getElementById('otpInput').value = '';
+        function showSetup() {
           document.getElementById('authScreen').style.display = 'none';
-          toast('📩 OTP Sent to your email');
+          const s = document.getElementById('setupScreen');
+          s.style.display = 'flex';
+          const name = currentUser.full_name || currentUser.username || '';
+          document.getElementById('setupName').value = name;
+          // Cloudinary URLs are already absolute; only prefix API for relative paths
+          const av = currentUser.avatar;
+          const avSrc = av ? (av.startsWith('http') ? av : API + av) : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=FF6B6B&color=fff&size=100`;
+          document.getElementById('setupAvatarImg').src = avSrc;
         }
-      } catch (e) {
-        errEl.textContent = e.message;
-      }
-      btn.disabled = false;
-      btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
-    }
 
-    async function verifyOTP() {
-      const otp = document.getElementById('otpInput').value.trim();
-      const errEl = document.getElementById('otpErr');
-      const btn = document.getElementById('otpVerifyBtn');
-      errEl.textContent = '';
-      if (!otp) { errEl.textContent = 'Enter the 6-digit code'; return; }
-
-      btn.disabled = true; btn.textContent = 'Verifying...';
-      try {
-        const payload = { ...pendingRegData, otp };
-        const data = await api('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
-        document.getElementById('otpOverlay').style.display = 'none';
-        processAuthSuccess(data);
-      } catch (e) {
-        errEl.textContent = e.message;
-      }
-      btn.disabled = false; btn.textContent = 'Verify OTP ✨';
-    }
-
-    async function resendOTP() {
-      if (!pendingRegData) return;
-      try {
-        await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email: pendingRegData.email, username: pendingRegData.username }) });
-        toast('📩 OTP Resent Successfully!');
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-      }
-    }
-
-    function cancelOTP() {
-      pendingRegData = null;
-      document.getElementById('otpOverlay').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'flex';
-    }
-
-    function processAuthSuccess(data) {
-      authToken = data.token;
-      currentUser = data.user;
-      localStorage.setItem('s2l_token', authToken);
-      localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-      appBooted = true;
-      initSocket();
-
-      if (!currentUser.is_setup) {
-        showSetup();
-      } else {
-        showMainApp();
-      }
-    }
-
-    async function logoutUser(silent = false) {
-      try { if (!silent) await api('/auth/logout', { method: 'POST' }); } catch (e) { }
-      localStorage.removeItem('s2l_token');
-      localStorage.removeItem('s2l_user');
-      authToken = '';
-      currentUser = null;
-      appBooted = false;
-      if (socket) { socket.disconnect(); socket = null; }
-      // Kill feed observer
-      if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
-      // Hide app shell, show auth
-      document.getElementById('topbar').style.display = 'none';
-      document.getElementById('mainArea').style.display = 'none';
-      document.getElementById('bottomNav').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'flex';
-      if (!silent) toast('👋 Logged out successfully');
-    }
-
-    function showSetup() {
-      document.getElementById('authScreen').style.display = 'none';
-      const s = document.getElementById('setupScreen');
-      s.style.display = 'flex';
-      const name = currentUser.full_name || currentUser.username || '';
-      document.getElementById('setupName').value = name;
-      // Cloudinary URLs are already absolute; only prefix API for relative paths
-      const av = currentUser.avatar;
-      const avSrc = av ? (av.startsWith('http') ? av : API + av) : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=FF6B6B&color=fff&size=100`;
-      document.getElementById('setupAvatarImg').src = avSrc;
-    }
-
-    function previewSetupAvatar(input) {
-      if (input.files[0]) {
-        document.getElementById('setupAvatarImg').src = URL.createObjectURL(input.files[0]);
-      }
-    }
-
-    let selectedDomains = [];
-
-    function toggleSetupDomain(el) {
-      el.classList.toggle('selected');
-      const domain = el.dataset.domain;
-      if (el.classList.contains('selected')) {
-        if (!selectedDomains.includes(domain)) selectedDomains.push(domain);
-      } else {
-        selectedDomains = selectedDomains.filter(d => d !== domain);
-      }
-    }
-
-    function addCustomSetupDomain() {
-      const inp = document.getElementById('customSetupDomainInput');
-      const name = inp.value.trim();
-      if (!name) return;
-      // Check if already exists
-      const existing = document.querySelector(`#setupDomainGrid .domain-chip[data-domain="${name}"]`);
-      if (existing) { existing.click(); inp.value = ''; return; }
-      // Create new chip (pre-selected)
-      const chip = document.createElement('span');
-      chip.className = 'domain-chip selected';
-      chip.dataset.domain = name;
-      chip.textContent = '🏷️ ' + name;
-      chip.onclick = function () { toggleSetupDomain(this); };
-      document.getElementById('setupDomainGrid').appendChild(chip);
-      if (!selectedDomains.includes(name)) selectedDomains.push(name);
-      // Also add to domain picker in Add screen
-      addDomainOption(name);
-      inp.value = '';
-      toast('✅ Added: ' + name);
-    }
-
-    function addCustomDomain() {
-      const inp = document.getElementById('customDomainInput');
-      const name = inp.value.trim();
-      if (!name) return;
-      addDomainOption(name);
-      document.getElementById('postDomain').value = name;
-      inp.value = '';
-      toast('✅ Domain added: ' + name);
-    }
-
-    function addDomainOption(name) {
-      const sel = document.getElementById('postDomain');
-      // Check if already exists
-      for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === name) return;
-      }
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = '🏷️ ' + name;
-      sel.appendChild(opt);
-    }
-
-    async function submitSetup() {
-      const btn = document.querySelector('#setupScreen .auth-btn');
-      const origText = btn ? btn.textContent : "Let's Go! 🚀";
-      try {
-        if (btn) {
-          btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div> Saving...';
-          btn.disabled = true;
-        }
-        const fd = new FormData();
-        fd.append('full_name', document.getElementById('setupName')?.value.trim() || '');
-        fd.append('bio', document.getElementById('setupBio')?.value.trim() || '');
-        fd.append('website', document.getElementById('setupWebsite')?.value.trim() || '');
-        fd.append('interests', JSON.stringify(selectedDomains));
-        fd.append('profession', document.getElementById('setupProfession')?.value || 'College');
-        const avatarFile = document.getElementById('setupAvatarInput')?.files[0];
-        if (avatarFile) fd.append('avatar', avatarFile);
-
-        // Use XHR for upload progress when avatar is present
-        if (avatarFile) {
-          const data = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', API + '/profile/setup', true);
-            xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
-            xhr.timeout = 60000; // 60s timeout for large avatars
-
-            xhr.upload.onprogress = (e) => {
-              if (e.lengthComputable && btn) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                btn.textContent = `Uploading... ${pct}%`;
-              }
-            };
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                resolve(JSON.parse(xhr.responseText));
-              } else {
-                try { reject(new Error(JSON.parse(xhr.responseText).error)); }
-                catch { reject(new Error('Setup failed')); }
-              }
-            };
-            xhr.onerror = () => reject(new Error('Network error'));
-            xhr.ontimeout = () => reject(new Error('Upload timed out — try a smaller image'));
-            xhr.send(fd);
-          });
-          if (data && data.user) {
-            currentUser = data.user;
-            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-          }
-        } else {
-          const data = await api('/profile/setup', { method: 'PUT', body: fd });
-          if (data && data.user) {
-            currentUser = data.user;
-            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+        function previewSetupAvatar(input) {
+          if (input.files[0]) {
+            document.getElementById('setupAvatarImg').src = URL.createObjectURL(input.files[0]);
           }
         }
-        toast('✨ Profile set up!');
-        showMainApp();
-      } catch (e) {
-        console.error('Setup Error:', e);
-        toast('⚠️ ' + e.message);
-      } finally {
-        if (btn) { btn.textContent = origText; btn.disabled = false; }
-      }
-    }
 
-    async function editProfession() {
-      const currentProf = currentUser?.profession || 'College';
-      const prof = prompt("Enter your profession (School, College, or Working):", currentProf);
-      if (!prof) return;
-      const valid = ['School', 'College', 'Working'];
-      const normalized = valid.find(v => v.toLowerCase() === prof.toLowerCase().trim());
-      if (!normalized) {
-        toast('⚠️ Please enter exactly: School, College, or Working');
-        return;
-      }
-      try {
-        const data = await api('/profile/profession', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ profession: normalized })
-        });
-        if (data.user) {
-          currentUser = data.user;
-          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-          toast('✅ Profession updated to ' + normalized);
+        let selectedDomains = [];
+
+        function toggleSetupDomain(el) {
+          el.classList.toggle('selected');
+          const domain = el.dataset.domain;
+          if (el.classList.contains('selected')) {
+            if (!selectedDomains.includes(domain)) selectedDomains.push(domain);
+          } else {
+            selectedDomains = selectedDomains.filter(d => d !== domain);
+          }
         }
-      } catch (e) {
-        toast('⚠️ Failed to update profession');
-      }
-    }
 
-    function skipSetup() {
-      showMainApp();
-    }
+        function addCustomSetupDomain() {
+          const inp = document.getElementById('customSetupDomainInput');
+          const name = inp.value.trim();
+          if (!name) return;
+          // Check if already exists
+          const existing = document.querySelector(`#setupDomainGrid .domain-chip[data-domain="${name}"]`);
+          if (existing) { existing.click(); inp.value = ''; return; }
+          // Create new chip (pre-selected)
+          const chip = document.createElement('span');
+          chip.className = 'domain-chip selected';
+          chip.dataset.domain = name;
+          chip.textContent = '🏷️ ' + name;
+          chip.onclick = function () { toggleSetupDomain(this); };
+          document.getElementById('setupDomainGrid').appendChild(chip);
+          if (!selectedDomains.includes(name)) selectedDomains.push(name);
+          // Also add to domain picker in Add screen
+          addDomainOption(name);
+          inp.value = '';
+          toast('✅ Added: ' + name);
+        }
 
-    function showMainApp() {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('setupScreen').style.display = 'none';
-      document.getElementById('topbar').style.display = 'flex';
-      document.getElementById('mainArea').style.display = 'block';
-      document.getElementById('bottomNav').style.display = 'flex';
+        function addCustomDomain() {
+          const inp = document.getElementById('customDomainInput');
+          const name = inp.value.trim();
+          if (!name) return;
+          addDomainOption(name);
+          document.getElementById('postDomain').value = name;
+          inp.value = '';
+          toast('✅ Domain added: ' + name);
+        }
 
-      // Reset to home screen
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('homeScreen').classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      const homeBtn = document.querySelector('.nav-btn[data-section="home"]');
-      if (homeBtn) homeBtn.classList.add('active');
+        function addDomainOption(name) {
+          const sel = document.getElementById('postDomain');
+          // Check if already exists
+          for (let i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === name) return;
+          }
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = '🏷️ ' + name;
+          sel.appendChild(opt);
+        }
 
-      // Show/hide admin tab
-      const adminTab = document.getElementById('adminNavBtn');
-      if (adminTab) adminTab.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
+        async function submitSetup() {
+          const btn = document.querySelector('#setupScreen .auth-btn');
+          const origText = btn ? btn.textContent : "Let's Go! 🚀";
+          try {
+            if (btn) {
+              btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div> Saving...';
+              btn.disabled = true;
+            }
+            const fd = new FormData();
+            fd.append('full_name', document.getElementById('setupName')?.value.trim() || '');
+            fd.append('bio', document.getElementById('setupBio')?.value.trim() || '');
+            fd.append('website', document.getElementById('setupWebsite')?.value.trim() || '');
+            fd.append('interests', JSON.stringify(selectedDomains));
+            fd.append('profession', document.getElementById('setupProfession')?.value || 'College');
+            const avatarFile = document.getElementById('setupAvatarInput')?.files[0];
+            if (avatarFile) fd.append('avatar', avatarFile);
 
-      const adminRadial = document.getElementById('adminRadialItem');
-      if (adminRadial) adminRadial.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
+            // Use XHR for upload progress when avatar is present
+            if (avatarFile) {
+              const data = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', API + '/profile/setup', true);
+                xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+                xhr.timeout = 60000; // 60s timeout for large avatars
 
-      initRadialItems(); // Adjust radial layout dynamically for admin item
+                xhr.upload.onprogress = (e) => {
+                  if (e.lengthComputable && btn) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    btn.textContent = `Uploading... ${pct}%`;
+                  }
+                };
+                xhr.onload = () => {
+                  if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                  } else {
+                    try { reject(new Error(JSON.parse(xhr.responseText).error)); }
+                    catch { reject(new Error('Setup failed')); }
+                  }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.ontimeout = () => reject(new Error('Upload timed out — try a smaller image'));
+                xhr.send(fd);
+              });
+              if (data && data.user) {
+                currentUser = data.user;
+                localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+              }
+            } else {
+              const data = await api('/profile/setup', { method: 'PUT', body: fd });
+              if (data && data.user) {
+                currentUser = data.user;
+                localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+              }
+            }
+            toast('✨ Profile set up!');
+            showMainApp();
+          } catch (e) {
+            console.error('Setup Error:', e);
+            toast('⚠️ ' + e.message);
+          } finally {
+            if (btn) { btn.textContent = origText; btn.disabled = false; }
+          }
+        }
 
-      // ── CRITICAL: reset feed state BEFORE setting up observer
-      feedPage = 1; feedDone = false; feedLoading = false;
-      document.getElementById('feedContainer').innerHTML = '';
-      document.getElementById('feedEnd').classList.add('hidden');
+        async function editProfession() {
+          const currentProf = currentUser?.profession || 'College';
+          const prof = prompt("Enter your profession (School, College, or Working):", currentProf);
+          if (!prof) return;
+          const valid = ['School', 'College', 'Working'];
+          const normalized = valid.find(v => v.toLowerCase() === prof.toLowerCase().trim());
+          if (!normalized) {
+            toast('⚠️ Please enter exactly: School, College, or Working');
+            return;
+          }
+          try {
+            const data = await api('/profile/profession', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ profession: normalized })
+            });
+            if (data.user) {
+              currentUser = data.user;
+              localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+              toast('✅ Profession updated to ' + normalized);
+            }
+          } catch (e) {
+            toast('⚠️ Failed to update profession');
+          }
+        }
 
-      updateProfileUI();
-      initInfiniteScroll();   // observer will trigger loadFeed() automatically
-      loadReels();
-      // ⚠️  Do NOT call loadFeed() here — the IntersectionObserver handles it
-      // Calling it here + observer = double call = the loop bug
+        function skipSetup() {
+          showMainApp();
+        }
 
-      // Silently verify token in background (no reload side-effects)
-      refreshUserSilent();
-    }
+        function showMainApp() {
+          document.getElementById('authScreen').style.display = 'none';
+          document.getElementById('setupScreen').style.display = 'none';
+          document.getElementById('topbar').style.display = 'flex';
+          document.getElementById('mainArea').style.display = 'block';
+          document.getElementById('bottomNav').style.display = 'flex';
 
-    /* ═══════════════════════════════════════════════════════
-       NAVIGATION
-    ═══════════════════════════════════════════════════════ */
-    function navigate(section, btn) {
-      // Pause all videos globally to prevent audio bleed
-      document.querySelectorAll('video').forEach(v => v.pause());
+          // Reset to home screen
+          document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+          document.getElementById('homeScreen').classList.add('active');
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          const homeBtn = document.querySelector('.nav-btn[data-section="home"]');
+          if (homeBtn) homeBtn.classList.add('active');
 
-      if (section === 'home') {
-        refreshHomeFeed();
-        if (document.getElementById('homeScreen').classList.contains('active')) return;
-      }
+          // Show/hide admin tab
+          const adminTab = document.getElementById('adminNavBtn');
+          if (adminTab) adminTab.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
 
-      if (section === 'reels') {
-        document.getElementById('reelsScreen').scrollTo({ top: 0 });
-        loadReels();
-        if (document.getElementById('reelsScreen').classList.contains('active')) return;
-      }
+          const adminRadial = document.getElementById('adminRadialItem');
+          if (adminRadial) adminRadial.style.display = currentUser && currentUser.is_admin ? 'flex' : 'none';
 
-      // Hide all screens
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      // Deactivate all nav buttons
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          initRadialItems(); // Adjust radial layout dynamically for admin item
 
-      const screenMap = { home: 'homeScreen', reels: 'reelsScreen', add: 'addScreen', search: 'searchScreen', profile: 'profileScreen', admin: 'adminScreen', settings: 'settingsScreen', chat: 'chatScreen' };
-      const screen = document.getElementById(screenMap[section]);
-      if (screen) screen.classList.add('active');
+          // ── CRITICAL: reset feed state BEFORE setting up observer
+          feedPage = 1; feedDone = false; feedLoading = false;
+          document.getElementById('feedContainer').innerHTML = '';
+          document.getElementById('feedEnd').classList.add('hidden');
 
-      // Always find the correct nav button by data-section (avoids wrong-btn bugs)
-      const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
-      if (navBtn) navBtn.classList.add('active');
+          updateProfileUI();
+          initInfiniteScroll();   // observer will trigger loadFeed() automatically
+          loadReels();
+          // ⚠️  Do NOT call loadFeed() here — the IntersectionObserver handles it
+          // Calling it here + observer = double call = the loop bug
 
-      if (section === 'profile') { loadProfileStats(); updateProfileUI(); loadMyPosts(); }
-      if (section === 'reels') { setTimeout(activateReels, 100); }
-      if (section === 'admin') { loadAdminScreen(); }
-      if (section === 'settings') { syncSettingsToggles(); }
-      if (section === 'chat') { loadChatUsers(); }
-    }
+          // Silently verify token in background (no reload side-effects)
+          refreshUserSilent();
+        }
 
-    function refreshHomeFeed() {
-      // Reset state
-      feedPage = 1;
-      feedDone = false;
-      feedLoading = false;
-      document.getElementById('feedContainer').innerHTML = '';
-      document.getElementById('feedEnd').classList.add('hidden');
-      // Scroll to top
-      document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
-      // Re-init infinite scroll (which triggers loadFeed)
-      initInfiniteScroll();
-      toast('🚀 Feed refreshed!');
-    }
+        /* ═══════════════════════════════════════════════════════
+           NAVIGATION
+        ═══════════════════════════════════════════════════════ */
+        function navigate(section, btn) {
+          // Pause all videos globally to prevent audio bleed
+          document.querySelectorAll('video').forEach(v => v.pause());
 
-    /* ═══════════════════════════════════════════════════════
-       STORIES
-    ═══════════════════════════════════════════════════════ */
-    /* Story functions removed */
+          if (section === 'home') {
+            refreshHomeFeed();
+            if (document.getElementById('homeScreen').classList.contains('active')) return;
+          }
 
-    /* ═══════════════════════════════════════════════════════
-       FEED
-    ═══════════════════════════════════════════════════════ */
-    async function loadFeed() {
-      if (feedLoading || feedDone) return;
-      feedLoading = true;
-      
-      const container = document.getElementById('feedContainer');
-      if (feedPage === 1) {
-        container.innerHTML = Array(3).fill(0).map(() => `
+          if (section === 'reels') {
+            document.getElementById('reelsScreen').scrollTo({ top: 0 });
+            loadReels();
+            if (document.getElementById('reelsScreen').classList.contains('active')) return;
+          }
+
+          // Hide all screens
+          document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+          // Deactivate all nav buttons
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+          const screenMap = { home: 'homeScreen', reels: 'reelsScreen', add: 'addScreen', search: 'searchScreen', profile: 'profileScreen', admin: 'adminScreen', settings: 'settingsScreen', chat: 'chatScreen' };
+          const screen = document.getElementById(screenMap[section]);
+          if (screen) screen.classList.add('active');
+
+          // Always find the correct nav button by data-section (avoids wrong-btn bugs)
+          const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
+          if (navBtn) navBtn.classList.add('active');
+
+          if (section === 'profile') { loadProfileStats(); updateProfileUI(); loadMyPosts(); }
+          if (section === 'reels') { setTimeout(activateReels, 100); }
+          if (section === 'admin') { loadAdminScreen(); }
+          if (section === 'settings') { syncSettingsToggles(); }
+          if (section === 'chat') { loadChatUsers(); }
+        }
+
+        function refreshHomeFeed() {
+          // Reset state
+          feedPage = 1;
+          feedDone = false;
+          feedLoading = false;
+          document.getElementById('feedContainer').innerHTML = '';
+          document.getElementById('feedEnd').classList.add('hidden');
+          // Scroll to top
+          document.getElementById('homeScreen').scrollTo({ top: 0, behavior: 'smooth' });
+          // Re-init infinite scroll (which triggers loadFeed)
+          initInfiniteScroll();
+          toast('🚀 Feed refreshed!');
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           STORIES
+        ═══════════════════════════════════════════════════════ */
+        /* Story functions removed */
+
+        /* ═══════════════════════════════════════════════════════
+           FEED
+        ═══════════════════════════════════════════════════════ */
+        async function loadFeed() {
+          if (feedLoading || feedDone) return;
+          feedLoading = true;
+
+          const container = document.getElementById('feedContainer');
+          if (feedPage === 1) {
+            container.innerHTML = Array(3).fill(0).map(() => `
           <div class="skeleton-card">
             <div class="sk-head">
               <div class="skeleton sk-av"></div>
@@ -4631,81 +4716,81 @@
             <div class="skeleton sk-caption" style="width:60%"></div>
           </div>
         `).join('');
-      }
-      
-      document.getElementById('feedSpinner').classList.remove('hidden');
+          }
 
-      try {
-        const data = await api(`/feed?page=${feedPage}&per_page=8`);
-        const container = document.getElementById('feedContainer');
+          document.getElementById('feedSpinner').classList.remove('hidden');
 
-        if (feedPage === 1) {
-          container.innerHTML = ''; // Kill skeleton
-        }
+          try {
+            const data = await api(`/feed?page=${feedPage}&per_page=8`);
+            const container = document.getElementById('feedContainer');
 
-        if (data.posts.length === 0 && feedPage === 1) {
-          container.innerHTML = `<div class="empty-state" style="margin-top:40px">
+            if (feedPage === 1) {
+              container.innerHTML = ''; // Kill skeleton
+            }
+
+            if (data.posts.length === 0 && feedPage === 1) {
+              container.innerHTML = `<div class="empty-state" style="margin-top:40px">
         <span class="material-icons-round">auto_stories</span>
         <p>No approved posts yet. Upload something!</p>
       </div>`;
-        }
-
-        data.posts.forEach(post => {
-          const card = post.type === 'reel' ? buildReelCard(post) : buildPostCard(post);
-          container.appendChild(card);
-
-          // Observe video to auto-pause when scrolled out of view, and auto-play reels when visible
-          const vid = card.querySelector('video');
-          if (vid) {
-            if (!window.feedVideoObserver) {
-              window.feedVideoObserver = new IntersectionObserver(entries => {
-                entries.forEach(e => {
-                  if (!e.isIntersecting) {
-                    e.target.pause();
-                  } else if (e.target.hasAttribute('autoplay')) {
-                    const playPromise = e.target.play();
-                    if (playPromise !== undefined) playPromise.catch(() => { });
-                  }
-                });
-              }, { threshold: 0.4 });
             }
-            window.feedVideoObserver.observe(vid);
-          }
-        });
 
-        if (!data.has_more) {
-          feedDone = true;
-          if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
-          if (feedPage > 1) document.getElementById('feedEnd').classList.remove('hidden');
-        }
-        feedPage++;
-      } catch (e) {
-        console.error('Feed load failed:', e);
-        if (feedPage === 1) {
-          container.innerHTML = `
+            data.posts.forEach(post => {
+              const card = post.type === 'reel' ? buildReelCard(post) : buildPostCard(post);
+              container.appendChild(card);
+
+              // Observe video to auto-pause when scrolled out of view, and auto-play reels when visible
+              const vid = card.querySelector('video');
+              if (vid) {
+                if (!window.feedVideoObserver) {
+                  window.feedVideoObserver = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                      if (!e.isIntersecting) {
+                        e.target.pause();
+                      } else if (e.target.hasAttribute('autoplay')) {
+                        const playPromise = e.target.play();
+                        if (playPromise !== undefined) playPromise.catch(() => { });
+                      }
+                    });
+                  }, { threshold: 0.4 });
+                }
+                window.feedVideoObserver.observe(vid);
+              }
+            });
+
+            if (!data.has_more) {
+              feedDone = true;
+              if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+              if (feedPage > 1) document.getElementById('feedEnd').classList.remove('hidden');
+            }
+            feedPage++;
+          } catch (e) {
+            console.error('Feed load failed:', e);
+            if (feedPage === 1) {
+              container.innerHTML = `
             <div class="empty-state" style="margin-top:40px">
               <span class="material-icons-round" style="color:var(--accent2)">error_outline</span>
               <p>Couldn't load feed. Please check your connection.</p>
               <button onclick="refreshHomeFeed()" class="auth-btn" style="width:auto; padding:10px 24px; margin-top:16px; background:var(--surface2); border:1px solid var(--border)">Retry 🔄</button>
             </div>
           `;
+            }
+          }
+
+          feedLoading = false;
+          document.getElementById('feedSpinner').classList.add('hidden');
         }
-      }
 
-      feedLoading = false;
-      document.getElementById('feedSpinner').classList.add('hidden');
-    }
+        function buildPostCard(p) {
+          const el = document.createElement('div');
+          el.className = 'post-card';
+          el.dataset.postId = p.id;
+          const av = getAvatarUrl(p.avatar, p.author);
+          const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+          const mediaUrl = p.media_url || 'https://picsum.photos/seed/' + p.id + '/600/400';
+          const tags = (p.hashtags || []).map(t => t).join(' ');
 
-    function buildPostCard(p) {
-      const el = document.createElement('div');
-      el.className = 'post-card';
-      el.dataset.postId = p.id;
-      const av = getAvatarUrl(p.avatar, p.author);
-      const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
-      const mediaUrl = p.media_url || 'https://picsum.photos/seed/' + p.id + '/600/400';
-      const tags = (p.hashtags || []).map(t => t).join(' ');
-
-      el.innerHTML = `
+          el.innerHTML = `
     <div class="post-head">
       <img class="post-avatar" src="${av}" alt="${p.author}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=38'">
       <div class="post-user">
@@ -4716,8 +4801,8 @@
     </div>
     <div class="post-media">
       ${isVideo
-          ? `<video src="${mediaUrl}" muted playsinline loop onclick="this.paused?this.play():this.pause()"></video>`
-          : `<img src="${mediaUrl}" alt="${p.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${p.id}/600/400'">`}
+              ? `<video src="${mediaUrl}" muted playsinline loop onclick="this.paused?this.play():this.pause()"></video>`
+              : `<img src="${mediaUrl}" alt="${p.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${p.id}/600/400'">`}
     </div>
     <div class="post-actions-row">
       <div class="post-acts-left">
@@ -4745,17 +4830,17 @@
     </div>
     ${p.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${p.id})">View all ${p.comments_count} comments</div>` : ''}
   `;
-      return el;
-    }
+          return el;
+        }
 
-    function buildReelCard(r) {
-      const el = document.createElement('div');
-      el.className = 'post-card';
-      el.dataset.postId = r.id;
-      const av = getAvatarUrl(r.avatar, r.author);
-      const tags = (r.hashtags || []).map(t => t).join(' ');
-      const isOwnPost = currentUser && r.author === currentUser.username;
-      el.innerHTML = `
+        function buildReelCard(r) {
+          const el = document.createElement('div');
+          el.className = 'post-card';
+          el.dataset.postId = r.id;
+          const av = getAvatarUrl(r.avatar, r.author);
+          const tags = (r.hashtags || []).map(t => t).join(' ');
+          const isOwnPost = currentUser && r.author === currentUser.username;
+          el.innerHTML = `
     <div class="post-head">
       <img class="post-avatar" src="${av}" alt="${r.author}" onerror="this.src='https://ui-avatars.com/api/?name=${r.author}&background=333&color=fff&size=38'">
       <div class="post-user">
@@ -4797,35 +4882,35 @@
     </div>
     ${r.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${r.id})">View all ${r.comments_count} comments</div>` : ''}
   `;
-      return el;
-    }
+          return el;
+        }
 
-    /* ═══════════════════════════════════════════════════════
-       REELS SCREEN
-    ═══════════════════════════════════════════════════════ */
-    async function loadReels() {
-      try {
-        const data = await api('/feed?per_page=20');
-        reelsData = data.posts.filter(p => p.type === 'reel');
-        renderReelsScreen();
-      } catch { }
-    }
+        /* ═══════════════════════════════════════════════════════
+           REELS SCREEN
+        ═══════════════════════════════════════════════════════ */
+        async function loadReels() {
+          try {
+            const data = await api('/feed?per_page=20');
+            reelsData = data.posts.filter(p => p.type === 'reel');
+            renderReelsScreen();
+          } catch { }
+        }
 
-    function renderReelsScreen() {
-      const container = document.getElementById('reelsContainer');
-      if (reelsData.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="height:100%;color:#fff">
+        function renderReelsScreen() {
+          const container = document.getElementById('reelsContainer');
+          if (reelsData.length === 0) {
+            container.innerHTML = `<div class="empty-state" style="height:100%;color:#fff">
       <span class="material-icons-round">play_circle</span>
       <p>No reels yet. Upload the first one!</p>
     </div>`;
-        return;
-      }
-      container.innerHTML = '';
-      reelsData.forEach(r => {
-        const el = document.createElement('div');
-        el.className = 'reel-full';
-        const av = getAvatarUrl(r.avatar, r.author);
-        el.innerHTML = `
+            return;
+          }
+          container.innerHTML = '';
+          reelsData.forEach(r => {
+            const el = document.createElement('div');
+            el.className = 'reel-full';
+            const av = getAvatarUrl(r.avatar, r.author);
+            el.innerHTML = `
       <video src="${r.media_url}" ${isMuted ? 'muted' : ''} playsinline loop></video>
       <div class="reel-full-overlay"></div>
       <div class="reel-full-info">
@@ -4856,84 +4941,84 @@
       <div class="video-sound-toggle" onclick="toggleGlobalMute(event, this)" style="bottom: 110px; right: 12px;">
         <span class="material-icons-round" style="font-size:22px">${isMuted ? 'volume_off' : 'volume_up'}</span>
       </div>`;
-        container.appendChild(el);
-      });
-    }
+            container.appendChild(el);
+          });
+        }
 
-    function activateReels() {
-      // Auto-play visible video
-      const videos = document.querySelectorAll('#reelsContainer video');
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.play();
-          } else {
-            e.target.pause();
-            e.target.currentTime = 0; // Reset audio position
+        function activateReels() {
+          // Auto-play visible video
+          const videos = document.querySelectorAll('#reelsContainer video');
+          const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+              if (e.isIntersecting) {
+                e.target.play();
+              } else {
+                e.target.pause();
+                e.target.currentTime = 0; // Reset audio position
+              }
+            });
+          }, { threshold: 0.7 });
+          videos.forEach(v => obs.observe(v));
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           INTERACTIONS
+        ═══════════════════════════════════════════════════════ */
+        async function toggleLike(btn, postId) {
+          if (!authToken) { toast('Login to like posts'); return; }
+          const wasLiked = btn.dataset.liked === 'true' || btn.classList.contains('liked');
+          const icon = btn.querySelector('.material-icons-round');
+          const liked = !wasLiked;
+
+          // Optimistic
+          btn.classList.toggle('liked', liked);
+          btn.dataset.liked = liked;
+          icon.textContent = liked ? 'favorite' : 'favorite_border';
+          if (liked) btn.classList.add('heart-pop');
+          setTimeout(() => btn.classList.remove('heart-pop'), 400);
+
+          // Update count
+          const likesEl = document.getElementById(`likes-${postId}`);
+          if (likesEl) {
+            const curr = parseInt(likesEl.textContent);
+            const newCount = liked ? curr + 1 : Math.max(0, curr - 1);
+            likesEl.textContent = `${newCount} ${newCount === 1 ? 'like' : 'likes'}`;
           }
-        });
-      }, { threshold: 0.7 });
-      videos.forEach(v => obs.observe(v));
-    }
+          const rlikes = document.getElementById(`rlikes-${postId}`);
+          if (rlikes) rlikes.textContent = parseInt(rlikes.textContent) + (liked ? 1 : -1);
 
-    /* ═══════════════════════════════════════════════════════
-       INTERACTIONS
-    ═══════════════════════════════════════════════════════ */
-    async function toggleLike(btn, postId) {
-      if (!authToken) { toast('Login to like posts'); return; }
-      const wasLiked = btn.dataset.liked === 'true' || btn.classList.contains('liked');
-      const icon = btn.querySelector('.material-icons-round');
-      const liked = !wasLiked;
+          try {
+            await api(`/posts/${postId}/like`, { method: 'POST' });
+            if (liked) addNotif(`❤️ You liked a post`);
+          } catch { }
+        }
 
-      // Optimistic
-      btn.classList.toggle('liked', liked);
-      btn.dataset.liked = liked;
-      icon.textContent = liked ? 'favorite' : 'favorite_border';
-      if (liked) btn.classList.add('heart-pop');
-      setTimeout(() => btn.classList.remove('heart-pop'), 400);
+        async function toggleSave(btn, postId) {
+          if (!authToken) { toast('Login to save posts'); return; }
+          const saved = !btn.classList.contains('saved');
+          btn.classList.toggle('saved', saved);
+          const icon = btn.querySelector('.material-icons-round');
+          icon.textContent = saved ? 'bookmark' : 'bookmark_border';
+          toast(saved ? '🔖 Saved!' : 'Removed from saved');
+          try { await api(`/posts/${postId}/save`, { method: 'POST' }); } catch { }
+        }
 
-      // Update count
-      const likesEl = document.getElementById(`likes-${postId}`);
-      if (likesEl) {
-        const curr = parseInt(likesEl.textContent);
-        const newCount = liked ? curr + 1 : Math.max(0, curr - 1);
-        likesEl.textContent = `${newCount} ${newCount === 1 ? 'like' : 'likes'}`;
-      }
-      const rlikes = document.getElementById(`rlikes-${postId}`);
-      if (rlikes) rlikes.textContent = parseInt(rlikes.textContent) + (liked ? 1 : -1);
-
-      try {
-        await api(`/posts/${postId}/like`, { method: 'POST' });
-        if (liked) addNotif(`❤️ You liked a post`);
-      } catch { }
-    }
-
-    async function toggleSave(btn, postId) {
-      if (!authToken) { toast('Login to save posts'); return; }
-      const saved = !btn.classList.contains('saved');
-      btn.classList.toggle('saved', saved);
-      const icon = btn.querySelector('.material-icons-round');
-      icon.textContent = saved ? 'bookmark' : 'bookmark_border';
-      toast(saved ? '🔖 Saved!' : 'Removed from saved');
-      try { await api(`/posts/${postId}/save`, { method: 'POST' }); } catch { }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       COMMENTS
-    ═══════════════════════════════════════════════════════ */
-    async function openComment(postId) {
-      currentPostId = postId;
-      showSheet('commentSheet', 'commentOverlay');
-      const inp = document.getElementById('commInput');
-      if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 300); }
-      document.getElementById('commentList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
-      try {
-        const comments = await api(`/posts/${postId}/comments`);
-        const list = document.getElementById('commentList');
-        if (comments.length === 0) {
-          list.innerHTML = '<div class="empty-state" style="padding:24px 0"><span class="material-icons-round">chat_bubble_outline</span><p>No comments yet.</p></div>';
-        } else {
-          list.innerHTML = comments.map(c => `
+        /* ═══════════════════════════════════════════════════════
+           COMMENTS
+        ═══════════════════════════════════════════════════════ */
+        async function openComment(postId) {
+          currentPostId = postId;
+          showSheet('commentSheet', 'commentOverlay');
+          const inp = document.getElementById('commInput');
+          if (inp) { inp.value = ''; setTimeout(() => inp.focus(), 300); }
+          document.getElementById('commentList').innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+          try {
+            const comments = await api(`/posts/${postId}/comments`);
+            const list = document.getElementById('commentList');
+            if (comments.length === 0) {
+              list.innerHTML = '<div class="empty-state" style="padding:24px 0"><span class="material-icons-round">chat_bubble_outline</span><p>No comments yet.</p></div>';
+            } else {
+              list.innerHTML = comments.map(c => `
         <div class="comment-item">
           <img class="comment-av" src="${c.avatar ? API + c.avatar : `https://ui-avatars.com/api/?name=${c.username}&background=333&color=fff&size=32`}" alt="${c.username}" onerror="this.src='https://ui-avatars.com/api/?name=${c.username}&background=333&color=fff&size=32'">
           <div class="comment-body">
@@ -4942,252 +5027,252 @@
             <small>${c.time}</small>
           </div>
         </div>`).join('');
+            }
+          } catch { }
         }
-      } catch { }
-    }
 
-    function closeComment() {
-      hideSheet('commentSheet', 'commentOverlay');
-    }
-
-    async function sendComment() {
-      const inp = document.getElementById('commInput');
-      const text = inp.value.trim();
-      if (!text || !currentPostId) return;
-      if (!authToken) { toast('Login to comment'); return; }
-      inp.value = '';
-      try {
-        await api(`/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
-        openComment(currentPostId);
-        toast('💬 Comment posted!');
-        addNotif(`💬 You commented on a post`);
-      } catch (e) { toast('⚠️ ' + e.message); }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       SHARE
-    ═══════════════════════════════════════════════════════ */
-    function openShare(postId) { currentPostId = postId; showSheet('shareSheet', 'shareOverlay'); }
-    function closeShare() { hideSheet('shareSheet', 'shareOverlay'); }
-    function shareAction(type) {
-      closeShare();
-      if (type === 'copy') { navigator.clipboard.writeText(window.location.href).then(() => toast('🔗 Link copied!')); }
-      else toast('Sharing via ' + type + '...');
-    }
-
-
-
-    /* ═══════════════════════════════════════════════════════
-       CREATE POST
-    ═══════════════════════════════════════════════════════ */
-    let currentUploadType = 'post';
-    function selectType(type, btn) {
-      currentUploadType = type;
-      document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-
-    function toggleProfTag(el) {
-      el.classList.toggle('sel');
-      const tag = el.textContent.trim();
-      if (el.classList.contains('sel')) { if (!selectedProfTags.includes(tag)) selectedProfTags.push(tag); }
-      else { selectedProfTags = selectedProfTags.filter(t => t !== tag); }
-    }
-
-    function toggleHtag(el) {
-      el.classList.toggle('sel');
-      const tag = el.textContent;
-      if (el.classList.contains('sel')) { if (!selectedHtags.includes(tag)) selectedHtags.push(tag); }
-      else { selectedHtags = selectedHtags.filter(t => t !== tag); }
-    }
-
-    function previewUpload(input) {
-      const wrap = document.getElementById('uploadPreview');
-      if (!input.files[0]) return;
-      const url = URL.createObjectURL(input.files[0]);
-      const isVid = input.files[0].type.startsWith('video');
-      wrap.innerHTML = isVid ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
-      wrap.classList.remove('hidden');
-      document.getElementById('uploadZone').style.display = 'none';
-    }
-
-    async function publishPost() {
-      const file = document.getElementById('postFile').files[0];
-      if (!file) { toast('⚠️ Select media to publish'); return; }
-      if (!authToken) { toast('Please login first'); return; }
-
-      const title = document.getElementById('postTitle').value.trim();
-      const description = document.getElementById('postDesc').value.trim();
-      const domain = document.getElementById('postDomain').value;
-
-      if (!title || !description || !domain) {
-        toast('⚠️ All fields are mandatory (Title, Description, Domain)');
-        return;
-      }
-
-      const fd = new FormData();
-      fd.append('type', currentUploadType);
-      fd.append('title', title);
-      fd.append('description', description);
-      fd.append('hashtags', JSON.stringify(selectedHtags));
-      fd.append('target_profession', JSON.stringify(selectedProfTags));
-      fd.append('domain', domain);
-      fd.append('media', file);
-
-      const btn = document.querySelector('.pub-btn');
-      btn.textContent = 'Publishing...'; btn.disabled = true;
-      
-      const progressContainer = document.getElementById('uploadProgressContainer');
-      const progressBar = document.getElementById('uploadProgressBar');
-      progressContainer.style.display = 'block';
-      progressBar.style.width = '0%';
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', API + '/posts', true);
-      xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
-
-      xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-          const percentComplete = (e.loaded / e.total) * 100;
-          progressBar.style.width = percentComplete + '%';
+        function closeComment() {
+          hideSheet('commentSheet', 'commentOverlay');
         }
-      };
 
-      xhr.onload = function() {
-        btn.textContent = 'Publish 🚀'; 
-        btn.disabled = false;
-        progressContainer.style.display = 'none';
-        progressBar.style.width = '0%';
-
-        if (xhr.status === 200 || xhr.status === 201) {
-          const data = JSON.parse(xhr.responseText);
-          toast('🚀 Published successfully!');
-          addNotif(`✨ You published a new ${currentUploadType}!`);
-          // Reset form
-          document.getElementById('postTitle').value = '';
-          document.getElementById('postDesc').value = '';
-          document.getElementById('postFile').value = '';
-          document.getElementById('postDomain').value = '';
-          document.getElementById('uploadPreview').classList.add('hidden');
-          document.getElementById('uploadZone').style.display = 'flex';
-          document.querySelectorAll('.htag').forEach(h => h.classList.remove('sel'));
-          selectedHtags = [];
-          
-          feedPage = 1; feedDone = false; feedLoading = false;
-          document.getElementById('feedContainer').innerHTML = '';
-          document.getElementById('feedEnd').classList.add('hidden');
-          navigate('home');
-          initInfiniteScroll();
-          loadReels();
-
-          if (data.pending) {
-            toast('⏳ Submitted for admin review!');
-            addNotif('⏳ Your post is pending admin approval before it appears in the feed.');
-          }
-        } else {
+        async function sendComment() {
+          const inp = document.getElementById('commInput');
+          const text = inp.value.trim();
+          if (!text || !currentPostId) return;
+          if (!authToken) { toast('Login to comment'); return; }
+          inp.value = '';
           try {
-            const data = JSON.parse(xhr.responseText);
-            toast('⚠️ ' + (data.error || 'Upload failed'));
-          } catch(e) {
-            toast('⚠️ Upload failed');
+            await api(`/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
+            openComment(currentPostId);
+            toast('💬 Comment posted!');
+            addNotif(`💬 You commented on a post`);
+          } catch (e) { toast('⚠️ ' + e.message); }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           SHARE
+        ═══════════════════════════════════════════════════════ */
+        function openShare(postId) { currentPostId = postId; showSheet('shareSheet', 'shareOverlay'); }
+        function closeShare() { hideSheet('shareSheet', 'shareOverlay'); }
+        function shareAction(type) {
+          closeShare();
+          if (type === 'copy') { navigator.clipboard.writeText(window.location.href).then(() => toast('🔗 Link copied!')); }
+          else toast('Sharing via ' + type + '...');
+        }
+
+
+
+        /* ═══════════════════════════════════════════════════════
+           CREATE POST
+        ═══════════════════════════════════════════════════════ */
+        let currentUploadType = 'post';
+        function selectType(type, btn) {
+          currentUploadType = type;
+          document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+          btn.classList.add('active');
+        }
+
+
+        function toggleProfTag(el) {
+          el.classList.toggle('sel');
+          const tag = el.textContent.trim();
+          if (el.classList.contains('sel')) { if (!selectedProfTags.includes(tag)) selectedProfTags.push(tag); }
+          else { selectedProfTags = selectedProfTags.filter(t => t !== tag); }
+        }
+
+        function toggleHtag(el) {
+          el.classList.toggle('sel');
+          const tag = el.textContent;
+          if (el.classList.contains('sel')) { if (!selectedHtags.includes(tag)) selectedHtags.push(tag); }
+          else { selectedHtags = selectedHtags.filter(t => t !== tag); }
+        }
+
+        function previewUpload(input) {
+          const wrap = document.getElementById('uploadPreview');
+          if (!input.files[0]) return;
+          const url = URL.createObjectURL(input.files[0]);
+          const isVid = input.files[0].type.startsWith('video');
+          wrap.innerHTML = isVid ? `<video src="${url}" controls></video>` : `<img src="${url}">`;
+          wrap.classList.remove('hidden');
+          document.getElementById('uploadZone').style.display = 'none';
+        }
+
+        async function publishPost() {
+          const file = document.getElementById('postFile').files[0];
+          if (!file) { toast('⚠️ Select media to publish'); return; }
+          if (!authToken) { toast('Please login first'); return; }
+
+          const title = document.getElementById('postTitle').value.trim();
+          const description = document.getElementById('postDesc').value.trim();
+          const domain = document.getElementById('postDomain').value;
+
+          if (!title || !description || !domain) {
+            toast('⚠️ All fields are mandatory (Title, Description, Domain)');
+            return;
+          }
+
+          const fd = new FormData();
+          fd.append('type', currentUploadType);
+          fd.append('title', title);
+          fd.append('description', description);
+          fd.append('hashtags', JSON.stringify(selectedHtags));
+          fd.append('target_profession', JSON.stringify(selectedProfTags));
+          fd.append('domain', domain);
+          fd.append('media', file);
+
+          const btn = document.querySelector('.pub-btn');
+          btn.textContent = 'Publishing...'; btn.disabled = true;
+
+          const progressContainer = document.getElementById('uploadProgressContainer');
+          const progressBar = document.getElementById('uploadProgressBar');
+          progressContainer.style.display = 'block';
+          progressBar.style.width = '0%';
+
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', API + '/posts', true);
+          xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+
+          xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+              const percentComplete = (e.loaded / e.total) * 100;
+              progressBar.style.width = percentComplete + '%';
+            }
+          };
+
+          xhr.onload = function () {
+            btn.textContent = 'Publish 🚀';
+            btn.disabled = false;
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+
+            if (xhr.status === 200 || xhr.status === 201) {
+              const data = JSON.parse(xhr.responseText);
+              toast('🚀 Published successfully!');
+              addNotif(`✨ You published a new ${currentUploadType}!`);
+              // Reset form
+              document.getElementById('postTitle').value = '';
+              document.getElementById('postDesc').value = '';
+              document.getElementById('postFile').value = '';
+              document.getElementById('postDomain').value = '';
+              document.getElementById('uploadPreview').classList.add('hidden');
+              document.getElementById('uploadZone').style.display = 'flex';
+              document.querySelectorAll('.htag').forEach(h => h.classList.remove('sel'));
+              selectedHtags = [];
+
+              feedPage = 1; feedDone = false; feedLoading = false;
+              document.getElementById('feedContainer').innerHTML = '';
+              document.getElementById('feedEnd').classList.add('hidden');
+              navigate('home');
+              initInfiniteScroll();
+              loadReels();
+
+              if (data.pending) {
+                toast('⏳ Submitted for admin review!');
+                addNotif('⏳ Your post is pending admin approval before it appears in the feed.');
+              }
+            } else {
+              try {
+                const data = JSON.parse(xhr.responseText);
+                toast('⚠️ ' + (data.error || 'Upload failed'));
+              } catch (e) {
+                toast('⚠️ Upload failed');
+              }
+            }
+          };
+
+          xhr.onerror = function () {
+            btn.textContent = 'Publish 🚀';
+            btn.disabled = false;
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+            toast('⚠️ Network Error');
+          };
+
+          xhr.send(fd);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           PASSWORD EYE TOGGLE
+        ═══════════════════════════════════════════════════════ */
+        function togglePasswordVisibility() {
+          const inp = document.getElementById('authPass');
+          const icon = document.getElementById('eyeIcon');
+          if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.textContent = 'visibility';
+          } else {
+            inp.type = 'password';
+            icon.textContent = 'visibility_off';
           }
         }
-      };
 
-      xhr.onerror = function() {
-        btn.textContent = 'Publish 🚀'; 
-        btn.disabled = false;
-        progressContainer.style.display = 'none';
-        progressBar.style.width = '0%';
-        toast('⚠️ Network Error');
-      };
-
-      xhr.send(fd);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       PASSWORD EYE TOGGLE
-    ═══════════════════════════════════════════════════════ */
-    function togglePasswordVisibility() {
-      const inp = document.getElementById('authPass');
-      const icon = document.getElementById('eyeIcon');
-      if (inp.type === 'password') {
-        inp.type = 'text';
-        icon.textContent = 'visibility';
-      } else {
-        inp.type = 'password';
-        icon.textContent = 'visibility_off';
-      }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       POST MENU (three-dot)
-    ═══════════════════════════════════════════════════════ */
-    function openPostMenu(postId, author) {
-      menuPostId = postId;
-      menuPostAuthor = author;
-      // Show delete only if owner or admin
-      const canDelete = currentUser && (currentUser.username === author || currentUser.is_admin);
-      document.getElementById('postMenuDeleteBtn').style.display = canDelete ? 'flex' : 'none';
-      showSheet('postMenuSheet', 'postMenuOverlay');
-    }
-
-    function closePostMenu() {
-      hideSheet('postMenuSheet', 'postMenuOverlay');
-      menuPostId = null;
-      menuPostAuthor = '';
-    }
-
-    function hidePost() {
-      if (menuPostId) {
-        const card = document.querySelector(`.post-card[data-post-id="${menuPostId}"]`);
-        if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
-        toast('🚫 Post hidden');
-      }
-      closePostMenu();
-    }
-
-    async function deletePost(postId) {
-      const id = postId || menuPostId;
-      if (!id) return;
-      if (!confirm('Are you sure you want to delete this post?')) { closePostMenu(); return; }
-      try {
-        await api(`/posts/${id}`, { method: 'DELETE' });
-        // Remove from feed
-        const card = document.querySelector(`.post-card[data-post-id="${id}"]`);
-        if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
-        // Remove from profile grid
-        const thumb = document.querySelector(`.profile-post-thumb[data-post-id="${id}"]`);
-        if (thumb) { thumb.style.transition = 'opacity .3s'; thumb.style.opacity = '0'; setTimeout(() => thumb.remove(), 300); }
-        toast('🗑️ Post deleted');
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-      }
-      closePostMenu();
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       PROFILE POSTS GRID
-    ═══════════════════════════════════════════════════════ */
-    async function loadMyPosts() {
-      try {
-        const data = await api('/profile/posts');
-        const grid = document.getElementById('profilePostsGrid');
-        grid.innerHTML = '';
-        if (!data.posts || data.posts.length === 0) {
-          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--sub);padding:24px"><span class="material-icons-round" style="font-size:48px;opacity:.3">photo_library</span><p>No posts yet</p></div>';
-          return;
+        /* ═══════════════════════════════════════════════════════
+           POST MENU (three-dot)
+        ═══════════════════════════════════════════════════════ */
+        function openPostMenu(postId, author) {
+          menuPostId = postId;
+          menuPostAuthor = author;
+          // Show delete only if owner or admin
+          const canDelete = currentUser && (currentUser.username === author || currentUser.is_admin);
+          document.getElementById('postMenuDeleteBtn').style.display = canDelete ? 'flex' : 'none';
+          showSheet('postMenuSheet', 'postMenuOverlay');
         }
-        data.posts.forEach(p => {
-          const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
-          const status = p.is_approved ? 'approved' : (p.rejection_reason ? 'rejected' : 'pending');
-          const statusLabel = status === 'approved' ? '✅' : (status === 'pending' ? '⏳' : '❌');
-          const typeIcon = p.type === 'reel' ? '🎬' : '📸';
-          const thumb = document.createElement('div');
-          thumb.className = 'profile-post-thumb';
-          thumb.dataset.postId = p.id;
-          thumb.innerHTML = `
+
+        function closePostMenu() {
+          hideSheet('postMenuSheet', 'postMenuOverlay');
+          menuPostId = null;
+          menuPostAuthor = '';
+        }
+
+        function hidePost() {
+          if (menuPostId) {
+            const card = document.querySelector(`.post-card[data-post-id="${menuPostId}"]`);
+            if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+            toast('🚫 Post hidden');
+          }
+          closePostMenu();
+        }
+
+        async function deletePost(postId) {
+          const id = postId || menuPostId;
+          if (!id) return;
+          if (!confirm('Are you sure you want to delete this post?')) { closePostMenu(); return; }
+          try {
+            await api(`/posts/${id}`, { method: 'DELETE' });
+            // Remove from feed
+            const card = document.querySelector(`.post-card[data-post-id="${id}"]`);
+            if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+            // Remove from profile grid
+            const thumb = document.querySelector(`.profile-post-thumb[data-post-id="${id}"]`);
+            if (thumb) { thumb.style.transition = 'opacity .3s'; thumb.style.opacity = '0'; setTimeout(() => thumb.remove(), 300); }
+            toast('🗑️ Post deleted');
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+          }
+          closePostMenu();
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           PROFILE POSTS GRID
+        ═══════════════════════════════════════════════════════ */
+        async function loadMyPosts() {
+          try {
+            const data = await api('/profile/posts');
+            const grid = document.getElementById('profilePostsGrid');
+            grid.innerHTML = '';
+            if (!data.posts || data.posts.length === 0) {
+              grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--sub);padding:24px"><span class="material-icons-round" style="font-size:48px;opacity:.3">photo_library</span><p>No posts yet</p></div>';
+              return;
+            }
+            data.posts.forEach(p => {
+              const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+              const status = p.is_approved ? 'approved' : (p.rejection_reason ? 'rejected' : 'pending');
+              const statusLabel = status === 'approved' ? '✅' : (status === 'pending' ? '⏳' : '❌');
+              const typeIcon = p.type === 'reel' ? '🎬' : '📸';
+              const thumb = document.createElement('div');
+              thumb.className = 'profile-post-thumb';
+              thumb.dataset.postId = p.id;
+              thumb.innerHTML = `
             ${isVideo ? `<video src="${p.media_url}" muted preload="metadata"></video>` : `<img src="${p.media_url}" alt="${p.title || 'Post'}" loading="lazy">`}
             <span class="ppt-type-badge">${typeIcon}</span>
             <span class="ppt-status ${status}">${statusLabel} ${status}</span>
@@ -5199,356 +5284,365 @@
               <span class="material-icons-round">delete</span>
             </button>
           `;
-          grid.appendChild(thumb);
-        });
-      } catch (e) {
-        console.warn('Profile posts error:', e);
-      }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       SEARCH
-    ═══════════════════════════════════════════════════════ */
-    function debounceSearch(q) {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => performSearch(q), 400);
-    }
-
-    async function performSearch(q) {
-      if (!q.trim()) {
-        document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
-        return;
-      }
-      try {
-        const data = await api(`/search?q=${encodeURIComponent(q)}`);
-        const el = document.getElementById('searchResults');
-        el.innerHTML = '';
-        if (data.posts.length === 0 && data.users.length === 0) {
-          el.innerHTML = '<div class="empty-state"><span class="material-icons-round">search_off</span><p>No results found</p></div>';
-          return;
+              grid.appendChild(thumb);
+            });
+          } catch (e) {
+            console.warn('Profile posts error:', e);
+          }
         }
-        data.posts.forEach(p => {
-          const card = document.createElement('div');
-          card.className = 'search-card';
-          const thumb = p.media_url || `https://picsum.photos/seed/${p.id}/48`;
-          card.innerHTML = `
+
+        /* ═══════════════════════════════════════════════════════
+           SEARCH
+        ═══════════════════════════════════════════════════════ */
+        function debounceSearch(q) {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(() => performSearch(q), 400);
+        }
+
+        async function performSearch(q) {
+          if (!q.trim()) {
+            document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
+            return;
+          }
+          try {
+            const data = await api(`/search?q=${encodeURIComponent(q)}`);
+            const el = document.getElementById('searchResults');
+            el.innerHTML = '';
+            if (data.posts.length === 0 && data.users.length === 0) {
+              el.innerHTML = '<div class="empty-state"><span class="material-icons-round">search_off</span><p>No results found</p></div>';
+              return;
+            }
+            data.posts.forEach(p => {
+              const card = document.createElement('div');
+              card.className = 'search-card';
+              const thumb = p.media_url || `https://picsum.photos/seed/${p.id}/48`;
+              card.innerHTML = `
         <div class="search-card-icon"><img src="${thumb}" alt="${p.title}" onerror="this.src='https://picsum.photos/seed/${p.id}/48'"></div>
         <div class="search-card-text">
           <h4>${p.title || p.description?.slice(0, 30) || 'Post'}</h4>
           <p>@${p.author} · ${p.time}</p>
         </div>`;
-          el.appendChild(card);
+              el.appendChild(card);
+            });
+          } catch { }
+        }
+
+        function filterTag(el, tag) {
+          document.querySelectorAll('.tag-chip').forEach(t => t.classList.remove('active'));
+          el.classList.add('active');
+          if (tag !== 'all') {
+            document.getElementById('searchInp').value = tag;
+            performSearch(tag);
+          } else {
+            document.getElementById('searchInp').value = '';
+            document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
+          }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           PROFILE
+        ═══════════════════════════════════════════════════════ */
+        function updateProfileUI() {
+          if (!currentUser) return;
+          const u = currentUser;
+          const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name || u.username || 'U')}&background=FF6B6B&color=fff&size=88`;
+          document.getElementById('profileAvatar').src = av;
+          document.getElementById('profileName').textContent = u.full_name || u.username || '—';
+          document.getElementById('profileUsername').textContent = '@' + (u.username || '—');
+          document.getElementById('profileBio').textContent = u.bio || '';
+          const linkEl = document.getElementById('profileLink');
+          if (u.website) { linkEl.textContent = u.website; linkEl.href = u.website; }
+          else linkEl.textContent = '';
+
+          // Badges
+          const badges = document.getElementById('profileBadges');
+          badges.innerHTML = [
+            '🔥 Streak 7', '⚡ Fast Learner', '🏆 Top 10%'
+          ].map(b => `<span class="badge">${b}</span>`).join('');
+        }
+
+        async function loadProfileStats() {
+          if (!authToken) return;
+          try {
+            const stats = await api('/profile/stats');
+            document.getElementById('statPosts').textContent = stats.posts;
+            document.getElementById('statReels').textContent = stats.reels;
+            document.getElementById('statLikes').textContent = stats.likes;
+            document.getElementById('statSaved').textContent = stats.saved;
+            
+            // Stats for UI
+            document.getElementById('adm-likes').textContent = stats.likes;
+            document.getElementById('adm-comments').textContent = stats.comments;
+            
+            // Log DB status for debugging persistence
+            console.log('Backend Status:', stats.db_type === 'postgres' ? '✅ Persistent PG' : '⚠️ Temporary DB');
+          } catch (e) {
+            console.error('Stats loading error:', e);
+          }
+        }
+
+        function openEditProfile() {
+          showSetup();
+          document.getElementById('setupScreen').style.display = 'flex';
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           NOTIFICATIONS
+        ═══════════════════════════════════════════════════════ */
+        function toggleNotif() {
+          const panel = document.getElementById('notifPanel');
+          panel.classList.toggle('show');
+          document.getElementById('notifDot').style.display = 'none';
+          if (panel.classList.contains('show')) setOverlayActive(true);
+          else setOverlayActive(false);
+        }
+        function closeNotif() {
+          document.getElementById('notifPanel').classList.remove('show');
+          setOverlayActive(false);
+        }
+        function addNotif(msg) {
+          const item = document.createElement('div');
+          item.className = 'notif-item';
+          item.textContent = msg;
+          document.getElementById('notifItems').prepend(item);
+          document.getElementById('notifDot').style.display = 'block';
+        }
+
+        /* Navigation Hiding Logic */
+        let lastScrollY = 0;
+        let isNavHidden = false;
+        let isOverlayActive = false;
+
+        function hideNav() {
+          if (isNavHidden) return;
+          document.getElementById('bottomNav').classList.add('nav-hidden');
+          isNavHidden = true;
+        }
+
+        function showNav() {
+          if (!isNavHidden || isOverlayActive) return;
+          document.getElementById('bottomNav').classList.remove('nav-hidden');
+          isNavHidden = false;
+        }
+
+        function handleScroll(e) {
+          if (isOverlayActive) return;
+          const currentScrollY = e.target.scrollTop;
+          // Hide on scroll down, show on scroll up
+          if (currentScrollY > lastScrollY && currentScrollY > 80) {
+            hideNav();
+          } else if (currentScrollY < lastScrollY) {
+            showNav();
+          }
+          lastScrollY = currentScrollY;
+        }
+
+        // Attach scroll listeners to all screens
+        document.querySelectorAll('.screen, .reels-container').forEach(el => {
+          let scrollTimer;
+          el.addEventListener('scroll', (e) => {
+            if (scrollTimer) return;
+            scrollTimer = setTimeout(() => {
+              handleScroll(e);
+              scrollTimer = null;
+            }, 100);
+          }, { passive: true });
         });
-      } catch { }
-    }
 
-    function filterTag(el, tag) {
-      document.querySelectorAll('.tag-chip').forEach(t => t.classList.remove('active'));
-      el.classList.add('active');
-      if (tag !== 'all') {
-        document.getElementById('searchInp').value = tag;
-        performSearch(tag);
-      } else {
-        document.getElementById('searchInp').value = '';
-        document.getElementById('searchResults').innerHTML = '<div class="empty-state"><span class="material-icons-round">search</span><p>Search for posts, reels, and creators</p></div>';
-      }
-    }
+        function setOverlayActive(active) {
+          isOverlayActive = active;
+          if (active) hideNav();
+          else showNav();
+        }
 
-    /* ═══════════════════════════════════════════════════════
-       PROFILE
-    ═══════════════════════════════════════════════════════ */
-    function updateProfileUI() {
-      if (!currentUser) return;
-      const u = currentUser;
-      const av = u.avatar ? (u.avatar.startsWith('http') ? u.avatar : API + u.avatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name || u.username || 'U')}&background=FF6B6B&color=fff&size=88`;
-      document.getElementById('profileAvatar').src = av;
-      document.getElementById('profileName').textContent = u.full_name || u.username || '—';
-      document.getElementById('profileUsername').textContent = '@' + (u.username || '—');
-      document.getElementById('profileBio').textContent = u.bio || '';
-      const linkEl = document.getElementById('profileLink');
-      if (u.website) { linkEl.textContent = u.website; linkEl.href = u.website; }
-      else linkEl.textContent = '';
+        /* ═══════════════════════════════════════════════════════
+           SHEET HELPERS
+        ═══════════════════════════════════════════════════════ */
+        function showSheet(sheetId, overlayId) {
+          setOverlayActive(true);
+          document.getElementById(overlayId).classList.add('show');
+          setTimeout(() => document.getElementById(sheetId).classList.add('show'), 10);
+        }
+        function hideSheet(sheetId, overlayId) {
+          document.getElementById(sheetId).classList.remove('show');
+          document.getElementById(overlayId).classList.remove('show');
+          setTimeout(() => setOverlayActive(false), 300);
+        }
 
-      // Badges
-      const badges = document.getElementById('profileBadges');
-      badges.innerHTML = [
-        '🔥 Streak 7', '⚡ Fast Learner', '🏆 Top 10%'
-      ].map(b => `<span class="badge">${b}</span>`).join('');
-    }
+        /* ═══════════════════════════════════════════════════════
+           TOAST
+        ═══════════════════════════════════════════════════════ */
+        let toastTimer;
+        function toast(msg) {
+          const el = document.getElementById('toastEl');
+          el.textContent = msg; el.classList.add('show');
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+        }
 
-    async function loadProfileStats() {
-      if (!authToken) return;
-      try {
-        const stats = await api('/profile/stats');
-        document.getElementById('statPosts').textContent = stats.posts;
-        document.getElementById('statReels').textContent = stats.reels;
-        document.getElementById('statLikes').textContent = stats.likes;
-        document.getElementById('statSaved').textContent = stats.saved;
-      } catch { }
-    }
+        /* ═══════════════════════════════════════════════════════
+           UTILITIES
+        ═══════════════════════════════════════════════════════ */
+        function getAvatarUrl(avatar, username) {
+          if (avatar) return avatar.startsWith('http') ? avatar : API + avatar;
+          return `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'U')}&background=333&color=fff&size=38`;
+        }
 
-    function openEditProfile() {
-      showSetup();
-      document.getElementById('setupScreen').style.display = 'flex';
-    }
+        /* Demo posts when backend is offline */
+        function renderDemoPosts() {
+          const demos = [
+            { id: 1, type: 'post', title: 'Python Variables 🐍', description: 'Variables store data. In Python, no type declaration needed!', media_url: 'https://picsum.photos/seed/py1/600/400', author: 'codeguru', full_name: 'Code Guru', time: '2h ago', avatar: '', likes_count: 24, comments_count: 5, liked: false, saved: false, hashtags: ['#Python'] },
+            { id: 2, type: 'post', title: 'CSS Flexbox 🎨', description: 'Flexbox makes responsive layouts a breeze. Use display:flex!', media_url: 'https://picsum.photos/seed/css1/600/400', author: 'webdev', full_name: 'Web Dev', time: '4h ago', avatar: '', likes_count: 18, comments_count: 3, liked: false, saved: false, hashtags: ['#CSS'] },
+            { id: 3, type: 'post', title: 'JavaScript Promises ⚡', description: 'Handle async operations elegantly with Promise chains.', media_url: 'https://picsum.photos/seed/js1/600/400', author: 'jsmaster', full_name: 'JS Master', time: '6h ago', avatar: '', likes_count: 31, comments_count: 7, liked: false, saved: false, hashtags: ['#JavaScript'] },
+          ];
+          const container = document.getElementById('feedContainer');
+          demos.forEach(p => container.appendChild(buildPostCard(p)));
+        }
 
-    /* ═══════════════════════════════════════════════════════
-       NOTIFICATIONS
-    ═══════════════════════════════════════════════════════ */
-    function toggleNotif() {
-      const panel = document.getElementById('notifPanel');
-      panel.classList.toggle('show');
-      document.getElementById('notifDot').style.display = 'none';
-      if (panel.classList.contains('show')) setOverlayActive(true);
-      else setOverlayActive(false);
-    }
-    function closeNotif() {
-      document.getElementById('notifPanel').classList.remove('show');
-      setOverlayActive(false);
-    }
-    function addNotif(msg) {
-      const item = document.createElement('div');
-      item.className = 'notif-item';
-      item.textContent = msg;
-      document.getElementById('notifItems').prepend(item);
-      document.getElementById('notifDot').style.display = 'block';
-    }
-
-    /* Navigation Hiding Logic */
-    let lastScrollY = 0;
-    let isNavHidden = false;
-    let isOverlayActive = false;
-
-    function hideNav() {
-      if (isNavHidden) return;
-      document.getElementById('bottomNav').classList.add('nav-hidden');
-      isNavHidden = true;
-    }
-
-    function showNav() {
-      if (!isNavHidden || isOverlayActive) return;
-      document.getElementById('bottomNav').classList.remove('nav-hidden');
-      isNavHidden = false;
-    }
-
-    function handleScroll(e) {
-      if (isOverlayActive) return;
-      const currentScrollY = e.target.scrollTop;
-      // Hide on scroll down, show on scroll up
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        hideNav();
-      } else if (currentScrollY < lastScrollY) {
-        showNav();
-      }
-      lastScrollY = currentScrollY;
-    }
-
-    // Attach scroll listeners to all screens
-    document.querySelectorAll('.screen, .reels-container').forEach(el => {
-      let scrollTimer;
-      el.addEventListener('scroll', (e) => {
-        if (scrollTimer) return;
-        scrollTimer = setTimeout(() => {
-          handleScroll(e);
-          scrollTimer = null;
-        }, 100);
-      }, { passive: true });
-    });
-
-    function setOverlayActive(active) {
-      isOverlayActive = active;
-      if (active) hideNav();
-      else showNav();
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       SHEET HELPERS
-    ═══════════════════════════════════════════════════════ */
-    function showSheet(sheetId, overlayId) {
-      setOverlayActive(true);
-      document.getElementById(overlayId).classList.add('show');
-      setTimeout(() => document.getElementById(sheetId).classList.add('show'), 10);
-    }
-    function hideSheet(sheetId, overlayId) {
-      document.getElementById(sheetId).classList.remove('show');
-      document.getElementById(overlayId).classList.remove('show');
-      setTimeout(() => setOverlayActive(false), 300);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       TOAST
-    ═══════════════════════════════════════════════════════ */
-    let toastTimer;
-    function toast(msg) {
-      const el = document.getElementById('toastEl');
-      el.textContent = msg; el.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       UTILITIES
-    ═══════════════════════════════════════════════════════ */
-    function getAvatarUrl(avatar, username) {
-      if (avatar) return avatar.startsWith('http') ? avatar : API + avatar;
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'U')}&background=333&color=fff&size=38`;
-    }
-
-    /* Demo posts when backend is offline */
-    function renderDemoPosts() {
-      const demos = [
-        { id: 1, type: 'post', title: 'Python Variables 🐍', description: 'Variables store data. In Python, no type declaration needed!', media_url: 'https://picsum.photos/seed/py1/600/400', author: 'codeguru', full_name: 'Code Guru', time: '2h ago', avatar: '', likes_count: 24, comments_count: 5, liked: false, saved: false, hashtags: ['#Python'] },
-        { id: 2, type: 'post', title: 'CSS Flexbox 🎨', description: 'Flexbox makes responsive layouts a breeze. Use display:flex!', media_url: 'https://picsum.photos/seed/css1/600/400', author: 'webdev', full_name: 'Web Dev', time: '4h ago', avatar: '', likes_count: 18, comments_count: 3, liked: false, saved: false, hashtags: ['#CSS'] },
-        { id: 3, type: 'post', title: 'JavaScript Promises ⚡', description: 'Handle async operations elegantly with Promise chains.', media_url: 'https://picsum.photos/seed/js1/600/400', author: 'jsmaster', full_name: 'JS Master', time: '6h ago', avatar: '', likes_count: 31, comments_count: 7, liked: false, saved: false, hashtags: ['#JavaScript'] },
-      ];
-      const container = document.getElementById('feedContainer');
-      demos.forEach(p => container.appendChild(buildPostCard(p)));
-    }
-
-    // Close notif on outside click
-    document.addEventListener('click', e => {
-      const panel = document.getElementById('notifPanel');
-      const btn = document.getElementById('topbar')?.querySelector('.icon-btn');
-      if (panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
-        closeNotif();
-      }
-    });
-
-    /* ═══════════════════════════════════════════════════════
-       AI DOUBT SOLVER
-    ═══════════════════════════════════════════════════════ */
-    let aiHistory = [];
-
-    function openAI(topic) {
-      setOverlayActive(true);
-      aiHistory = [];
-      document.getElementById('aiTopicLabel').textContent = topic;
-      document.getElementById('aiMessages').innerHTML = '';
-      document.getElementById('aiChatInput').value = '';
-      document.getElementById('aiModalOverlay').classList.add('show');
-
-      // Auto-send the first question about the topic
-      const initialMsg = `Explain about: ${topic}`;
-      addAIMessage('user', initialMsg);
-      aiHistory.push({ role: 'user', text: initialMsg });
-      callAI(initialMsg);
-    }
-
-    async function sendAIMessage() {
-      const inp = document.getElementById('aiChatInput');
-      const msg = inp.value.trim();
-      if (!msg) return;
-      inp.value = '';
-      addAIMessage('user', msg);
-      aiHistory.push({ role: 'user', text: msg });
-      await callAI(msg);
-    }
-
-    async function callAI(message) {
-      // Show typing indicator
-      const typingEl = document.createElement('div');
-      typingEl.className = 'ai-msg ai-msg-bot';
-      typingEl.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
-      document.getElementById('aiMessages').appendChild(typingEl);
-      scrollAIChat();
-
-      try {
-        const data = await api('/ai/chat', {
-          method: 'POST',
-          body: JSON.stringify({ message, history: aiHistory.slice(0, -1) })
+        // Close notif on outside click
+        document.addEventListener('click', e => {
+          const panel = document.getElementById('notifPanel');
+          const btn = document.getElementById('topbar')?.querySelector('.icon-btn');
+          if (panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
+            closeNotif();
+          }
         });
-        typingEl.remove();
-        const reply = data.reply || 'Sorry, I could not generate a response.';
-        addAIMessage('bot', reply);
-        aiHistory.push({ role: 'model', text: reply });
-      } catch (e) {
-        typingEl.remove();
-        addAIMessage('bot', `⚠️ ${e.message || 'AI service unavailable. Please try again.'}`);
-      }
-    }
 
-    function addAIMessage(role, text) {
-      const el = document.createElement('div');
-      el.className = `ai-msg ai-msg-${role === 'user' ? 'user' : 'bot'}`;
-      if (role === 'user') {
-        el.textContent = text;
-      } else {
-        el.innerHTML = renderAIMarkdown(text);
-      }
-      document.getElementById('aiMessages').appendChild(el);
-      scrollAIChat();
-    }
+        /* ═══════════════════════════════════════════════════════
+           AI DOUBT SOLVER
+        ═══════════════════════════════════════════════════════ */
+        let aiHistory = [];
 
-    function scrollAIChat() {
-      const area = document.getElementById('aiChatArea');
-      setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
-    }
+        function openAI(topic) {
+          setOverlayActive(true);
+          aiHistory = [];
+          document.getElementById('aiTopicLabel').textContent = topic;
+          document.getElementById('aiMessages').innerHTML = '';
+          document.getElementById('aiChatInput').value = '';
+          document.getElementById('aiModalOverlay').classList.add('show');
 
-    function renderAIMarkdown(text) {
-      return text
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^[\s]*[-\*]\s+(.+)/gm, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-        .replace(/\n{2,}/g, '<br><br>')
-        .replace(/\n/g, '<br>');
-    }
+          // Auto-send the first question about the topic
+          const initialMsg = `Explain about: ${topic}`;
+          addAIMessage('user', initialMsg);
+          aiHistory.push({ role: 'user', text: initialMsg });
+          callAI(initialMsg);
+        }
 
-    function closeAI() {
-      document.getElementById('aiModalOverlay').classList.remove('show');
-      setOverlayActive(false);
-    }
+        async function sendAIMessage() {
+          const inp = document.getElementById('aiChatInput');
+          const msg = inp.value.trim();
+          if (!msg) return;
+          inp.value = '';
+          addAIMessage('user', msg);
+          aiHistory.push({ role: 'user', text: msg });
+          await callAI(msg);
+        }
 
-    /* ═══════════════════════════════════════════════════════
-       ADMIN DASHBOARD
-    ═══════════════════════════════════════════════════════ */
-    async function loadAdminScreen() {
-      if (!currentUser || !currentUser.is_admin) return;
-      try {
-        const [stats, pending] = await Promise.all([
-          api('/admin/stats'),
-          api('/admin/pending')
-        ]);
-        // Update stat cards
-        document.getElementById('adm-posts').textContent = stats.posts;
-        document.getElementById('adm-reels').textContent = stats.reels;
-        document.getElementById('adm-pending').textContent = stats.pending;
-        document.getElementById('adm-approved').textContent = stats.approved;
-        document.getElementById('adm-rejected').textContent = stats.rejected;
-        document.getElementById('adm-users').textContent = stats.users;
-        document.getElementById('adm-likes').textContent = stats.likes;
-        document.getElementById('adm-comments').textContent = stats.comments;
+        async function callAI(message) {
+          // Show typing indicator
+          const typingEl = document.createElement('div');
+          typingEl.className = 'ai-msg ai-msg-bot';
+          typingEl.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+          document.getElementById('aiMessages').appendChild(typingEl);
+          scrollAIChat();
 
-        // Render pending posts
-        const container = document.getElementById('adminPendingList');
-        if (pending.posts.length === 0) {
-          container.innerHTML = `<div class="empty-state" style="padding:40px 0">
+          try {
+            const data = await api('/ai/chat', {
+              method: 'POST',
+              body: JSON.stringify({ message, history: aiHistory.slice(0, -1) })
+            });
+            typingEl.remove();
+            const reply = data.reply || 'Sorry, I could not generate a response.';
+            addAIMessage('bot', reply);
+            aiHistory.push({ role: 'model', text: reply });
+          } catch (e) {
+            typingEl.remove();
+            addAIMessage('bot', `⚠️ ${e.message || 'AI service unavailable. Please try again.'}`);
+          }
+        }
+
+        function addAIMessage(role, text) {
+          const el = document.createElement('div');
+          el.className = `ai-msg ai-msg-${role === 'user' ? 'user' : 'bot'}`;
+          if (role === 'user') {
+            el.textContent = text;
+          } else {
+            el.innerHTML = renderAIMarkdown(text);
+          }
+          document.getElementById('aiMessages').appendChild(el);
+          scrollAIChat();
+        }
+
+        function scrollAIChat() {
+          const area = document.getElementById('aiChatArea');
+          setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+        }
+
+        function renderAIMarkdown(text) {
+          return text
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^[\s]*[-\*]\s+(.+)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+            .replace(/\n{2,}/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+        }
+
+        function closeAI() {
+          document.getElementById('aiModalOverlay').classList.remove('show');
+          setOverlayActive(false);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           ADMIN DASHBOARD
+        ═══════════════════════════════════════════════════════ */
+        async function loadAdminScreen() {
+          if (!currentUser || !currentUser.is_admin) return;
+          try {
+            const [stats, pending] = await Promise.all([
+              api('/admin/stats'),
+              api('/admin/pending')
+            ]);
+            // Update stat cards
+            document.getElementById('adm-posts').textContent = stats.posts;
+            document.getElementById('adm-reels').textContent = stats.reels;
+            document.getElementById('adm-pending').textContent = stats.pending;
+            document.getElementById('adm-approved').textContent = stats.approved;
+            document.getElementById('adm-rejected').textContent = stats.rejected;
+            document.getElementById('adm-users').textContent = stats.users;
+            document.getElementById('adm-likes').textContent = stats.likes;
+            document.getElementById('adm-comments').textContent = stats.comments;
+
+            // Render pending posts
+            const container = document.getElementById('adminPendingList');
+            if (pending.posts.length === 0) {
+              container.innerHTML = `<div class="empty-state" style="padding:40px 0">
             <span class="material-icons-round" style="color:var(--accent2)">check_circle</span>
             <p>All caught up! No pending posts.</p>
           </div>`;
-        } else {
-          container.innerHTML = '';
-          pending.posts.forEach(p => container.appendChild(buildAdminCard(p)));
-        }
-        
-        // Load Users
-        loadAdminUsers();
-      } catch (e) {
-        console.warn('Admin load error:', e);
-      }
-    }
+            } else {
+              container.innerHTML = '';
+              pending.posts.forEach(p => container.appendChild(buildAdminCard(p)));
+            }
 
-    async function loadAdminUsers() {
-      const container = document.getElementById('adminUsersList');
-      try {
-        const data = await api('/admin/users');
-        if (!data.users || data.users.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No users found</p></div>';
-          return;
+            // Load Users
+            loadAdminUsers();
+          } catch (e) {
+            console.warn('Admin load error:', e);
+          }
         }
-        container.innerHTML = `
+
+        async function loadAdminUsers() {
+          const container = document.getElementById('adminUsersList');
+          try {
+            const data = await api('/admin/users');
+            if (!data.users || data.users.length === 0) {
+              container.innerHTML = '<div class="empty-state"><p>No users found</p></div>';
+              return;
+            }
+            container.innerHTML = `
           <table class="admin-table">
             <thead>
               <tr>
@@ -5586,30 +5680,30 @@
             </tbody>
           </table>
         `;
-      } catch (e) {
-        container.innerHTML = '<div class="empty-state"><p>Failed to load users</p></div>';
-      }
-    }
+          } catch (e) {
+            container.innerHTML = '<div class="empty-state"><p>Failed to load users</p></div>';
+          }
+        }
 
-    async function adminDeleteUser(uid) {
-      if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) return;
-      try {
-        await api('/admin/users/' + uid, { method: 'DELETE' });
-        const row = document.getElementById('adm-user-' + uid);
-        if (row) row.remove();
-        toast('🗑️ User deleted');
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-      }
-    }
+        async function adminDeleteUser(uid) {
+          if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) return;
+          try {
+            await api('/admin/users/' + uid, { method: 'DELETE' });
+            const row = document.getElementById('adm-user-' + uid);
+            if (row) row.remove();
+            toast('🗑️ User deleted');
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+          }
+        }
 
-    function buildAdminCard(p) {
-      const el = document.createElement('div');
-      el.className = 'admin-post-card';
-      el.id = `apc-${p.id}`;
-      const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
-      const av = getAvatarUrl(p.avatar, p.author);
-      el.innerHTML = `
+        function buildAdminCard(p) {
+          const el = document.createElement('div');
+          el.className = 'admin-post-card';
+          el.id = `apc-${p.id}`;
+          const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+          const av = getAvatarUrl(p.avatar, p.author);
+          el.innerHTML = `
     <div class="apc-head">
       <img class="apc-av" src="${av}" onerror="this.src='https://ui-avatars.com/api/?name=${p.author}&background=333&color=fff&size=36'" alt="">
       <div class="apc-meta">
@@ -5619,8 +5713,8 @@
     </div>
     <div class="apc-media">
       ${isVideo
-          ? `<video src="${p.media_url}" muted playsinline style="width:100%;max-height:200px;object-fit:cover;border-radius:12px"></video>`
-          : `<img src="${p.media_url}" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px" onerror="this.style.display='none'">`}
+              ? `<video src="${p.media_url}" muted playsinline style="width:100%;max-height:200px;object-fit:cover;border-radius:12px"></video>`
+              : `<img src="${p.media_url}" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px" onerror="this.style.display='none'">`}
     </div>
     <div class="apc-caption"><strong>${p.title || ''}</strong> ${p.description || ''}</div>
     ${p.hashtags && p.hashtags.length ? `<div class="apc-tags">${p.hashtags.join(' ')}</div>` : ''}
@@ -5635,450 +5729,450 @@
         <span class="material-icons-round">cancel</span> Reject
       </button>
     </div>`;
-      return el;
-    }
+          return el;
+        }
 
-    async function adminApprove(postId) {
-      const card = document.getElementById(`apc-${postId}`);
-      if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
-      try {
-        await api(`/admin/posts/${postId}/approve`, { method: 'POST' });
-        toast('✅ Post approved & published!');
-        addNotif(`✅ You approved post #${postId}`);
-        if (card) card.remove();
-        // Update pending count
-        const el = document.getElementById('adm-pending');
-        if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
-        const appr = document.getElementById('adm-approved');
-        if (appr) appr.textContent = parseInt(appr.textContent || 0) + 1;
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-        if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
-      }
-    }
-
-    async function adminReject(postId) {
-      const card = document.getElementById(`apc-${postId}`);
-      if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
-      try {
-        await api(`/admin/posts/${postId}/reject`, { method: 'POST', body: JSON.stringify({ reason: 'Does not meet content guidelines' }) });
-        toast('❌ Post rejected');
-        addNotif(`❌ You rejected post #${postId}`);
-        if (card) card.remove();
-        const el = document.getElementById('adm-pending');
-        if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
-        const rej = document.getElementById('adm-rejected');
-        if (rej) rej.textContent = parseInt(rej.textContent || 0) + 1;
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-        if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
-      }
-    }
-
-    let editingPost = null;
-    function adminOpenEdit(id, title, desc, domain) {
-      editingPost = { id, title, desc, domain };
-      document.getElementById('edit-pid').value = id;
-      document.getElementById('edit-title').value = title || '';
-      document.getElementById('edit-desc').value = desc || '';
-      document.getElementById('edit-domain').value = domain || 'Other';
-      document.getElementById('adminEditModal').classList.add('show');
-    }
-
-    function adminCloseEdit() {
-      document.getElementById('adminEditModal').classList.remove('show');
-      editingPost = null;
-    }
-
-    async function adminUpdatePost() {
-      const id = document.getElementById('edit-pid').value;
-      const title = document.getElementById('edit-title').value.trim();
-      const desc = document.getElementById('edit-desc').value.trim();
-      const domain = document.getElementById('edit-domain').value;
-
-      if (!title || !desc || !domain) {
-        toast('⚠️ All fields are mandatory');
-        return;
-      }
-
-      const btn = document.querySelector('.ae-save');
-      btn.textContent = 'Updating...'; btn.disabled = true;
-
-      try {
-        await api(`/admin/posts/${id}/edit`, {
-          method: 'PUT',
-          body: JSON.stringify({ title, description: desc, domain })
-        });
-        toast('⚡ Post updated!');
-        // Update local UI card
-        const card = document.getElementById(`apc-${id}`);
-        if (card) {
-          const caption = card.querySelector('.apc-caption');
-          if (caption) caption.innerHTML = `<strong>${title}</strong> ${desc}`;
-          // Update the edit button call as well
-          const editBtn = card.querySelector('.apc-edit');
-          if (editBtn) {
-            editBtn.setAttribute('onclick', `adminOpenEdit(${id}, '${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}', '${domain}')`);
+        async function adminApprove(postId) {
+          const card = document.getElementById(`apc-${postId}`);
+          if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+          try {
+            await api(`/admin/posts/${postId}/approve`, { method: 'POST' });
+            toast('✅ Post approved & published!');
+            addNotif(`✅ You approved post #${postId}`);
+            if (card) card.remove();
+            // Update pending count
+            const el = document.getElementById('adm-pending');
+            if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
+            const appr = document.getElementById('adm-approved');
+            if (appr) appr.textContent = parseInt(appr.textContent || 0) + 1;
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+            if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
           }
         }
-        adminCloseEdit();
-      } catch (e) {
-        toast('⚠️ ' + e.message);
-      }
-      btn.textContent = 'Update ⚡'; btn.disabled = false;
-    }
 
-    /* ═══════════════════════════════════════════════════════
-       CUSTOM HASHTAGS
-    ═══════════════════════════════════════════════════════ */
-    function addCustomHashtag() {
-      const inp = document.getElementById('customHtagInput');
-      let val = inp.value.trim().replace(/\s+/g, '');
-      if (!val) return;
-      if (!val.startsWith('#')) val = '#' + val;
-      // Check if already exists
-      const existing = Array.from(document.querySelectorAll('#hashtagChips .htag'))
-        .find(el => el.textContent === val);
-      if (existing) { existing.classList.add('sel'); if (!selectedHtags.includes(val)) selectedHtags.push(val); inp.value = ''; return; }
-      // Create new chip
-      const chip = document.createElement('span');
-      chip.className = 'htag sel';
-      chip.textContent = val;
-      chip.onclick = () => toggleHtag(chip);
-      document.getElementById('hashtagChips').appendChild(chip);
-      if (!selectedHtags.includes(val)) selectedHtags.push(val);
-      inp.value = '';
-      toast(`${val} added!`);
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       LIGHT / DARK MODE TOGGLE
-    ═══════════════════════════════════════════════════════ */
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute('data-theme') || 'dark';
-      const next = current === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('s2l_theme', next);
-
-      // Update toggle checkbox if it exists
-      const toggle = document.getElementById('settingsThemeToggle');
-      if (toggle) toggle.checked = (next === 'light');
-
-      updateThemeIcon(next);
-    }
-
-    function updateThemeIcon(theme) {
-      const icon = document.getElementById('themeIcon');
-      if (icon) {
-        icon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
-      }
-    }
-
-    // Apply saved theme on load
-    (function initTheme() {
-      const saved = localStorage.getItem('s2l_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-      // Wait for DOM to sync checkbox and icon
-      document.addEventListener('DOMContentLoaded', () => {
-        updateThemeIcon(saved);
-        const toggle = document.getElementById('settingsThemeToggle');
-        if (toggle) toggle.checked = (saved === 'light');
-      });
-    })();
-
-    /* ═══════════════════════════════════════════════════════
-       RADIAL MENU LOGIC (PHYSICS, INTERACTIONS)
-    ═══════════════════════════════════════════════════════ */
-    const radialOverlay = document.getElementById('radialMenuOverlay');
-    const radialWheel = document.getElementById('radialWheel');
-
-    let isRadialOpen = false;
-    let radialRot = 0; // Current rotation
-    let rotVelocity = 0;
-    let angularFriction = 0.92; // Inertia decay
-    let isSpinning = false;
-
-    let lastAngle = 0;
-    let isDraggingRadial = false;
-    let animFrame = null;
-    let lastTime = 0;
-
-    // Setup variables (will be populated on init)
-    let radialItems = [];
-    let TOTAL_ITEMS = 0;
-    let STEP_ANGLE = 0;
-
-    function initRadialItems() {
-      // Only parse visible items to prevent gaps in the circle
-      radialItems = Array.from(document.querySelectorAll('.radial-item')).filter(el => el.style.display !== 'none');
-      TOTAL_ITEMS = radialItems.length;
-      if (!TOTAL_ITEMS) return;
-      STEP_ANGLE = 360 / TOTAL_ITEMS;
-
-      radialItems.forEach((item, i) => {
-        const agl = i * STEP_ANGLE;
-        item.style.setProperty('--angle', `${agl}deg`);
-        item.style.setProperty('--radius', `120px`);
-      });
-      updateRadialTransform();
-    }
-
-    document.addEventListener('DOMContentLoaded', initRadialItems);
-
-    function toggleRadialMenu() {
-      if (!isRadialOpen) {
-        radialOverlay.classList.add('open');
-        // snap to closest on open
-        radialRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
-        updateRadialTransform();
-        isRadialOpen = true;
-      } else {
-        closeRadialMenuInternal();
-      }
-    }
-
-    function closeRadialMenuInternal() {
-      isRadialOpen = false;
-      radialOverlay.classList.remove('open');
-      cancelAnimationFrame(animFrame);
-    }
-
-    function closeRadialMenu(e) {
-      if (e && (e.target === radialOverlay || e.target.id === 'radialMenuWrapper')) closeRadialMenuInternal();
-    }
-
-    // Touch vs mouse detection for radial menu
-    let isTouchDevice = false;
-    window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
-    let radialDblClickMap = {};
-
-    function handleRadialClick(action) {
-      // On laptop/desktop: require double click to activate
-      if (!isTouchDevice) {
-        const now = Date.now();
-        const lastClick = radialDblClickMap[action] || 0;
-        if (now - lastClick > 400) {
-          radialDblClickMap[action] = now;
-          return; // Wait for second click
+        async function adminReject(postId) {
+          const card = document.getElementById(`apc-${postId}`);
+          if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+          try {
+            await api(`/admin/posts/${postId}/reject`, { method: 'POST', body: JSON.stringify({ reason: 'Does not meet content guidelines' }) });
+            toast('❌ Post rejected');
+            addNotif(`❌ You rejected post #${postId}`);
+            if (card) card.remove();
+            const el = document.getElementById('adm-pending');
+            if (el) el.textContent = Math.max(0, parseInt(el.textContent || 0) - 1);
+            const rej = document.getElementById('adm-rejected');
+            if (rej) rej.textContent = parseInt(rej.textContent || 0) + 1;
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+            if (card) { card.style.opacity = '1'; card.style.pointerEvents = 'auto'; }
+          }
         }
-        radialDblClickMap[action] = 0;
-      }
-      executeRadialAction(action);
-    }
 
-    function executeRadialAction(action) {
-      closeRadialMenuInternal();
-      setTimeout(() => {
-        if (action === 'profile') navigate('profile', null);
-        if (action === 'add') navigate('add', null);
-        if (action === 'search') navigate('search', null);
-        if (action === 'ai') openAI('General Learning');
-        if (action === 'notif') toggleNotif();
-        if (action === 'explore') navigate('reels', null);
-        if (action === 'settings') { navigate('settings', null); }
-        if (action === 'admin') navigate('admin', null);
-      }, 150);
-    }
-
-    // --- PHYSICS / DRAG ---
-    function getAngleCenter(e) {
-      const rect = radialWheel.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      // In atan2, top is usually -90 if 0 is right. We offset by 90 to make top=0.
-      let ang = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
-      return ang + 90;
-    }
-
-    function onDragStart(e) {
-      if (!isRadialOpen) return;
-      isDraggingRadial = true;
-      cancelAnimationFrame(animFrame);
-      isSpinning = false;
-      lastAngle = getAngleCenter(e);
-      lastTime = performance.now();
-    }
-
-    function onDragMove(e) {
-      if (!isDraggingRadial) return;
-      e.preventDefault();
-      const currentAngle = getAngleCenter(e);
-      const currentTime = performance.now();
-
-      let diff = currentAngle - lastAngle;
-      // Handle boundary wrap
-      if (diff > 180) diff -= 360;
-      if (diff < -180) diff += 360;
-
-      radialRot += diff;
-      rotVelocity = diff; // track last diff as velocity
-
-      updateRadialTransform();
-      lastAngle = currentAngle;
-      lastTime = currentTime;
-    }
-
-    function onDragEnd() {
-      if (!isDraggingRadial) return;
-      isDraggingRadial = false;
-      isSpinning = true;
-      spinLoop();
-    }
-
-    radialWheel.addEventListener('mousedown', onDragStart);
-    window.addEventListener('mousemove', onDragMove, { passive: false });
-    window.addEventListener('mouseup', onDragEnd);
-
-    radialWheel.addEventListener('touchstart', onDragStart, { passive: false });
-    window.addEventListener('touchmove', onDragMove, { passive: false });
-    window.addEventListener('touchend', onDragEnd);
-
-    function spinLoop() {
-      if (!isSpinning) return;
-
-      // Decay friction
-      radialRot += rotVelocity;
-      rotVelocity *= angularFriction;
-
-      // Snapping recoil behavior
-      if (Math.abs(rotVelocity) < 1.0) {
-        const targetRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
-        const diff = targetRot - radialRot;
-
-        if (Math.abs(diff) < 0.2) {
-          radialRot = targetRot;
-          isSpinning = false;
-        } else {
-          // spring towards target
-          rotVelocity = diff * 0.15;
-          radialRot += rotVelocity;
+        let editingPost = null;
+        function adminOpenEdit(id, title, desc, domain) {
+          editingPost = { id, title, desc, domain };
+          document.getElementById('edit-pid').value = id;
+          document.getElementById('edit-title').value = title || '';
+          document.getElementById('edit-desc').value = desc || '';
+          document.getElementById('edit-domain').value = domain || 'Other';
+          document.getElementById('adminEditModal').classList.add('show');
         }
-      }
 
-      updateRadialTransform();
-      if (isSpinning) animFrame = requestAnimationFrame(spinLoop);
-    }
-
-    function updateRadialTransform() {
-      // CSS custom property dynamically updates orientation inside css rule
-      radialWheel.style.setProperty('--wheel-rot', `${radialRot}deg`);
-
-      // Handle clipping (only 3 visible items!)
-      // Limit visibility to those near the top (absolute angle around 0)
-      radialItems.forEach((item, i) => {
-        let absAngle = (i * STEP_ANGLE + radialRot) % 360;
-        if (absAngle > 180) absAngle -= 360;
-        if (absAngle < -180) absAngle += 360;
-
-        // Show items within +/- roughly 70 degrees from top.
-        // Because Step is 51 deg. (0, +51, -51 will fit)
-        if (Math.abs(absAngle) <= 75) {
-          item.style.opacity = '1';
-          item.style.pointerEvents = 'auto';
-        } else {
-          item.style.opacity = '0';
-          item.style.pointerEvents = 'none';
+        function adminCloseEdit() {
+          document.getElementById('adminEditModal').classList.remove('show');
+          editingPost = null;
         }
-      });
-    }
 
-    // Advanced Event Listeners
-    document.addEventListener('keydown', (e) => {
-      // ESC bindings
-      if (e.key === 'Escape') {
-        if (isRadialOpen) closeRadialMenuInternal();
-        if (document.getElementById('notifPanel').classList.contains('show')) closeNotif();
-        if (document.getElementById('aiModalOverlay').style.display === 'flex') closeAI();
-      }
+        async function adminUpdatePost() {
+          const id = document.getElementById('edit-pid').value;
+          const title = document.getElementById('edit-title').value.trim();
+          const desc = document.getElementById('edit-desc').value.trim();
+          const domain = document.getElementById('edit-domain').value;
 
-      // Arrow Up/Down & Enter bindings
-      const feedContainer = document.getElementById('feedContainer');
-      const reelsScreen = document.getElementById('reelsScreen');
-      const homeScreen = document.getElementById('homeScreen');
+          if (!title || !desc || !domain) {
+            toast('⚠️ All fields are mandatory');
+            return;
+          }
 
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        const isReels = reelsScreen && reelsScreen.classList.contains('active');
-        const isHome = homeScreen && homeScreen.classList.contains('active');
+          const btn = document.querySelector('.ae-save');
+          btn.textContent = 'Updating...'; btn.disabled = true;
 
-        if (isReels) {
-          const rc = document.getElementById('reelsContainer');
-          const h = window.innerHeight;
-          const currentIdx = Math.round(rc.scrollTop / h);
-          const nextIdx = e.key === 'ArrowDown' ? currentIdx + 1 : currentIdx - 1;
-          rc.scrollTo({ top: nextIdx * h, behavior: 'smooth' });
-        } else if (isHome) {
-          const posts = Array.from(document.querySelectorAll('.post-card'));
-          if (posts.length > 0) {
-            // Find current post in viewport
-            let currentPostIdx = posts.findIndex(p => {
-              const rect = p.getBoundingClientRect();
-              return rect.top >= -100 && rect.top <= 100;
+          try {
+            await api(`/admin/posts/${id}/edit`, {
+              method: 'PUT',
+              body: JSON.stringify({ title, description: desc, domain })
             });
-            if (currentPostIdx === -1) {
-              // Fallback: finding the one closest to top
-              currentPostIdx = posts.reduce((prev, curr, idx) => {
-                const prevRect = posts[prev].getBoundingClientRect();
-                const currRect = curr.getBoundingClientRect();
-                return Math.abs(currRect.top) < Math.abs(prevRect.top) ? idx : prev;
-              }, 0);
+            toast('⚡ Post updated!');
+            // Update local UI card
+            const card = document.getElementById(`apc-${id}`);
+            if (card) {
+              const caption = card.querySelector('.apc-caption');
+              if (caption) caption.innerHTML = `<strong>${title}</strong> ${desc}`;
+              // Update the edit button call as well
+              const editBtn = card.querySelector('.apc-edit');
+              if (editBtn) {
+                editBtn.setAttribute('onclick', `adminOpenEdit(${id}, '${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}', '${domain}')`);
+              }
             }
-            const nextIdx = e.key === 'ArrowDown' ? Math.min(posts.length - 1, currentPostIdx + 1) : Math.max(0, currentPostIdx - 1);
-            posts[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            adminCloseEdit();
+          } catch (e) {
+            toast('⚠️ ' + e.message);
+          }
+          btn.textContent = 'Update ⚡'; btn.disabled = false;
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           CUSTOM HASHTAGS
+        ═══════════════════════════════════════════════════════ */
+        function addCustomHashtag() {
+          const inp = document.getElementById('customHtagInput');
+          let val = inp.value.trim().replace(/\s+/g, '');
+          if (!val) return;
+          if (!val.startsWith('#')) val = '#' + val;
+          // Check if already exists
+          const existing = Array.from(document.querySelectorAll('#hashtagChips .htag'))
+            .find(el => el.textContent === val);
+          if (existing) { existing.classList.add('sel'); if (!selectedHtags.includes(val)) selectedHtags.push(val); inp.value = ''; return; }
+          // Create new chip
+          const chip = document.createElement('span');
+          chip.className = 'htag sel';
+          chip.textContent = val;
+          chip.onclick = () => toggleHtag(chip);
+          document.getElementById('hashtagChips').appendChild(chip);
+          if (!selectedHtags.includes(val)) selectedHtags.push(val);
+          inp.value = '';
+          toast(`${val} added!`);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           LIGHT / DARK MODE TOGGLE
+        ═══════════════════════════════════════════════════════ */
+        function toggleTheme() {
+          const html = document.documentElement;
+          const current = html.getAttribute('data-theme') || 'dark';
+          const next = current === 'light' ? 'dark' : 'light';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('s2l_theme', next);
+
+          // Update toggle checkbox if it exists
+          const toggle = document.getElementById('settingsThemeToggle');
+          if (toggle) toggle.checked = (next === 'light');
+
+          updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+          const icon = document.getElementById('themeIcon');
+          if (icon) {
+            icon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
           }
         }
-      }
 
-      if (e.key === 'Enter') {
-        const isReels = reelsScreen && reelsScreen.classList.contains('active');
-        if (isReels) {
-          const currentVideo = document.querySelector('.reel-full video:not([style*="display: none"])'); // Simplification
-          // Actually find the video in the active reel
-          const rc = document.getElementById('reelsContainer');
-          const h = window.innerHeight;
-          const idx = Math.round(rc.scrollTop / h);
-          const videos = rc.querySelectorAll('video');
-          if (videos[idx]) {
-            if (videos[idx].paused) videos[idx].play();
-            else videos[idx].pause();
+        // Apply saved theme on load
+        (function initTheme() {
+          const saved = localStorage.getItem('s2l_theme') || 'dark';
+          document.documentElement.setAttribute('data-theme', saved);
+          // Wait for DOM to sync checkbox and icon
+          document.addEventListener('DOMContentLoaded', () => {
+            updateThemeIcon(saved);
+            const toggle = document.getElementById('settingsThemeToggle');
+            if (toggle) toggle.checked = (saved === 'light');
+          });
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           RADIAL MENU LOGIC (PHYSICS, INTERACTIONS)
+        ═══════════════════════════════════════════════════════ */
+        const radialOverlay = document.getElementById('radialMenuOverlay');
+        const radialWheel = document.getElementById('radialWheel');
+
+        let isRadialOpen = false;
+        let radialRot = 0; // Current rotation
+        let rotVelocity = 0;
+        let angularFriction = 0.92; // Inertia decay
+        let isSpinning = false;
+
+        let lastAngle = 0;
+        let isDraggingRadial = false;
+        let animFrame = null;
+        let lastTime = 0;
+
+        // Setup variables (will be populated on init)
+        let radialItems = [];
+        let TOTAL_ITEMS = 0;
+        let STEP_ANGLE = 0;
+
+        function initRadialItems() {
+          // Only parse visible items to prevent gaps in the circle
+          radialItems = Array.from(document.querySelectorAll('.radial-item')).filter(el => el.style.display !== 'none');
+          TOTAL_ITEMS = radialItems.length;
+          if (!TOTAL_ITEMS) return;
+          STEP_ANGLE = 360 / TOTAL_ITEMS;
+
+          radialItems.forEach((item, i) => {
+            const agl = i * STEP_ANGLE;
+            item.style.setProperty('--angle', `${agl}deg`);
+            item.style.setProperty('--radius', `120px`);
+          });
+          updateRadialTransform();
+        }
+
+        document.addEventListener('DOMContentLoaded', initRadialItems);
+
+        function toggleRadialMenu() {
+          if (!isRadialOpen) {
+            radialOverlay.classList.add('open');
+            // snap to closest on open
+            radialRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
+            updateRadialTransform();
+            isRadialOpen = true;
+          } else {
+            closeRadialMenuInternal();
           }
         }
-      }
-    });
 
-    /* ═══════════════════════════════════════════════════════
-       EXIT MECHANISM & NAVIGATION Flow
-    ═══════════════════════════════════════════════════════ */
-    // Initialize history state on load to intercept first back button
-    if (history.state?.page !== 'home') {
-      history.pushState({ page: 'home' }, '');
-    }
+        function closeRadialMenuInternal() {
+          isRadialOpen = false;
+          radialOverlay.classList.remove('open');
+          cancelAnimationFrame(animFrame);
+        }
 
-    window.onpopstate = function (event) {
-      const homeScreen = document.getElementById('homeScreen');
-      if (!homeScreen || !homeScreen.classList.contains('active')) {
-        // If not on home, back button takes us home first
-        navigate('home');
-        history.pushState({ page: 'home' }, '');
-        return;
-      }
+        function closeRadialMenu(e) {
+          if (e && (e.target === radialOverlay || e.target.id === 'radialMenuWrapper')) closeRadialMenuInternal();
+        }
 
-      // If already on home, check double back
-      exitClickCount++;
-      if (exitClickCount === 1) {
-        toast('👋 Press back again to exit Scroll2Learn');
-        // Push state again so next back triggers popstate again
-        history.pushState({ page: 'home' }, '');
-        clearTimeout(exitTimer);
-        exitTimer = setTimeout(() => { exitClickCount = 0; }, 2000);
-      } else {
-        // For real exit, we need to go back in history past our initial push
-        history.go(-2);
-      }
-    };
+        // Touch vs mouse detection for radial menu
+        let isTouchDevice = false;
+        window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
+        let radialDblClickMap = {};
+
+        function handleRadialClick(action) {
+          // On laptop/desktop: require double click to activate
+          if (!isTouchDevice) {
+            const now = Date.now();
+            const lastClick = radialDblClickMap[action] || 0;
+            if (now - lastClick > 400) {
+              radialDblClickMap[action] = now;
+              return; // Wait for second click
+            }
+            radialDblClickMap[action] = 0;
+          }
+          executeRadialAction(action);
+        }
+
+        function executeRadialAction(action) {
+          closeRadialMenuInternal();
+          setTimeout(() => {
+            if (action === 'profile') navigate('profile', null);
+            if (action === 'add') navigate('add', null);
+            if (action === 'search') navigate('search', null);
+            if (action === 'ai') openAI('General Learning');
+            if (action === 'notif') toggleNotif();
+            if (action === 'explore') navigate('reels', null);
+            if (action === 'settings') { navigate('settings', null); }
+            if (action === 'admin') navigate('admin', null);
+          }, 150);
+        }
+
+        // --- PHYSICS / DRAG ---
+        function getAngleCenter(e) {
+          const rect = radialWheel.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          // In atan2, top is usually -90 if 0 is right. We offset by 90 to make top=0.
+          let ang = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+          return ang + 90;
+        }
+
+        function onDragStart(e) {
+          if (!isRadialOpen) return;
+          isDraggingRadial = true;
+          cancelAnimationFrame(animFrame);
+          isSpinning = false;
+          lastAngle = getAngleCenter(e);
+          lastTime = performance.now();
+        }
+
+        function onDragMove(e) {
+          if (!isDraggingRadial) return;
+          e.preventDefault();
+          const currentAngle = getAngleCenter(e);
+          const currentTime = performance.now();
+
+          let diff = currentAngle - lastAngle;
+          // Handle boundary wrap
+          if (diff > 180) diff -= 360;
+          if (diff < -180) diff += 360;
+
+          radialRot += diff;
+          rotVelocity = diff; // track last diff as velocity
+
+          updateRadialTransform();
+          lastAngle = currentAngle;
+          lastTime = currentTime;
+        }
+
+        function onDragEnd() {
+          if (!isDraggingRadial) return;
+          isDraggingRadial = false;
+          isSpinning = true;
+          spinLoop();
+        }
+
+        radialWheel.addEventListener('mousedown', onDragStart);
+        window.addEventListener('mousemove', onDragMove, { passive: false });
+        window.addEventListener('mouseup', onDragEnd);
+
+        radialWheel.addEventListener('touchstart', onDragStart, { passive: false });
+        window.addEventListener('touchmove', onDragMove, { passive: false });
+        window.addEventListener('touchend', onDragEnd);
+
+        function spinLoop() {
+          if (!isSpinning) return;
+
+          // Decay friction
+          radialRot += rotVelocity;
+          rotVelocity *= angularFriction;
+
+          // Snapping recoil behavior
+          if (Math.abs(rotVelocity) < 1.0) {
+            const targetRot = Math.round(radialRot / STEP_ANGLE) * STEP_ANGLE;
+            const diff = targetRot - radialRot;
+
+            if (Math.abs(diff) < 0.2) {
+              radialRot = targetRot;
+              isSpinning = false;
+            } else {
+              // spring towards target
+              rotVelocity = diff * 0.15;
+              radialRot += rotVelocity;
+            }
+          }
+
+          updateRadialTransform();
+          if (isSpinning) animFrame = requestAnimationFrame(spinLoop);
+        }
+
+        function updateRadialTransform() {
+          // CSS custom property dynamically updates orientation inside css rule
+          radialWheel.style.setProperty('--wheel-rot', `${radialRot}deg`);
+
+          // Handle clipping (only 3 visible items!)
+          // Limit visibility to those near the top (absolute angle around 0)
+          radialItems.forEach((item, i) => {
+            let absAngle = (i * STEP_ANGLE + radialRot) % 360;
+            if (absAngle > 180) absAngle -= 360;
+            if (absAngle < -180) absAngle += 360;
+
+            // Show items within +/- roughly 70 degrees from top.
+            // Because Step is 51 deg. (0, +51, -51 will fit)
+            if (Math.abs(absAngle) <= 75) {
+              item.style.opacity = '1';
+              item.style.pointerEvents = 'auto';
+            } else {
+              item.style.opacity = '0';
+              item.style.pointerEvents = 'none';
+            }
+          });
+        }
+
+        // Advanced Event Listeners
+        document.addEventListener('keydown', (e) => {
+          // ESC bindings
+          if (e.key === 'Escape') {
+            if (isRadialOpen) closeRadialMenuInternal();
+            if (document.getElementById('notifPanel').classList.contains('show')) closeNotif();
+            if (document.getElementById('aiModalOverlay').style.display === 'flex') closeAI();
+          }
+
+          // Arrow Up/Down & Enter bindings
+          const feedContainer = document.getElementById('feedContainer');
+          const reelsScreen = document.getElementById('reelsScreen');
+          const homeScreen = document.getElementById('homeScreen');
+
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const isReels = reelsScreen && reelsScreen.classList.contains('active');
+            const isHome = homeScreen && homeScreen.classList.contains('active');
+
+            if (isReels) {
+              const rc = document.getElementById('reelsContainer');
+              const h = window.innerHeight;
+              const currentIdx = Math.round(rc.scrollTop / h);
+              const nextIdx = e.key === 'ArrowDown' ? currentIdx + 1 : currentIdx - 1;
+              rc.scrollTo({ top: nextIdx * h, behavior: 'smooth' });
+            } else if (isHome) {
+              const posts = Array.from(document.querySelectorAll('.post-card'));
+              if (posts.length > 0) {
+                // Find current post in viewport
+                let currentPostIdx = posts.findIndex(p => {
+                  const rect = p.getBoundingClientRect();
+                  return rect.top >= -100 && rect.top <= 100;
+                });
+                if (currentPostIdx === -1) {
+                  // Fallback: finding the one closest to top
+                  currentPostIdx = posts.reduce((prev, curr, idx) => {
+                    const prevRect = posts[prev].getBoundingClientRect();
+                    const currRect = curr.getBoundingClientRect();
+                    return Math.abs(currRect.top) < Math.abs(prevRect.top) ? idx : prev;
+                  }, 0);
+                }
+                const nextIdx = e.key === 'ArrowDown' ? Math.min(posts.length - 1, currentPostIdx + 1) : Math.max(0, currentPostIdx - 1);
+                posts[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }
+
+          if (e.key === 'Enter') {
+            const isReels = reelsScreen && reelsScreen.classList.contains('active');
+            if (isReels) {
+              const currentVideo = document.querySelector('.reel-full video:not([style*="display: none"])'); // Simplification
+              // Actually find the video in the active reel
+              const rc = document.getElementById('reelsContainer');
+              const h = window.innerHeight;
+              const idx = Math.round(rc.scrollTop / h);
+              const videos = rc.querySelectorAll('video');
+              if (videos[idx]) {
+                if (videos[idx].paused) videos[idx].play();
+                else videos[idx].pause();
+              }
+            }
+          }
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           EXIT MECHANISM & NAVIGATION Flow
+        ═══════════════════════════════════════════════════════ */
+        // Initialize history state on load to intercept first back button
+        if (history.state?.page !== 'home') {
+          history.pushState({ page: 'home' }, '');
+        }
+
+        window.onpopstate = function (event) {
+          const homeScreen = document.getElementById('homeScreen');
+          if (!homeScreen || !homeScreen.classList.contains('active')) {
+            // If not on home, back button takes us home first
+            navigate('home');
+            history.pushState({ page: 'home' }, '');
+            return;
+          }
+
+          // If already on home, check double back
+          exitClickCount++;
+          if (exitClickCount === 1) {
+            toast('👋 Press back again to exit Scroll2Learn');
+            // Push state again so next back triggers popstate again
+            history.pushState({ page: 'home' }, '');
+            clearTimeout(exitTimer);
+            exitTimer = setTimeout(() => { exitClickCount = 0; }, 2000);
+          } else {
+            // For real exit, we need to go back in history past our initial push
+            history.go(-2);
+          }
+        };
   </script>
 </body>
 
