@@ -41,13 +41,32 @@ except Exception as e:
     print(f'⚠️  Gemini AI not available: {e}')
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=[
-    'https://scroll2learn.netlify.app',
+
+ALLOWED_ORIGINS = [
+    "https://scroll2learn.netlify.app",
     "https://scroll2learn.vercel.app",
-    'http://localhost:3000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500'
-])
+    "http://localhost:3000",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+]
+
+CORS(
+    app,
+    resources={r"/*": {"origins": ALLOWED_ORIGINS}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
+
+@app.after_request
+def after_request(response):
+    origin = request.headers.get("Origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
 # Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
@@ -349,13 +368,20 @@ def register():
     except psycopg2.IntegrityError:
         conn.close(); return jsonify({'error':'Username or email already taken'}),409
 
-@app.route('/auth/login', methods=['POST'])
+@app.route('/auth/login', methods=['POST', 'OPTIONS'])
 def login():
-    d = request.get_json()
-    identifier = d.get('identifier','').strip().lower()
-    password = d.get('password','')
+    if request.method == 'OPTIONS':
+        return ('', 200)
+
+    d = request.get_json() or {}
+
+    identifier = d.get('identifier', '').strip().lower()
+    password = d.get('password', '')
+
     conn = get_db()
-    if not conn: return jsonify({'error': 'DB Error'}), 500
+    if not conn:
+        return jsonify({'error': 'DB Error'}), 500
+
     curr = conn.cursor()
     curr.execute('SELECT * FROM users WHERE (username=%s OR email=%s) AND password_hash=%s',
                         (identifier,identifier,hash_password(password)))
