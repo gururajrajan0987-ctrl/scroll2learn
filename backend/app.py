@@ -41,38 +41,18 @@ except Exception as e:
     print(f'⚠️  Gemini AI not available: {e}')
 
 app = Flask(__name__)
-ALLOWED_ORIGINS = [
+CORS(app, supports_credentials=True, origins=[
     'https://scroll2learn.netlify.app',
-    'https://scroll2learn.vercel.app',
+    "https://scroll2learn.vercel.app",
     'http://localhost:3000',
     'http://localhost:5500',
     'http://127.0.0.1:5500'
-]
-
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
-
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            res = app.make_default_options_response()
-            res.headers['Access-Control-Allow-Origin'] = origin
-            res.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
-            res.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            res.headers['Access-Control-Allow-Credentials'] = 'true'
-            return res
+])
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
 # Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
 socketio = SocketIO(app, 
-    cors_allowed_origins=[
-        'https://scroll2learn.netlify.app',
-        'https://scroll2learn.vercel.app',
-        'http://localhost:3000',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500'
-    ],
+    cors_allowed_origins="*", 
     async_mode='gevent',
     logger=True, 
     engineio_logger=True,
@@ -167,7 +147,7 @@ def format_post(d, liked=False, saved=False):
             'hashtags': json.loads(d.get('hashtags', '[]')) if isinstance(d.get('hashtags'), str) else [],
             'likes_count': d.get('likes_count', 0), 'comments_count': d.get('comments_count', 0),
             'liked': liked, 'saved': saved, 'author': d.get('username', ''),
-            'author_id': d.get('user_id'),
+            'author_id': d.get('user_id') or d.get('author_id'),
             'is_following': bool(d.get('is_following', 0)),
             'full_name': d.get('full_name', '') or d.get('username', ''),
             'avatar': avatar, 'time': time_ago(d.get('created_at', '')),
@@ -521,6 +501,44 @@ def get_feed():
         result.append(format_post(d,liked,saved))
     conn.close()
     return jsonify({'posts':result,'page':page,'has_more':offset+per_page<total,'total':total})
+
+@app.route('/feed/reels', methods=['GET'])
+def get_reels_feed():
+    user = get_current_user(request)
+    page = max(1,int(request.args.get('page',1)))
+    per_page = min(20,int(request.args.get('per_page',10)))
+    offset = (page-1)*per_page
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    
+    if user:
+        query = """
+            SELECT p.*, u.username, u.full_name, u.avatar,
+                   (CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END) as is_following
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            LEFT JOIN followers f ON (f.following_id = p.user_id AND f.follower_id = %s)
+            WHERE p.is_approved = 1 AND p.type = 'reel'
+            ORDER BY p.created_at DESC
+            LIMIT %s OFFSET %s
+        """
+        curr.execute(query, (user['id'], per_page, offset))
+    else:
+        curr.execute("SELECT p.*, u.username, u.full_name, u.avatar FROM posts p JOIN users u ON p.user_id = u.id WHERE p.is_approved=1 AND p.type='reel' ORDER BY p.created_at DESC LIMIT %s OFFSET %s", (per_page, offset))
+    
+    rows = curr.fetchall()
+    result = []
+    for row in rows:
+        d = dict(row); liked=saved=False
+        if user:
+            curr.execute('SELECT 1 FROM likes WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+            liked = bool(curr.fetchone())
+            curr.execute('SELECT 1 FROM saves WHERE user_id=%s AND post_id=%s',(user['id'],d['id']))
+            saved = bool(curr.fetchone())
+        result.append(format_post(d,liked,saved))
+    conn.close()
+    return jsonify({'posts':result})
 
 @app.route('/posts', methods=['POST'])
 def create_post():

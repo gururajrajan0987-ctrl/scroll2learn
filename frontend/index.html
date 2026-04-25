@@ -4651,11 +4651,21 @@
       const params = new URLSearchParams(window.location.search);
       if (params.has('user')) {
         openUserProfile(params.get('user'));
+      } else if (params.has('post')) {
+        // Deep link for post could load a specific view, for now just home
+        navigate('home');
       } else if (params.has('reel')) {
         navigate('reels');
       } else {
         navigate('home');
       }
+
+      // Add double-click to refresh on Home Feed
+      document.getElementById('homeScreen').addEventListener('dblclick', (e) => {
+        // Only if clicking on background or feed container (not buttons)
+        if (e.target.closest('.act-btn, .follow-btn, .ph-left, .icon-btn')) return;
+        refreshHomeFeed();
+      });
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -4851,7 +4861,7 @@
         <button type="button" class="act-btn" onclick="openComment(${p.id})">
           <span class="material-icons-round">chat_bubble_outline</span>
         </button>
-        <button type="button" class="act-btn" onclick="openShare(${p.id})">
+        <button type="button" class="act-btn" onclick="openShare('post', ${p.id}, '${p.title}')">
           <span class="material-icons-round">send</span>
         </button>
       </div>
@@ -4886,8 +4896,14 @@
         <div class="post-author">${r.full_name || r.author} <span style="font-size:12px;color:var(--sub)">@${r.author}</span> <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:11px;font-weight:700;margin-left:4px">REEL</span></div>
         <div class="post-time">${r.time}</div>
       </div>
-      <div style="margin-left:auto"></div>
-      <button type="button" class="icon-btn post-more" onclick="openPostMenu(${r.id}, '${r.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+      <div class="ph-right" style="display:flex; align-items:center; gap:8px">
+        ${(currentUser && currentUser.username !== r.author) ? `
+          <button type="button" class="follow-btn ${r.is_following ? 'following' : ''}" onclick="toggleFollow(this, ${r.author_id})">
+            ${r.is_following ? 'Following' : 'Follow'}
+          </button>
+        ` : ''}
+        <button type="button" class="icon-btn post-more" onclick="openPostMenu(this, ${r.id}, '${r.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+      </div>
     </div>
     <div class="post-media" style="position:relative">
       <video src="${r.media_url}" ${isMuted ? 'muted' : ''} playsinline loop autoplay onclick="this.paused?this.play():this.pause()" style="max-height:480px"></video>
@@ -4903,7 +4919,7 @@
         <button type="button" class="act-btn" onclick="openComment(${r.id})">
           <span class="material-icons-round">chat_bubble_outline</span>
         </button>
-        <button type="button" class="act-btn" onclick="openShare(${r.id})">
+        <button type="button" class="act-btn" onclick="openShare('reel', ${r.id}, '${r.title}')">
           <span class="material-icons-round">send</span>
         </button>
       </div>
@@ -4929,10 +4945,10 @@
     ═══════════════════════════════════════════════════════ */
     async function loadReels() {
       try {
-        const data = await api('/feed?per_page=20');
-        reelsData = data.posts.filter(p => p.type === 'reel');
+        const data = await api('/feed/reels?per_page=20');
+        reelsData = data.posts || [];
         renderReelsScreen();
-      } catch { }
+      } catch (e) { console.error('Reels load failed', e); }
     }
 
     function renderReelsScreen() {
@@ -4959,6 +4975,7 @@
         </div>
         <div class="rfc">${r.title || ''} ${r.description || ''}</div>
       </div>
+      <div class="reel-full-acts">
         <div class="video-sound-toggle-btn rfab" onclick="toggleGlobalMute(event, this)">
           <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
           <small>Mute</small>
@@ -4975,7 +4992,7 @@
           <span class="material-icons-round">chat_bubble_outline</span>
           <small>${r.comments_count}</small>
         </div>
-        <div class="rfab" onclick="openShare(${r.id})">
+        <div class="rfab" onclick="openShare('reel', ${r.id}, '${r.title}')">
           <span class="material-icons-round">send</span>
           <small>Share</small>
         </div>
