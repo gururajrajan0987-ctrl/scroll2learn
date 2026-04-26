@@ -14,7 +14,6 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
-from openrouter import OpenRouter
 import google.generativeai as genai
 
 # ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
