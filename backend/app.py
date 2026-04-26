@@ -1,4 +1,5 @@
-# ── Imports ────────────────────────────────────────────────────────────────
+import gevent.monkey
+gevent.monkey.patch_all()
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import os, hashlib, secrets, time, json, random, smtplib
@@ -14,6 +15,7 @@ import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
 from openrouter import OpenRouter
+import google.generativeai as genai
 
 # ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
 load_dotenv()
@@ -34,6 +36,8 @@ try:
     from google import genai
     from google.genai import types
     GEMINI_KEY = os.getenv('GEMINI_KEY')
+    if not GEMINI_KEY:
+        raise Exception("GEMINI_KEY is not set in environment variables")
     gemini_client = genai.Client(api_key=GEMINI_KEY)
     GEMINI_OK = True
     print('✅ Gemini AI loaded')
@@ -58,6 +62,9 @@ CORS(
     allow_headers=["Content-Type", "Authorization"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
+@app.route("/", methods=["GET","HEAD"])
+def home():
+    return "Scroll2Learn Backend Running", 200
 
 @app.after_request
 def after_request(response):
@@ -71,11 +78,10 @@ def after_request(response):
 
 # ── WebSocket configuration ──────────────────────────────────────────────────
 # Force websocket transport and relax CORS for SocketIO to avoid Render handshake issues
-socketio = SocketIO(app, 
-    cors_allowed_origins="*", 
-    async_mode='gevent',
-    logger=True, 
-    engineio_logger=True,
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=ALLOWED_ORIGINS,
+    async_mode="gevent",
     ping_timeout=60,
     ping_interval=25
 )
@@ -475,7 +481,18 @@ def profile_stats():
     followers_count = curr.fetchone()['count']
     curr.execute("SELECT COUNT(*) FROM followers WHERE follower_id=%s", (user['id'],))
     following_count = curr.fetchone()['count']
-    conn.close(); return jsonify({'posts':posts,'reels':reels,'likes':likes,'saved':saved,'pending':pending, 'followers': followers_count, 'following': following_count})
+    db_type = 'postgres' if DATABASE_URL and ('postgresql' in DATABASE_URL or 'postgres' in DATABASE_URL) else 'temporary'
+    conn.close(); return jsonify({
+        'posts':posts,
+        'reels':reels,
+        'likes':likes,
+        'saved':saved,
+        'pending':pending, 
+        'followers': followers_count, 
+        'following': following_count,
+        'db_type': db_type,
+        'ai_ok': GEMINI_OK
+    })
 
 # FEED
 @app.route('/feed', methods=['GET'])
