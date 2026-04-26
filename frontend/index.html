@@ -1202,37 +1202,41 @@
 
     .reel-full-acts {
       position: absolute;
-      bottom: 30px;
       right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 22px;
       align-items: center;
-      z-index: 5;
+      z-index: 10;
     }
 
     .rfab {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       color: #fff;
       cursor: pointer;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
     }
 
     .rfab .material-icons-round {
-      font-size: 28px;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .6));
+      font-size: 32px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .rfab:active .material-icons-round { transform: scale(1.3); }
 
     .rfab small {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
     }
 
-    .rfab.liked .material-icons-round {
-      color: var(--accent);
-    }
+    .rfab.liked .material-icons-round { color: #ff3b5c !important; }
+    .rfab.saved .material-icons-round { color: #face15 !important; }
 
     .reel-progress {
       position: absolute;
@@ -1541,6 +1545,112 @@
     #profileScreen {
       padding-bottom: 80px;
     }
+    .profile-tabs {
+      display: flex;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-top: 20px;
+      background: var(--surface);
+    }
+    .p-tab {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px 0;
+      color: var(--sub);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .p-tab.active {
+      color: var(--accent);
+    }
+    .p-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .p-tab .material-icons-round { font-size: 24px; }
+    .profile-content-area {
+      min-height: 200px;
+    }
+    .profile-posts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    .profile-post-thumb {
+      aspect-ratio: 1/1;
+      background: var(--surface2);
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .profile-post-thumb img, .profile-post-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .ppt-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .profile-post-thumb:hover .ppt-overlay { opacity: 1; }
+    .ppt-type-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 14px;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    }
+    .ppt-status {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .ppt-status.approved { color: #4ade80; }
+    .ppt-status.pending { color: #facc15; }
+    .ppt-status.rejected { color: #f87171; }
+    .ppt-delete-btn {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: rgba(255,0,0,0.7);
+      color: #fff;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .ppt-delete-btn span { font-size: 14px; }
 
     .profile-banner {
       height: 120px;
@@ -3467,11 +3577,17 @@
           </div>
         </div>
         <div class="profile-badges" id="profileBadges"></div>
-        <div class="profile-posts-section">
-          <div class="profile-posts-header">
-            <span class="material-icons-round">grid_on</span> My Posts
+        <div class="profile-tabs" id="profileTabs">
+          <div class="p-tab active" onclick="switchProfileTab('posts', this)">
+            <span class="material-icons-round">grid_on</span>
           </div>
+          <div class="p-tab" onclick="switchProfileTab('saved', this)">
+            <span class="material-icons-round">bookmark_border</span>
+          </div>
+        </div>
+        <div class="profile-content-area">
           <div class="profile-posts-grid" id="profilePostsGrid"></div>
+          <div class="profile-posts-grid hidden" id="profileSavedGrid"></div>
         </div>
         <button class="logout-btn" onclick="logoutUser()">
           <span class="material-icons-round">logout</span>
@@ -4877,7 +4993,7 @@
       <strong>${p.full_name || p.author}</strong>${p.title ? p.title + ' — ' : ''}${p.description}
       ${tags ? `<div class="tags">${tags}</div>` : ''}
     </div>
-    ${p.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${p.id})">View all ${p.comments_count} comments</div>` : ''}
+    ${p.comments_count > 0 ? `<div class="post-view-comments" id="vcomms-${p.id}" onclick="openComment(${p.id})">View all ${p.comments_count} comments</div>` : `<div class="post-view-comments hidden" id="vcomms-${p.id}" onclick="openComment(${p.id})">View comments</div>`}
   `;
       return el;
     }
@@ -4935,7 +5051,7 @@
       <strong>${r.full_name || r.author}</strong>${r.title ? r.title + ' — ' : ''}${r.description || ''}
       ${tags ? `<div class="tags">${tags}</div>` : ''}
     </div>
-    ${r.comments_count > 0 ? `<div class="post-view-comments" onclick="openComment(${r.id})">View all ${r.comments_count} comments</div>` : ''}
+    ${r.comments_count > 0 ? `<div class="post-view-comments" id="vcomms-${r.id}" onclick="openComment(${r.id})">View all ${r.comments_count} comments</div>` : `<div class="post-view-comments hidden" id="vcomms-${r.id}" onclick="openComment(${r.id})">View comments</div>`}
   `;
       return el;
     }
@@ -4969,28 +5085,27 @@
       <video src="${r.media_url}" ${isMuted ? 'muted' : ''} playsinline loop></video>
       <div class="reel-full-overlay"></div>
       <div class="reel-full-info">
-        <div class="rfa">
+        <div class="rfa" style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
           <img class="rfa-av" src="${av}" onerror="this.src='https://ui-avatars.com/api/?name=${r.author}&background=333&color=fff&size=36'">
-          <span class="rfa-name">@${r.author}</span>
+          <div style="display:flex; flex-direction:column">
+            <span class="rfa-name" style="font-weight:700; text-shadow:0 1px 2px rgba(0,0,0,0.8)">@${r.author}</span>
+          </div>
+          ${(currentUser && currentUser.username !== r.author) ? `
+            <button class="follow-btn ${r.is_following ? 'following' : ''}" style="padding:4px 12px; font-size:11px" onclick="toggleFollow(this, ${r.author_id})">
+              ${r.is_following ? 'Following' : 'Follow'}
+            </button>
+          ` : ''}
         </div>
-        <div class="rfc">${r.title || ''} ${r.description || ''}</div>
+        <div class="rfc" style="font-size:14px; line-height:1.4; text-shadow:0 1px 2px rgba(0,0,0,0.8)">${r.title || ''} ${r.description || ''}</div>
       </div>
       <div class="reel-full-acts">
-        <div class="video-sound-toggle-btn rfab" onclick="toggleGlobalMute(event, this)">
-          <span class="material-icons-round">${isMuted ? 'volume_off' : 'volume_up'}</span>
-          <small>Mute</small>
-        </div>
-        <div class="rfab ${r.is_following ? 'following' : ''}" onclick="toggleFollow(this, ${r.author_id})">
-          <span class="material-icons-round">${r.is_following ? 'person_remove' : 'person_add'}</span>
-          <small>${r.is_following ? 'Following' : 'Follow'}</small>
-        </div>
         <div class="rfab${r.liked ? ' liked' : ''}" onclick="toggleLike(this,${r.id})">
           <span class="material-icons-round">${r.liked ? 'favorite' : 'favorite_border'}</span>
-          <small>${r.likes_count}</small>
+          <small id="rlikes-${r.id}">${r.likes_count}</small>
         </div>
         <div class="rfab" onclick="openComment(${r.id})">
-          <span class="material-icons-round">chat_bubble_outline</span>
-          <small>${r.comments_count}</small>
+          <span class="material-icons-round">chat_bubble</span>
+          <small id="rcomms-${r.id}">${r.comments_count}</small>
         </div>
         <div class="rfab" onclick="openShare('reel', ${r.id}, '${r.title}')">
           <span class="material-icons-round">send</span>
@@ -4999,6 +5114,13 @@
         <div class="rfab${r.saved ? ' saved' : ''}" onclick="toggleSave(this,${r.id})">
           <span class="material-icons-round">${r.saved ? 'bookmark' : 'bookmark_border'}</span>
           <small>Save</small>
+        </div>
+        <div class="rfab" onclick="window.open('${r.media_url}', '_blank')">
+          <span class="material-icons-round">file_download</span>
+          <small>Down</small>
+        </div>
+        <div class="video-sound-toggle-btn rfab" onclick="toggleGlobalMute(event, this)" style="margin-top:10px">
+          <span class="material-icons-round" style="font-size:24px">${isMuted ? 'volume_off' : 'volume_up'}</span>
         </div>
       </div>`;
         container.appendChild(el);
@@ -5037,20 +5159,36 @@
       if (liked) btn.classList.add('heart-pop');
       setTimeout(() => btn.classList.remove('heart-pop'), 400);
 
-      // Update count
-      const likesEl = document.getElementById(`likes-${postId}`);
-      if (likesEl) {
-        const curr = parseInt(likesEl.textContent);
-        const newCount = liked ? curr + 1 : Math.max(0, curr - 1);
-        likesEl.textContent = `${newCount} ${newCount === 1 ? 'like' : 'likes'}`;
-      }
-      const rlikes = document.getElementById(`rlikes-${postId}`);
-      if (rlikes) rlikes.textContent = parseInt(rlikes.textContent) + (liked ? 1 : -1);
+      // Update count everywhere
+      const updateCounts = (id, inc) => {
+        const els = [
+          document.getElementById(`likes-${id}`),
+          document.getElementById(`rlikes-${id}`)
+        ];
+        els.forEach(el => {
+          if (el) {
+            let val = parseInt(el.textContent) || 0;
+            let newVal = inc ? val + 1 : Math.max(0, val - 1);
+            if (el.id.startsWith('likes-')) {
+               el.textContent = `${newVal} ${newVal === 1 ? 'like' : 'likes'}`;
+            } else {
+               el.textContent = newVal;
+            }
+          }
+        });
+      };
+      updateCounts(postId, liked);
 
       try {
-        await api(`/posts/${postId}/like`, { method: 'POST' });
+        const res = await api(`/posts/${postId}/like`, { method: 'POST' });
+        // Optional: ensure count is accurate from server
+        // if (res.likes_count !== undefined) updateCounts(postId, res.liked, res.likes_count);
         if (liked) addNotif(`❤️ You liked a post`);
-      } catch { }
+      } catch (e) {
+         // Rollback if error
+         btn.classList.toggle('liked', !liked);
+         updateCounts(postId, !liked);
+      }
     }
 
     async function toggleSave(btn, postId) {
@@ -5060,7 +5198,60 @@
       const icon = btn.querySelector('.material-icons-round');
       icon.textContent = saved ? 'bookmark' : 'bookmark_border';
       toast(saved ? '🔖 Saved!' : 'Removed from saved');
-      try { await api(`/posts/${postId}/save`, { method: 'POST' }); } catch { }
+      try {
+        await api(`/posts/${postId}/save`, { method: 'POST' });
+        if (saved) addNotif(`🔖 You saved a post`);
+      } catch (e) {
+        btn.classList.toggle('saved', !saved);
+        icon.textContent = !saved ? 'bookmark' : 'bookmark_border';
+      }
+    }
+
+    async function switchProfileTab(tab, btn) {
+      document.querySelectorAll('.p-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const postsGrid = document.getElementById('profilePostsGrid');
+      const savedGrid = document.getElementById('profileSavedGrid');
+      if (tab === 'posts') {
+        postsGrid.classList.remove('hidden');
+        savedGrid.classList.add('hidden');
+      } else {
+        postsGrid.classList.add('hidden');
+        savedGrid.classList.remove('hidden');
+        loadSavedContent();
+      }
+    }
+
+    async function loadSavedContent() {
+      const grid = document.getElementById('profileSavedGrid');
+      grid.innerHTML = '<div class="feed-spinner"><div class="spinner"></div></div>';
+      try {
+        const data = await api('/users/me/saved');
+        const posts = data.posts || [];
+        if (posts.length === 0) {
+          grid.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px 0"><span class="material-icons-round">bookmark_border</span><p>No saved posts yet.</p></div>';
+          return;
+        }
+        grid.innerHTML = posts.map(p => {
+          const isVid = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+          return `
+            <div class="profile-post-thumb" onclick="openFullContent(${p.id})">
+              ${isVid ? `<video src="${p.media_url}"></video><div class="thumb-reel-icon"><span class="material-icons-round">play_arrow</span></div>` : `<img src="${p.media_url}">`}
+            </div>`;
+        }).join('');
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column: span 3"><p>Error loading saved items.</p></div>';
+      }
+    }
+
+    async function openFullContent(postId) {
+      // For now, just scroll to it on home or open a modal
+      // Simplified: just show it on Home
+      navigate('home');
+      setTimeout(() => {
+        const el = document.querySelector(`[data-post-id="${postId}"]`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -5104,6 +5295,17 @@
       try {
         await api(`/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
         openComment(currentPostId);
+        
+        // Instant count update
+        const rcomms = document.getElementById(`rcomms-${currentPostId}`);
+        if (rcomms) rcomms.textContent = (parseInt(rcomms.textContent) || 0) + 1;
+        const vcomms = document.getElementById(`vcomms-${currentPostId}`);
+        if (vcomms) {
+          vcomms.classList.remove('hidden');
+          let count = (parseInt(vcomms.textContent.replace(/\D/g, '')) || 0) + 1;
+          vcomms.textContent = `View all ${count} comments`;
+        }
+
         toast('💬 Comment posted!');
         addNotif(`💬 You commented on a post`);
       } catch (e) { toast('⚠️ ' + e.message); }
@@ -5344,36 +5546,67 @@
     async function loadMyPosts() {
       try {
         const data = await api('/profile/posts');
-        const grid = document.getElementById('profilePostsGrid');
-        grid.innerHTML = '';
-        if (!data.posts || data.posts.length === 0) {
-          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--sub);padding:24px"><span class="material-icons-round" style="font-size:48px;opacity:.3">photo_library</span><p>No posts yet</p></div>';
-          return;
-        }
-        data.posts.forEach(p => {
-          const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
-          const status = p.is_approved ? 'approved' : (p.rejection_reason ? 'rejected' : 'pending');
-          const statusLabel = status === 'approved' ? '✅' : (status === 'pending' ? '⏳' : '❌');
-          const typeIcon = p.type === 'reel' ? '🎬' : '📸';
-          const thumb = document.createElement('div');
-          thumb.className = 'profile-post-thumb';
-          thumb.dataset.postId = p.id;
-          thumb.innerHTML = `
-            ${isVideo ? `<video src="${p.media_url}" muted preload="metadata"></video>` : `<img src="${p.media_url}" alt="${p.title || 'Post'}" loading="lazy">`}
-            <span class="ppt-type-badge">${typeIcon}</span>
-            <span class="ppt-status ${status}">${statusLabel} ${status}</span>
-            <div class="ppt-overlay">
-              <span class="material-icons-round">favorite</span>
-              <small>${p.likes_count}</small>
-            </div>
+        renderGrid('profilePostsGrid', data.posts);
+      } catch (e) { console.warn('Profile posts error:', e); }
+    }
+
+    async function loadSavedContent() {
+      try {
+        const data = await api('/users/me/saved');
+        renderGrid('profileSavedGrid', data.posts);
+      } catch (e) { console.warn('Saved content error:', e); }
+    }
+
+    function renderGrid(containerId, posts) {
+      const grid = document.getElementById(containerId);
+      grid.innerHTML = '';
+      if (!posts || posts.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--sub);padding:32px"><span class="material-icons-round" style="font-size:48px;opacity:.3">auto_awesome_motion</span><p>No content here yet</p></div>';
+        return;
+      }
+      posts.forEach(p => {
+        const isVideo = p.media_url && p.media_url.match(/\.(mp4|webm|mov)$/i);
+        const typeIcon = p.type === 'reel' ? '🎬' : '📸';
+        const thumb = document.createElement('div');
+        thumb.className = 'profile-post-thumb';
+        thumb.dataset.postId = p.id;
+        thumb.innerHTML = `
+          ${isVideo ? `<video src="${p.media_url}" muted preload="metadata"></video>` : `<img src="${p.media_url}" alt="${p.title || 'Post'}" loading="lazy">`}
+          <span class="ppt-type-badge">${typeIcon}</span>
+          <div class="ppt-overlay">
+            <span class="material-icons-round">favorite</span>
+            <small>${p.likes_count}</small>
+          </div>
+          ${containerId === 'profilePostsGrid' ? `
             <button type="button" class="ppt-delete-btn" onclick="event.stopPropagation();deletePost(${p.id})" title="Delete">
-              <span class="material-icons-round">delete</span>
+              <span class="material-icons-round">delete_outline</span>
             </button>
-          `;
-          grid.appendChild(thumb);
-        });
-      } catch (e) {
-        console.warn('Profile posts error:', e);
+          ` : ''}
+        `;
+        // Click to view post
+        thumb.onclick = () => {
+          // Open post in a special view or just scroll to it?
+          // For now, let's just toast
+          toast(`Opening ${p.type}...`);
+        };
+        grid.appendChild(thumb);
+      });
+    }
+
+    function switchProfileTab(tab, btn) {
+      document.querySelectorAll('#profileTabs .p-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const postsGrid = document.getElementById('profilePostsGrid');
+      const savedGrid = document.getElementById('profileSavedGrid');
+      
+      if (tab === 'posts') {
+        postsGrid.classList.remove('hidden');
+        savedGrid.classList.add('hidden');
+        loadMyPosts();
+      } else {
+        postsGrid.classList.add('hidden');
+        savedGrid.classList.remove('hidden');
+        loadSavedContent();
       }
     }
 

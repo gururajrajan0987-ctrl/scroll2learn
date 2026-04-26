@@ -13,6 +13,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
+from openrouter import OpenRouter
 
 # ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
 load_dotenv()
@@ -28,17 +29,7 @@ cloudinary.config(
 GMAIL_USER = os.getenv('GMAIL_USER')
 GMAIL_PASS = os.getenv('GMAIL_PASS')
 
-# ── Gemini AI ───────────────────────────────────────────────────────────────
-try:
-    from google import genai
-    from google.genai import types
-    GEMINI_KEY = os.getenv('GEMINI_KEY')
-    gemini_client = genai.Client(api_key=GEMINI_KEY)
-    GEMINI_OK = True
-    print('✅ Gemini AI loaded')
-except Exception as e:
-    GEMINI_OK = False
-    print(f'⚠️  Gemini AI not available: {e}')
+
 
 app = Flask(__name__)
 
@@ -635,6 +626,32 @@ def toggle_save(pid):
         curr.execute('INSERT INTO saves (user_id,post_id) VALUES (%s,%s)',(user['id'],pid)); saved=True
     conn.commit(); conn.close(); return jsonify({'saved':saved})
 
+@app.route('/users/me/saved', methods=['GET'])
+def get_saved_content():
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}),401
+    conn = get_db()
+    if not conn: return jsonify({'error': 'DB Error'}), 500
+    curr = conn.cursor()
+    curr.execute('''
+        SELECT p.*, u.username, u.full_name, u.avatar 
+        FROM posts p 
+        JOIN saves s ON p.id = s.post_id 
+        JOIN users u ON p.user_id = u.id 
+        WHERE s.user_id = %s 
+        ORDER BY s.created_at DESC
+    ''', (user['id'],))
+    rows = curr.fetchall()
+    result = []
+    for row in rows:
+        d = dict(row)
+        # Check if user liked this saved post
+        curr.execute('SELECT 1 FROM likes WHERE user_id=%s AND post_id=%s', (user['id'], d['id']))
+        liked = bool(curr.fetchone())
+        result.append(format_post(d, liked=liked, saved=True))
+    conn.close()
+    return jsonify({'posts': result})
+
 @app.route('/posts/<int:pid>/comments', methods=['GET'])
 def get_comments(pid):
     conn = get_db()
@@ -991,68 +1008,49 @@ def on_typing(data):
 # AI CHAT
 @app.route('/ai/chat', methods=['POST'])
 def ai_chat():
-    if not GEMINI_OK:
-        return jsonify({'error':'AI service not available'}),503
     user = get_current_user(request)
-    if not user: return jsonify({'error':'Unauthorized'}),401
-    d = request.get_json() or {}
-    message = d.get('message','').strip()
-    history = d.get('history', [])
-    if not message: return jsonify({'error':'Message required'}),400
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
 
-    # Build conversation contents
-    contents = []
-    for h in history:
-        contents.append(types.Content(
-            role=h.get('role','user'),
-            parts=[types.Part.from_text(text=h.get('text',''))]
-        ))
-    contents.append(types.Content(
-        role='user',
-        parts=[types.Part.from_text(text=message)]
-    ))
+    d = request.get_json() or {}
+    message = d.get('message', '').strip()
+
+    if not message:
+        return jsonify({'error': 'Message required'}), 400
 
     try:
-        config = types.GenerateContentConfig(
-            system_instruction=[
-                types.Part.from_text(text="""You are a helpful and professional AI assistant for scroll2learn, an educational social media platform.
-Goal: Help users learn and solve doubts about any educational topic including programming, competitive exams (UPSC, TNPSC, GATE), AI, data science, web development, and more.
+        with OpenRouter(
+            api_key=os.getenv("OPENROUTER_API_KEY", "")
+        ) as client:
+
+            response = client.chat.send(
+                model="google/gemma-3-27b-it:free",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a helpful and professional AI assistant for Scroll2Learn, an educational social media platform.
+
+Goal: Help users learn and solve doubts about any educational topic including programming, competitive exams (UPSC, TNPSC, GATE), AI, data science, web development,Always explain step-by-step.Use beginner examples.Motivate students. and more.
+
 Tone: Friendly, encouraging, and concise.
+
 Constraint: If a user asks a question unrelated to education or learning, politely guide them back to the platform's main purpose.
-Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answers focused and practical.""")
-            ],
-        )
-        # Try models in order of preference
-        models_to_try = [
-            'gemini-2.0-flash-lite',
-            'gemini-2.0-flash',
-            'gemini-flash-latest', # Replaces 1.5-flash
-            'gemini-2.5-flash',    # Future proofing
-            'gemini-pro-latest'
-        ]
-        last_err = None
-        for model_name in models_to_try:
-            try:
-                response = gemini_client.models.generate_content(
-                    model=model_name,
-                    contents=contents,
-                    config=config,
-                )
-                return jsonify({'reply': response.text})
-            except Exception as model_err:
-                last_err = model_err
-                err_msg = str(model_err)
-                # Retry if rate limited (429) OR if model not found (404) to move to the next fallback
-                if '429' in err_msg or '404' in err_msg or 'NOT_FOUND' in err_msg or 'RESOURCE_EXHAUSTED' in err_msg:
-                    continue 
-                break # Hard failure for other errors
-        # If all models failed
-        err_str = str(last_err)
-        if '429' in err_str or 'RESOURCE_EXHAUSTED' in err_str:
-            return jsonify({'error': 'AI is temporarily busy. Please try again in about a minute.'}), 429
-        return jsonify({'error': f'AI error: {err_str}'}), 500
+
+Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answers focused and practical."""
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ]
+            )
+
+        reply = response.choices[0].message.content
+
+        return jsonify({"reply": reply})
+
     except Exception as e:
-        return jsonify({'error': f'AI error: {str(e)}'}), 500
+        return jsonify({"error": f"AI error: {str(e)}"}), 500
 
 
 # FOLLOW SYSTEM
