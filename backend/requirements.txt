@@ -9,5 +9,4 @@ flask-socketio
 gevent
 simple-websocket
 gevent-websocket
-openrouter
-google-genai
+google-generativeai
