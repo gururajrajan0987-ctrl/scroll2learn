@@ -14,7 +14,8 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
 load_dotenv()
@@ -35,11 +36,9 @@ try:
     GEMINI_KEY = os.getenv("GEMINI_KEY")
 
     if not GEMINI_KEY:
-        raise Exception("GEMINI_KEY missing")
+        raise Exception("Missing GEMINI_KEY")
 
-    genai.configure(api_key=GEMINI_KEY)
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    client = genai.Client(api_key=GEMINI_KEY)
 
     GEMINI_OK = True
     print("✅ Gemini AI loaded")
@@ -1037,18 +1036,31 @@ def on_typing(data):
 
 # AI CHAT
 @app.route('/ai/chat', methods=['POST'])
+@app.route('/ai/chat', methods=['POST'])
 def ai_chat():
     if not GEMINI_OK:
-        return jsonify({'error':'AI service not available'}),503
+        return jsonify({'error': 'AI service not available'}), 503
+
     user = get_current_user(request)
-    if not user: return jsonify({'error':'Unauthorized'}),401
-    d = request.get_json() or {}
-    message = d.get('message','').strip()
-    history = d.get('history', [])
-    if not message: return jsonify({'error':'Message required'}),400
-    response = model.generate_content(message)
-    reply = response.text
-    print(reply)
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({'error': 'Message required'}), 400
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3-flash-preview",
+            contents=message
+        )
+
+        return jsonify({"reply": response.text})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     # Build conversation contents
     contents = []
