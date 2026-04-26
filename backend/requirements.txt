@@ -10,3 +10,4 @@ gevent
 simple-websocket
 gevent-websocket
 google-generativeai
+google-genai

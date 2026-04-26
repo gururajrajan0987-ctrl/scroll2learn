@@ -32,17 +32,21 @@ GMAIL_PASS = os.getenv('GMAIL_PASS')
 
 # ── Gemini AI ───────────────────────────────────────────────────────────────
 try:
-    from google import genai
-    from google.genai import types
-    GEMINI_KEY = os.getenv('GEMINI_KEY')
+    GEMINI_KEY = os.getenv("GEMINI_KEY")
+
     if not GEMINI_KEY:
-        raise Exception("GEMINI_KEY is not set in environment variables")
-    gemini_client = genai.Client(api_key=GEMINI_KEY)
+        raise Exception("GEMINI_KEY missing")
+
+    genai.configure(api_key=GEMINI_KEY)
+
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
     GEMINI_OK = True
-    print('✅ Gemini AI loaded')
+    print("✅ Gemini AI loaded")
+
 except Exception as e:
     GEMINI_OK = False
-    print(f'⚠️  Gemini AI not available: {e}')
+    print(f"⚠️ Gemini AI not available: {e}")
 
 app = Flask(__name__)
 
@@ -1042,6 +1046,9 @@ def ai_chat():
     message = d.get('message','').strip()
     history = d.get('history', [])
     if not message: return jsonify({'error':'Message required'}),400
+    response = model.generate_content(message)
+    reply = response.text
+    print(reply)
 
     # Build conversation contents
     contents = []
