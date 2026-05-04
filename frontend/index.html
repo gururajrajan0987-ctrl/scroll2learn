@@ -3292,6 +3292,9 @@
         </div>
         <div class="auth-err" id="authErr"></div>
         <button type="button" class="auth-btn" id="authSubmit" onclick="handleAuth()">Log In</button>
+        <div style="text-align:center; margin-top:16px">
+          <button type="button" onclick="openForgotPwd()" style="background:none; border:none; color:var(--accent2); font-size:13px; font-weight:600; cursor:pointer">Forgot Password?</button>
+        </div>
       </div>
     </div>
 
@@ -3721,10 +3724,15 @@
           </div>
         </div>
 
-        <!-- Security -->
+        <!-- Security & Help -->
         <div class="settings-section">
-          <div class="settings-section-label">Security</div>
+          <div class="settings-section-label">Security & Help</div>
           <div class="settings-card">
+            <div class="settings-row" onclick="openUserManual()">
+              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(0,240,255,.15))">📖</div>
+              <div class="settings-row-title">User Manual & Guide</div>
+              <span class="material-icons-round settings-row-arrow">chevron_right</span>
+            </div>
             <div class="settings-row highlight" onclick="logoutUser()">
               <div class="settings-row-icon"
                 style="background:linear-gradient(135deg, rgba(255,107,107,.15), rgba(255,51,102,.15))">🚪</div>
@@ -3992,10 +4000,11 @@
     </div>
   </div>
 
-  <!-- Change Password Modal -->
+  <!-- Change Password Modal (Authenticated) -->
   <div class="pwd-modal-overlay" id="pwdModalOverlay" onclick="if(event.target===this)closeChangePassword()">
     <div class="pwd-modal">
-      <h3>&#128272; Change Password</h3>
+      <h3>🔐 Change Password</h3>
+      <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter your current and new password below.</p>
       <div class="pwd-field">
         <label>Current Password</label>
         <input type="password" id="pwdOld" placeholder="Enter current password">
@@ -4012,6 +4021,71 @@
       <div class="confirm-modal-btns">
         <button type="button" class="confirm-btn confirm-btn-cancel" onclick="closeChangePassword()">Cancel</button>
         <button type="button" class="confirm-btn confirm-btn-primary" onclick="submitChangePassword()">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal (OTP Flow) -->
+  <div class="pwd-modal-overlay" id="forgotPwdOverlay" onclick="if(event.target===this)closeForgotPwd()">
+    <div class="pwd-modal">
+      <h3>🚀 Reset Password</h3>
+      <div id="forgotStep1">
+        <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter your email to receive a reset code.</p>
+        <div class="pwd-field">
+          <input type="email" id="forgotEmail" placeholder="Email address" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
+        </div>
+        <button type="button" class="auth-btn" style="margin-top:16px" onclick="requestResetOTP()">Send Reset Code</button>
+      </div>
+      <div id="forgotStep2" class="hidden">
+        <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter the code sent to your email and your new password.</p>
+        <div class="pwd-field">
+          <input type="text" id="forgotOTP" placeholder="6-digit code" maxlength="6" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text); letter-spacing:4px; text-align:center">
+        </div>
+        <div class="pwd-field">
+          <input type="password" id="forgotNewPass" placeholder="New Password" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
+        </div>
+        <button type="button" class="auth-btn" style="margin-top:16px" onclick="submitResetPassword()">Reset Password</button>
+      </div>
+      <div class="pwd-err" id="forgotErr"></div>
+      <button type="button" class="confirm-btn confirm-btn-cancel" style="margin-top:12px; width:100%" onclick="closeForgotPwd()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- User Manual Modal -->
+  <div class="pwd-modal-overlay" id="manualOverlay" onclick="if(event.target===this)closeUserManual()">
+    <div class="pwd-modal" style="max-width:500px; max-height:80vh; overflow-y:auto">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+        <h2 style="margin:0">📖 User Guide</h2>
+        <button type="button" onclick="closeUserManual()" style="background:none; border:none; color:var(--sub); cursor:pointer"><span class="material-icons-round">close</span></button>
+      </div>
+      <div class="manual-content" style="text-align:left; line-height:1.6">
+        <h4 style="color:var(--accent2)">Welcome to Scroll2Learn!</h4>
+        <p>A place where education meets social media. Here's how to use the platform:</p>
+        
+        <div style="margin-bottom:16px">
+          <strong>🏠 Home Feed</strong>
+          <p style="margin:4px 0; font-size:13px">Scroll through educational posts. Like, comment, and save content that interests you. Use the AI icon on any post to ask doubts about that topic.</p>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <strong>🎬 Reels</strong>
+          <p style="margin:4px 0; font-size:13px">Watch short educational videos. Double-tap the Reels icon in the dock to refresh your feed with new content!</p>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <strong>✍️ Create Content</strong>
+          <p style="margin:4px 0; font-size:13px">Share your knowledge! Click the <b>+</b> icon in the radial menu to upload photos or reels. Tag them with domains like Python, AI, or UPSC.</p>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <strong>🤖 AI Assistant</strong>
+          <p style="margin:4px 0; font-size:13px">Need help? Open the AI Assistant from the radial menu. It's your personal tutor, available 24/7 to solve your doubts.</p>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <strong>👤 Profile & Settings</strong>
+          <p style="margin:4px 0; font-size:13px">Customize your profile, track your posts, and manage your account security from the Settings screen.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -4035,6 +4109,12 @@
     let isMuted = true; // Global muted state for reels
     let exitClickCount = 0;
     let exitTimer = null;
+
+    /* Safe string escaper for onclick attributes */
+    function escAttr(s) {
+      if (!s) return '';
+      return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/`/g,'\\`');
+    }
 
     /* UI HELPERS */
     function toggleGlobalMute(e, btn) {
@@ -4961,7 +5041,7 @@
             ${p.is_following ? 'Following' : 'Follow'}
           </button>
         ` : ''}
-        <button type="button" class="icon-btn post-more" onclick="openPostMenu(${p.id}, '${p.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+        <button type="button" class="icon-btn post-more" onclick="openPostMenu(${p.id}, '${escAttr(p.author)}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
       </div>
     </div>
     <div class="post-media">
@@ -4977,14 +5057,14 @@
         <button type="button" class="act-btn" onclick="openComment(${p.id})">
           <span class="material-icons-round">chat_bubble_outline</span>
         </button>
-        <button type="button" class="act-btn" onclick="openShare('post', ${p.id}, '${p.title}')">
+        <button type="button" class="act-btn" onclick="openShare('post', ${p.id}, '${escAttr(p.title)}')">
           <span class="material-icons-round">send</span>
         </button>
       </div>
       <button type="button" class="act-btn${p.saved ? ' saved' : ''}" onclick="toggleSave(this,${p.id})" data-saved="${p.saved}">
         <span class="material-icons-round">${p.saved ? 'bookmark' : 'bookmark_border'}</span>
       </button>
-      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${(p.title || p.description || 'this topic').replace(/'/g, '').slice(0, 40)}')" title="AI Doubt Solver">
+      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${escAttr((p.title || p.description || 'this topic').slice(0, 40))}')" title="AI Doubt Solver">
         <span class="material-icons-round" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">smart_toy</span>
       </button>
     </div>
@@ -5018,7 +5098,7 @@
             ${r.is_following ? 'Following' : 'Follow'}
           </button>
         ` : ''}
-        <button type="button" class="icon-btn post-more" onclick="openPostMenu(this, ${r.id}, '${r.author}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
+        <button type="button" class="icon-btn post-more" onclick="openPostMenu(${r.id}, '${escAttr(r.author)}')"><span class="material-icons-round" style="font-size:20px">more_horiz</span></button>
       </div>
     </div>
     <div class="post-media" style="position:relative">
@@ -5035,14 +5115,14 @@
         <button type="button" class="act-btn" onclick="openComment(${r.id})">
           <span class="material-icons-round">chat_bubble_outline</span>
         </button>
-        <button type="button" class="act-btn" onclick="openShare('reel', ${r.id}, '${r.title}')">
+        <button type="button" class="act-btn" onclick="openShare('reel', ${r.id}, '${escAttr(r.title)}')">
           <span class="material-icons-round">send</span>
         </button>
       </div>
       <button type="button" class="act-btn${r.saved ? ' saved' : ''}" onclick="toggleSave(this,${r.id})" data-saved="${r.saved}">
         <span class="material-icons-round">${r.saved ? 'bookmark' : 'bookmark_border'}</span>
       </button>
-      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${(r.title || r.description || 'this topic').replace(/'/g, '').slice(0, 40)}')" title="AI Doubt Solver">
+      <button type="button" class="act-btn ai-act-btn" onclick="openAI('${escAttr((r.title || r.description || 'this topic').slice(0, 40))}')" title="AI Doubt Solver">
         <span class="material-icons-round" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">smart_toy</span>
       </button>
     </div>
@@ -5107,7 +5187,7 @@
           <span class="material-icons-round">chat_bubble</span>
           <small id="rcomms-${r.id}">${r.comments_count}</small>
         </div>
-        <div class="rfab" onclick="openShare('reel', ${r.id}, '${r.title}')">
+        <div class="rfab" onclick="openShare('reel', ${r.id}, '${escAttr(r.title)}')">
           <span class="material-icons-round">send</span>
           <small>Share</small>
         </div>
@@ -5493,6 +5573,101 @@
         icon.textContent = 'visibility_off';
       }
     }
+
+    /* ═══════════════════════════════════════════════════════
+       SETTINGS ACTIONS
+    ═══════════════════════════════════════════════════════ */
+    function openChangePassword() {
+      document.getElementById('pwdModalOverlay').classList.add('show');
+      document.getElementById('pwdErr').textContent = '';
+      document.getElementById('pwdOld').value = '';
+      document.getElementById('pwdNew').value = '';
+      document.getElementById('pwdConfirm').value = '';
+    }
+    function closeChangePassword() { document.getElementById('pwdModalOverlay').classList.remove('show'); }
+    async function submitChangePassword() {
+      const oldPass = document.getElementById('pwdOld').value;
+      const newPass = document.getElementById('pwdNew').value;
+      const confirmPass = document.getElementById('pwdConfirm').value;
+      const err = document.getElementById('pwdErr');
+      if (!oldPass || !newPass || !confirmPass) { err.textContent = 'All fields required'; return; }
+      if (newPass.length < 6) { err.textContent = 'New password must be at least 6 chars'; return; }
+      if (newPass !== confirmPass) { err.textContent = 'Passwords do not match'; return; }
+      try {
+        await api('/auth/change-password', { method: 'POST', body: JSON.stringify({ old_password: oldPass, new_password: newPass }) });
+        toast('✅ Password updated!');
+        closeChangePassword();
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    }
+
+    function openForgotPwd() {
+      document.getElementById('forgotPwdOverlay').classList.add('show');
+      document.getElementById('forgotStep1').classList.remove('hidden');
+      document.getElementById('forgotStep2').classList.add('hidden');
+      document.getElementById('forgotErr').textContent = '';
+      document.getElementById('forgotEmail').value = '';
+    }
+    function closeForgotPwd() { document.getElementById('forgotPwdOverlay').classList.remove('show'); }
+    async function requestResetOTP() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      if (!email) { document.getElementById('forgotErr').textContent = 'Email required'; return; }
+      try {
+        await api('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+        document.getElementById('forgotStep1').classList.add('hidden');
+        document.getElementById('forgotStep2').classList.remove('hidden');
+        document.getElementById('forgotErr').textContent = '';
+      } catch (e) {
+        document.getElementById('forgotErr').textContent = e.message;
+      }
+    }
+    async function submitResetPassword() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      const otp = document.getElementById('forgotOTP').value.trim();
+      const pass = document.getElementById('forgotNewPass').value;
+      if (!otp || !pass) { document.getElementById('forgotErr').textContent = 'All fields required'; return; }
+      try {
+        await api('/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, otp, new_password: pass }) });
+        toast('✅ Password reset successful! Log in now.');
+        closeForgotPwd();
+      } catch (e) {
+        document.getElementById('forgotErr').textContent = e.message;
+      }
+    }
+
+    function showDeleteAccountConfirm() {
+      if (confirm('⚠️ Are you sure you want to delete your account? This will permanently remove all your posts, reels, and data. This action CANNOT be undone.')) {
+        deleteAccount();
+      }
+    }
+    async function deleteAccount() {
+      try {
+        await api('/account/delete', { method: 'DELETE' });
+        toast('Account deleted successfully');
+        logoutUser(true);
+      } catch (e) {
+        toast('⚠️ Error: ' + e.message);
+      }
+    }
+
+    function showClearChatConfirm() {
+      if (confirm('🗑️ Clear all chat history? This will remove all your messages.')) {
+        clearChat();
+      }
+    }
+    async function clearChat() {
+      try {
+        await api('/chat/clear-history', { method: 'DELETE' });
+        toast('✅ Chat history cleared');
+        if (typeof refreshChatMsgs === 'function') refreshChatMsgs();
+      } catch (e) {
+        toast('⚠️ Error: ' + e.message);
+      }
+    }
+
+    function openUserManual() { document.getElementById('manualOverlay').classList.add('show'); }
+    function closeUserManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 
     /* ═══════════════════════════════════════════════════════
        POST MENU (three-dot)
@@ -6039,7 +6214,7 @@
     <div class="apc-caption"><strong>${p.title || ''}</strong> ${p.description || ''}</div>
     ${p.hashtags && p.hashtags.length ? `<div class="apc-tags">${p.hashtags.join(' ')}</div>` : ''}
     <div class="apc-actions">
-      <button type="button" class="apc-edit" onclick="adminOpenEdit(${p.id}, '${(p.title || '').replace(/'/g, "\\'")}', '${(p.description || '').replace(/'/g, "\\'")}', '${p.domain || 'Other'}')">
+      <button type="button" class="apc-edit" onclick="adminOpenEdit(${p.id}, '${escAttr(p.title || '')}', '${escAttr(p.description || '')}', '${escAttr(p.domain || 'Other')}')">
         <span class="material-icons-round">edit</span> Edit
       </button>
       <button type="button" class="apc-approve" onclick="adminApprove(${p.id})">
@@ -6047,6 +6222,9 @@
       </button>
       <button type="button" class="apc-reject" onclick="adminReject(${p.id})">
         <span class="material-icons-round">cancel</span> Reject
+      </button>
+      <button type="button" class="apc-reject" onclick="deletePost(${p.id})" style="background:rgba(239,68,68,0.15);color:#ef4444">
+        <span class="material-icons-round">delete</span> Delete
       </button>
     </div>`;
       return el;

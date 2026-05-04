@@ -308,37 +308,86 @@ def send_otp_email(recipient_email, otp):
         print(f"SMTP Error: {e}")
         return False
 
-@app.route('/auth/request-otp', methods=['POST'])
-def request_otp():
+    return jsonify({'message': 'OTP sent successfully'})
+
+@app.route('/auth/forgot-password', methods=['POST'])
+def forgot_password():
     d = request.get_json()
     email = d.get('email', '').strip().lower()
-    username = d.get('username', '').strip().lower()
-    
-    if not email or not username: return jsonify({'error': 'Email and username required'}), 400
+    if not email: return jsonify({'error': 'Email required'}), 400
     
     conn = get_db()
     curr = conn.cursor()
-    curr.execute("SELECT id FROM users WHERE email=%s OR username=%s", (email, username))
-    existing = curr.fetchone()
-    if existing:
+    curr.execute("SELECT id FROM users WHERE email=%s", (email,))
+    user = curr.fetchone()
+    if not user:
         conn.close()
-        return jsonify({'error': 'Username or email already taken'}), 409
+        # Return success even if email not found for security, but don't send anything
+        return jsonify({'message': 'If an account exists, an OTP has been sent.'})
         
     otp = str(random.randint(100000, 999999))
     expires_at = (datetime.now() + timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')
     
-    # cleanup old otps for this email
-    curr = conn.cursor()
     curr.execute("DELETE FROM otp_requests WHERE email=%s", (email,))
     curr.execute("INSERT INTO otp_requests (email, otp, expires_at) VALUES (%s, %s, %s)", (email, otp, expires_at))
     conn.commit()
     conn.close()
     
-    success = send_otp_email(email, otp)
-    if not success:
-        print(f"Warning: Failed to send real email. The OTP for {email} is {otp}")
+    send_otp_email(email, otp)
+    return jsonify({'message': 'If an account exists, an OTP has been sent.'})
 
-    return jsonify({'message': 'OTP sent successfully'})
+@app.route('/auth/reset-password', methods=['POST'])
+def reset_password():
+    d = request.get_json()
+    email = d.get('email', '').strip().lower()
+    otp = d.get('otp', '').strip()
+    new_password = d.get('new_password', '')
+    
+    if not email or not otp or not new_password:
+        return jsonify({'error': 'All fields required'}), 400
+        
+    conn = get_db()
+    curr = conn.cursor()
+    curr.execute("SELECT * FROM otp_requests WHERE email=%s AND otp=%s", (email, otp))
+    req = curr.fetchone()
+    
+    if not req or datetime.now() > req['expires_at']:
+        conn.close()
+        return jsonify({'error': 'Invalid or expired OTP'}), 400
+        
+    pass_hash = hash_password(new_password)
+    curr.execute("UPDATE users SET password_hash=%s WHERE email=%s", (pass_hash, email))
+    curr.execute("DELETE FROM otp_requests WHERE email=%s", (email,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Password reset successful'})
+
+@app.route('/auth/change-password', methods=['POST'])
+def change_password():
+    user = get_current_user(request)
+    if not user: return jsonify({'error': 'Unauthorized'}), 401
+    
+    d = request.get_json()
+    old_pass = d.get('old_password', '')
+    new_pass = d.get('new_password', '')
+    
+    if not old_pass or not new_pass:
+        return jsonify({'error': 'Current and new password required'}), 400
+        
+    conn = get_db()
+    curr = conn.cursor()
+    curr.execute("SELECT password_hash FROM users WHERE id=%s", (user['id'],))
+    row = curr.fetchone()
+    
+    if not row or row['password_hash'] != hash_password(old_pass):
+        conn.close()
+        return jsonify({'error': 'Incorrect current password'}), 401
+        
+    new_hash = hash_password(new_pass)
+    curr.execute("UPDATE users SET password_hash=%s WHERE id=%s", (new_hash, user['id']))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Password changed successfully'})
 
 @app.route('/auth/register', methods=['POST'])
 def register():
@@ -506,11 +555,6 @@ def get_feed():
     conn = get_db()
     if not conn: return jsonify({'error': 'DB Error'}), 500
     curr = conn.cursor()
-    # Recommended feed priorities:
-    # 1. Users current user follows
-    # 2. Domains matching user's interests or liked domains
-    # 3. Overall popularity (likes/comments)
-    # 4. Recency
     # Recommended feed priorities:
     # 1. Users current user follows
     # 2. Domains matching user's interests or liked domains
@@ -722,7 +766,31 @@ def delete_post(pid):
     curr.execute('DELETE FROM saves WHERE post_id=%s',(pid,))
     curr.execute('DELETE FROM posts WHERE id=%s',(pid,))
     conn.commit(); conn.close()
-    return jsonify({'message':'Deleted'})
+    return jsonify({'message':'Cleared'})
+
+@app.route('/account/delete', methods=['DELETE'])
+def delete_account():
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}), 401
+    conn = get_db()
+    curr = conn.cursor()
+    # Delete user (cascades will handle posts, reels, likes, messages, etc.)
+    curr.execute("DELETE FROM users WHERE id=%s", (user['id'],))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Account deleted successfully'})
+
+@app.route('/chat/clear-history', methods=['DELETE'])
+def clear_chat_history():
+    user = get_current_user(request)
+    if not user: return jsonify({'error':'Unauthorized'}), 401
+    conn = get_db()
+    curr = conn.cursor()
+    # Delete all messages where user is sender or receiver
+    curr.execute("DELETE FROM messages WHERE sender_id=%s OR receiver_id=%s", (user['id'], user['id']))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Chat history cleared'})
 
 @app.route('/profile/posts', methods=['GET'])
 def user_posts():
@@ -1036,7 +1104,6 @@ def on_typing(data):
 
 # AI CHAT
 @app.route('/ai/chat', methods=['POST'])
-@app.route('/ai/chat', methods=['POST'])
 def ai_chat():
     if not GEMINI_OK:
         return jsonify({'error': 'AI service not available'}), 503
@@ -1047,20 +1114,10 @@ def ai_chat():
 
     data = request.get_json() or {}
     message = data.get("message", "").strip()
+    history = data.get("history", [])
 
     if not message:
         return jsonify({'error': 'Message required'}), 400
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=message
-        )
-
-        return jsonify({"reply": response.text})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
     # Build conversation contents
     contents = []
@@ -1084,14 +1141,15 @@ Constraint: If a user asks a question unrelated to education or learning, polite
 Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answers focused and practical.""")
             ],
         )
+        
         # Try models in order of preference
         models_to_try = [
             'gemini-2.0-flash-lite',
             'gemini-2.0-flash',
-            'gemini-flash-latest', # Replaces 1.5-flash
-            'gemini-2.5-flash',    # Future proofing
+            'gemini-flash-latest',
             'gemini-pro-latest'
         ]
+        
         last_err = None
         for model_name in models_to_try:
             try:
