@@ -38,7 +38,7 @@ try:
     if not GEMINI_KEY:
         raise Exception("Missing GEMINI_KEY")
 
-    client = genai.Client(api_key=GEMINI_KEY)
+    gemini_client = genai.Client(api_key=GEMINI_KEY)
 
     GEMINI_OK = True
     print("✅ Gemini AI loaded")
