@@ -1219,15 +1219,18 @@
       gap: 5px;
       color: #fff;
       cursor: pointer;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
     }
 
     .rfab .material-icons-round {
       font-size: 32px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .rfab:active .material-icons-round { transform: scale(1.3); }
+
+    .rfab:active .material-icons-round {
+      transform: scale(1.3);
+    }
 
     .rfab small {
       font-size: 12px;
@@ -1235,8 +1238,13 @@
       color: #fff;
     }
 
-    .rfab.liked .material-icons-round { color: #ff3b5c !important; }
-    .rfab.saved .material-icons-round { color: #face15 !important; }
+    .rfab.liked .material-icons-round {
+      color: #ff3b5c !important;
+    }
+
+    .rfab.saved .material-icons-round {
+      color: #face15 !important;
+    }
 
     .reel-progress {
       position: absolute;
@@ -1545,6 +1553,7 @@
     #profileScreen {
       padding-bottom: 80px;
     }
+
     .profile-tabs {
       display: flex;
       border-top: 1px solid var(--border);
@@ -1552,6 +1561,7 @@
       margin-top: 20px;
       background: var(--surface);
     }
+
     .p-tab {
       flex: 1;
       display: flex;
@@ -1563,9 +1573,11 @@
       transition: all 0.2s;
       position: relative;
     }
+
     .p-tab.active {
       color: var(--accent);
     }
+
     .p-tab.active::after {
       content: '';
       position: absolute;
@@ -1577,16 +1589,22 @@
       background: var(--accent);
       border-radius: 2px;
     }
-    .p-tab .material-icons-round { font-size: 24px; }
+
+    .p-tab .material-icons-round {
+      font-size: 24px;
+    }
+
     .profile-content-area {
       min-height: 200px;
     }
+
     .profile-posts-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1px;
       background: var(--border);
     }
+
     .profile-post-thumb {
       aspect-ratio: 1/1;
       background: var(--surface2);
@@ -1594,15 +1612,18 @@
       cursor: pointer;
       overflow: hidden;
     }
-    .profile-post-thumb img, .profile-post-thumb video {
+
+    .profile-post-thumb img,
+    .profile-post-thumb video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+
     .ppt-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -1611,14 +1632,19 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
-    .profile-post-thumb:hover .ppt-overlay { opacity: 1; }
+
+    .profile-post-thumb:hover .ppt-overlay {
+      opacity: 1;
+    }
+
     .ppt-type-badge {
       position: absolute;
       top: 5px;
       right: 5px;
       font-size: 14px;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
     }
+
     .ppt-status {
       position: absolute;
       bottom: 5px;
@@ -1626,19 +1652,29 @@
       font-size: 9px;
       padding: 2px 6px;
       border-radius: 4px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       color: #fff;
       text-transform: uppercase;
       font-weight: 700;
     }
-    .ppt-status.approved { color: #4ade80; }
-    .ppt-status.pending { color: #facc15; }
-    .ppt-status.rejected { color: #f87171; }
+
+    .ppt-status.approved {
+      color: #4ade80;
+    }
+
+    .ppt-status.pending {
+      color: #facc15;
+    }
+
+    .ppt-status.rejected {
+      color: #f87171;
+    }
+
     .ppt-delete-btn {
       position: absolute;
       top: 5px;
       left: 5px;
-      background: rgba(255,0,0,0.7);
+      background: rgba(255, 0, 0, 0.7);
       color: #fff;
       border: none;
       width: 24px;
@@ -1650,7 +1686,10 @@
       cursor: pointer;
       z-index: 2;
     }
-    .ppt-delete-btn span { font-size: 14px; }
+
+    .ppt-delete-btn span {
+      font-size: 14px;
+    }
 
     .profile-banner {
       height: 120px;
@@ -3293,7 +3332,9 @@
         <div class="auth-err" id="authErr"></div>
         <button type="button" class="auth-btn" id="authSubmit" onclick="handleAuth()">Log In</button>
         <div style="text-align:center; margin-top:16px">
-          <button type="button" onclick="openForgotPwd()" style="background:none; border:none; color:var(--accent2); font-size:13px; font-weight:600; cursor:pointer">Forgot Password?</button>
+          <button type="button" onclick="openForgotPwd()"
+            style="background:none; border:none; color:var(--accent2); font-size:13px; font-weight:600; cursor:pointer">Forgot
+            Password?</button>
         </div>
       </div>
     </div>
@@ -3729,7 +3770,8 @@
           <div class="settings-section-label">Security & Help</div>
           <div class="settings-card">
             <div class="settings-row" onclick="openUserManual()">
-              <div class="settings-row-icon" style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(0,240,255,.15))">📖</div>
+              <div class="settings-row-icon"
+                style="background:linear-gradient(135deg, rgba(255,159,28,.15), rgba(0,240,255,.15))">📖</div>
               <div class="settings-row-title">User Manual & Guide</div>
               <span class="material-icons-round settings-row-arrow">chevron_right</span>
             </div>
@@ -4032,22 +4074,29 @@
       <div id="forgotStep1">
         <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter your email to receive a reset code.</p>
         <div class="pwd-field">
-          <input type="email" id="forgotEmail" placeholder="Email address" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
+          <input type="email" id="forgotEmail" placeholder="Email address"
+            style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
         </div>
-        <button type="button" class="auth-btn" style="margin-top:16px" onclick="requestResetOTP()">Send Reset Code</button>
+        <button type="button" class="auth-btn" style="margin-top:16px" onclick="requestResetOTP()">Send Reset
+          Code</button>
       </div>
       <div id="forgotStep2" class="hidden">
-        <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter the code sent to your email and your new password.</p>
+        <p style="font-size:12px; color:var(--sub); margin-bottom:16px">Enter the code sent to your email and your new
+          password.</p>
         <div class="pwd-field">
-          <input type="text" id="forgotOTP" placeholder="6-digit code" maxlength="6" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text); letter-spacing:4px; text-align:center">
+          <input type="text" id="forgotOTP" placeholder="6-digit code" maxlength="6"
+            style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text); letter-spacing:4px; text-align:center">
         </div>
         <div class="pwd-field">
-          <input type="password" id="forgotNewPass" placeholder="New Password" style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
+          <input type="password" id="forgotNewPass" placeholder="New Password"
+            style="padding:12px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); width:100%; color:var(--text)">
         </div>
-        <button type="button" class="auth-btn" style="margin-top:16px" onclick="submitResetPassword()">Reset Password</button>
+        <button type="button" class="auth-btn" style="margin-top:16px" onclick="submitResetPassword()">Reset
+          Password</button>
       </div>
       <div class="pwd-err" id="forgotErr"></div>
-      <button type="button" class="confirm-btn confirm-btn-cancel" style="margin-top:12px; width:100%" onclick="closeForgotPwd()">Cancel</button>
+      <button type="button" class="confirm-btn confirm-btn-cancel" style="margin-top:12px; width:100%"
+        onclick="closeForgotPwd()">Cancel</button>
     </div>
   </div>
 
@@ -4056,35 +4105,42 @@
     <div class="pwd-modal" style="max-width:500px; max-height:80vh; overflow-y:auto">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
         <h2 style="margin:0">📖 User Guide</h2>
-        <button type="button" onclick="closeUserManual()" style="background:none; border:none; color:var(--sub); cursor:pointer"><span class="material-icons-round">close</span></button>
+        <button type="button" onclick="closeUserManual()"
+          style="background:none; border:none; color:var(--sub); cursor:pointer"><span
+            class="material-icons-round">close</span></button>
       </div>
       <div class="manual-content" style="text-align:left; line-height:1.6">
         <h4 style="color:var(--accent2)">Welcome to Scroll2Learn!</h4>
         <p>A place where education meets social media. Here's how to use the platform:</p>
-        
+
         <div style="margin-bottom:16px">
           <strong>🏠 Home Feed</strong>
-          <p style="margin:4px 0; font-size:13px">Scroll through educational posts. Like, comment, and save content that interests you. Use the AI icon on any post to ask doubts about that topic.</p>
+          <p style="margin:4px 0; font-size:13px">Scroll through educational posts. Like, comment, and save content that
+            interests you. Use the AI icon on any post to ask doubts about that topic.</p>
         </div>
 
         <div style="margin-bottom:16px">
           <strong>🎬 Reels</strong>
-          <p style="margin:4px 0; font-size:13px">Watch short educational videos. Double-tap the Reels icon in the dock to refresh your feed with new content!</p>
+          <p style="margin:4px 0; font-size:13px">Watch short educational videos. Double-tap the Reels icon in the dock
+            to refresh your feed with new content!</p>
         </div>
 
         <div style="margin-bottom:16px">
           <strong>✍️ Create Content</strong>
-          <p style="margin:4px 0; font-size:13px">Share your knowledge! Click the <b>+</b> icon in the radial menu to upload photos or reels. Tag them with domains like Python, AI, or UPSC.</p>
+          <p style="margin:4px 0; font-size:13px">Share your knowledge! Click the <b>+</b> icon in the radial menu to
+            upload photos or reels. Tag them with domains like Python, AI, or UPSC.</p>
         </div>
 
         <div style="margin-bottom:16px">
           <strong>🤖 AI Assistant</strong>
-          <p style="margin:4px 0; font-size:13px">Need help? Open the AI Assistant from the radial menu. It's your personal tutor, available 24/7 to solve your doubts.</p>
+          <p style="margin:4px 0; font-size:13px">Need help? Open the AI Assistant from the radial menu. It's your
+            personal tutor, available 24/7 to solve your doubts.</p>
         </div>
 
         <div style="margin-bottom:16px">
           <strong>👤 Profile & Settings</strong>
-          <p style="margin:4px 0; font-size:13px">Customize your profile, track your posts, and manage your account security from the Settings screen.</p>
+          <p style="margin:4px 0; font-size:13px">Customize your profile, track your posts, and manage your account
+            security from the Settings screen.</p>
         </div>
       </div>
     </div>
@@ -4113,7 +4169,7 @@
     /* Safe string escaper for onclick attributes */
     function escAttr(s) {
       if (!s) return '';
-      return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/`/g,'\\`');
+      return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/`/g, '\\`');
     }
 
     /* UI HELPERS */
@@ -4415,11 +4471,18 @@
     function formatChatTime(ts) {
       if (!ts) return '';
       try {
-        const d = new Date(ts);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } catch (e) { return ''; }
-    }
+        const fixed = ts.replace(' ', 'T') + 'Z'; // force UTC
 
+        const d = new Date(fixed);
+
+        return d.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return '';
+      }
+    }
     function scrollToBottom() {
       const list = document.getElementById('dmMsgList');
       list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
@@ -5250,9 +5313,9 @@
             let val = parseInt(el.textContent) || 0;
             let newVal = inc ? val + 1 : Math.max(0, val - 1);
             if (el.id.startsWith('likes-')) {
-               el.textContent = `${newVal} ${newVal === 1 ? 'like' : 'likes'}`;
+              el.textContent = `${newVal} ${newVal === 1 ? 'like' : 'likes'}`;
             } else {
-               el.textContent = newVal;
+              el.textContent = newVal;
             }
           }
         });
@@ -5265,9 +5328,9 @@
         // if (res.likes_count !== undefined) updateCounts(postId, res.liked, res.likes_count);
         if (liked) addNotif(`❤️ You liked a post`);
       } catch (e) {
-         // Rollback if error
-         btn.classList.toggle('liked', !liked);
-         updateCounts(postId, !liked);
+        // Rollback if error
+        btn.classList.toggle('liked', !liked);
+        updateCounts(postId, !liked);
       }
     }
 
@@ -5375,7 +5438,7 @@
       try {
         await api(`/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ text }) });
         openComment(currentPostId);
-        
+
         // Instant count update
         const rcomms = document.getElementById(`rcomms-${currentPostId}`);
         if (rcomms) rcomms.textContent = (parseInt(rcomms.textContent) || 0) + 1;
@@ -5773,7 +5836,7 @@
       btn.classList.add('active');
       const postsGrid = document.getElementById('profilePostsGrid');
       const savedGrid = document.getElementById('profileSavedGrid');
-      
+
       if (tab === 'posts') {
         postsGrid.classList.remove('hidden');
         savedGrid.classList.add('hidden');
