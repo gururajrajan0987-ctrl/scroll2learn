@@ -3062,7 +3062,7 @@
     .confirm-modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 960;
+      z-index: 2000;
       background: rgba(0, 0, 0, .75);
       backdrop-filter: blur(10px);
       display: none;
@@ -3147,7 +3147,7 @@
     .pwd-modal-overlay {
       position: fixed;
       inset: 0;
-      z-index: 960;
+      z-index: 2000;
       background: rgba(0, 0, 0, .75);
       backdrop-filter: blur(10px);
       display: none;
@@ -3846,7 +3846,7 @@
 
   <!-- OTP Overlay Modal -->
   <div class="screen" id="otpOverlay"
-    style="display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);align-items:center;justify-content:center;padding:32px 28px;">
+    style="display:none;position:fixed;inset:0;z-index:2000;background:var(--bg);align-items:center;justify-content:center;padding:32px 28px;">
     <div
       style="background:var(--surface);width:100%;max-width:400px;border-radius:24px;padding:32px 24px;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center">
       <div style="font-size:42px;margin-bottom:12px">📩</div>
@@ -4235,6 +4235,12 @@
             document.getElementById('authErr') && (document.getElementById('authErr').textContent = 'Server waking up, please try again in a moment...');
           }
         }
+      } else {
+        // Not logged in: Ensure main shell is hidden, show auth
+        document.getElementById('topbar').style.display = 'none';
+        document.getElementById('mainArea').style.display = 'none';
+        document.getElementById('bottomNav').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
       }
     }
     function initSocket() {
