@@ -313,19 +313,44 @@ The Scroll2Learn Team ✨"""
         msg.attach(MIMEText(body, 'plain'))
         
         try:
-            # Added timeout to prevent hanging
-            server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
-            server.starttls()
+            # Try port 465 (SSL) which is often more reliable for Gmail
+            print(f"📧 Attempting to send email to {recipient_email}...")
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15)
             server.login(GMAIL_USER, GMAIL_PASS)
             server.send_message(msg)
             server.quit()
-            print(f"✅ OTP email sent to {recipient_email}")
+            print(f"✅ SUCCESS: OTP email sent to {recipient_email}")
         except Exception as e:
-            print(f"❌ SMTP Error for {recipient_email}: {e}")
-            print(f"💡 Fallback: Use OTP {otp} for testing if email delivery failed.")
+            print(f"❌ SMTP ERROR: Failed to send email to {recipient_email}")
+            print(f"   Reason: {str(e)}")
+            if "AuthenticationFailed" in str(e) or "Username and Password not accepted" in str(e):
+                print("   ⚠️ TIP: Ensure you are using a Gmail 'App Password', not your regular password.")
+            print(f"   💡 TESTING: Use OTP {otp} manually to proceed.")
 
     # Run in background thread to avoid blocking the main request
     threading.Thread(target=_send).start()
+
+@app.route('/auth/test-email', methods=['GET'])
+def test_email():
+    """Diagnostic route to test email sending synchronously"""
+    test_email = request.args.get('email', GMAIL_USER)
+    if not test_email:
+        return jsonify({'error': 'No recipient email provided'}), 400
+    
+    msg = MIMEMultipart()
+    msg['From'] = GMAIL_USER
+    msg['To'] = test_email
+    msg['Subject'] = 'Scroll2Learn - Test Connection ✅'
+    msg.attach(MIMEText("If you see this, your email configuration is working perfectly!", 'plain'))
+    
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15)
+        server.login(GMAIL_USER, GMAIL_PASS)
+        server.send_message(msg)
+        server.quit()
+        return jsonify({'status': 'success', 'message': f'Test email sent to {test_email}'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e), 'tip': 'Check your GMAIL_USER and GMAIL_PASS. Use an App Password if using Gmail.'}), 500
 
 @app.route('/auth/request-otp', methods=['POST'])
 def request_otp():
