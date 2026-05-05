@@ -308,6 +308,34 @@ def send_otp_email(recipient_email, otp):
         print(f"SMTP Error: {e}")
         return False
 
+@app.route('/auth/request-otp', methods=['POST'])
+def request_otp():
+    d = request.get_json()
+    email = d.get('email', '').strip().lower()
+    username = d.get('username', '').strip().lower()
+    
+    if not email or not username: return jsonify({'error': 'Email and username required'}), 400
+    
+    conn = get_db()
+    curr = conn.cursor()
+    curr.execute("SELECT id FROM users WHERE email=%s OR username=%s", (email, username))
+    existing = curr.fetchone()
+    if existing:
+        conn.close()
+        return jsonify({'error': 'Username or email already taken'}), 409
+        
+    otp = str(random.randint(100000, 999999))
+    expires_at = (datetime.now() + timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')
+    
+    curr.execute("DELETE FROM otp_requests WHERE email=%s", (email,))
+    curr.execute("INSERT INTO otp_requests (email, otp, expires_at) VALUES (%s, %s, %s)", (email, otp, expires_at))
+    conn.commit()
+    conn.close()
+    
+    success = send_otp_email(email, otp)
+    if not success:
+        print(f"Warning: Failed to send real email. The OTP for {email} is {otp}")
+
     return jsonify({'message': 'OTP sent successfully'})
 
 @app.route('/auth/forgot-password', methods=['POST'])
