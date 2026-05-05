@@ -312,19 +312,42 @@ The Scroll2Learn Team ✨"""
         
         msg.attach(MIMEText(body, 'plain'))
         
-        try:
-            # Try port 465 (SSL) which is often more reliable for Gmail
-            print(f"📧 Attempting to send email to {recipient_email}...")
-            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15)
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.send_message(msg)
-            server.quit()
-            print(f"✅ SUCCESS: OTP email sent to {recipient_email}")
-        except Exception as e:
-            print(f"❌ SMTP ERROR: Failed to send email to {recipient_email}")
-            print(f"   Reason: {str(e)}")
-            if "AuthenticationFailed" in str(e) or "Username and Password not accepted" in str(e):
-                print("   ⚠️ TIP: Ensure you are using a Gmail 'App Password', not your regular password.")
+        # Try multiple ports/protocols as cloud providers (like Render) often block one but not the other
+        ports_to_try = [
+            {'port': 465, 'use_ssl': True},
+            {'port': 587, 'use_ssl': False}
+        ]
+        
+        last_exception = None
+        success = False
+
+        for config in ports_to_try:
+            try:
+                p = config['port']
+                print(f"📧 Attempting email via port {p} ({'SSL' if config['use_ssl'] else 'STARTTLS'})...")
+                
+                if config['use_ssl']:
+                    server = smtplib.SMTP_SSL('smtp.gmail.com', p, timeout=15)
+                else:
+                    server = smtplib.SMTP('smtp.gmail.com', p, timeout=15)
+                    server.starttls()
+                
+                server.login(GMAIL_USER, GMAIL_PASS)
+                server.send_message(msg)
+                server.quit()
+                success = True
+                print(f"✅ SUCCESS: OTP email sent to {recipient_email} via port {p}")
+                break
+            except Exception as e:
+                last_exception = e
+                print(f"⚠️  Port {config['port']} failed: {str(e)}")
+                continue
+        
+        if not success:
+            print(f"❌ ALL SMTP PORTS FAILED for {recipient_email}")
+            print(f"   Final Error: {str(last_exception)}")
+            if "AuthenticationFailed" in str(last_exception) or "Username and Password not accepted" in str(last_exception):
+                print("   ⚠️  TIP: Check your 'App Password'. Regular Gmail passwords are NOT allowed.")
             print(f"   💡 TESTING: Use OTP {otp} manually to proceed.")
 
     # Run in background thread to avoid blocking the main request
@@ -344,13 +367,28 @@ def test_email():
     msg.attach(MIMEText("If you see this, your email configuration is working perfectly!", 'plain'))
     
     try:
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15)
-        server.login(GMAIL_USER, GMAIL_PASS)
-        server.send_message(msg)
-        server.quit()
-        return jsonify({'status': 'success', 'message': f'Test email sent to {test_email}'})
+        # Diagnostic: Try port 465 first
+        try:
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15)
+            server.login(GMAIL_USER, GMAIL_PASS)
+            server.send_message(msg)
+            server.quit()
+            return jsonify({'status': 'success', 'message': f'Test email sent to {test_email} via port 465'})
+        except Exception as e1:
+            # Fallback to 587
+            print(f"Diagnostic: Port 465 failed ({e1}), trying 587...")
+            server = smtplib.SMTP('smtp.gmail.com', 587, timeout=15)
+            server.starttls()
+            server.login(GMAIL_USER, GMAIL_PASS)
+            server.send_message(msg)
+            server.quit()
+            return jsonify({'status': 'success', 'message': f'Test email sent to {test_email} via port 587'})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e), 'tip': 'Check your GMAIL_USER and GMAIL_PASS. Use an App Password if using Gmail.'}), 500
+        return jsonify({
+            'status': 'error', 
+            'message': str(e), 
+            'tip': 'If you see "Network is unreachable", the hosting provider is blocking SMTP. Check your GMAIL_USER/PASS and use an App Password.'
+        }), 500
 
 @app.route('/auth/request-otp', methods=['POST'])
 def request_otp():
