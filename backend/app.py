@@ -2,7 +2,7 @@ import gevent.monkey
 gevent.monkey.patch_all()
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-import os, hashlib, secrets, time, json, random, smtplib
+import os, hashlib, secrets, time, json, random, smtplib, threading
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -291,22 +291,41 @@ init_db()
 
 # AUTH
 def send_otp_email(recipient_email, otp):
-    msg = MIMEMultipart()
-    msg['From'] = GMAIL_USER
-    msg['To'] = recipient_email
-    msg['Subject'] = 'Your Scroll2Learn Verification Code'
-    body = f"Hello!\\n\\nYour verification code is: {otp}\\n\\nThis code will expire in 5 minutes.\\n\\nStay curious,\\nScroll2Learn Team"
-    msg.attach(MIMEText(body, 'plain'))
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(GMAIL_USER, GMAIL_PASS)
-        server.send_message(msg)
-        server.quit()
-        return True
-    except Exception as e:
-        print(f"SMTP Error: {e}")
-        return False
+    def _send():
+        if not GMAIL_USER or not GMAIL_PASS:
+            print(f"⚠️ SMTP Config missing. The OTP for {recipient_email} is {otp}")
+            return
+
+        msg = MIMEMultipart()
+        msg['From'] = f"Scroll2Learn <{GMAIL_USER}>"
+        msg['To'] = recipient_email
+        msg['Subject'] = 'Your Scroll2Learn Verification Code 🚀'
+        
+        body = f"""Hello! 👋
+
+Your verification code is: {otp}
+
+This code will expire in 5 minutes. If you didn't request this, you can safely ignore this email.
+
+Stay curious,
+The Scroll2Learn Team ✨"""
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        try:
+            # Added timeout to prevent hanging
+            server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+            server.starttls()
+            server.login(GMAIL_USER, GMAIL_PASS)
+            server.send_message(msg)
+            server.quit()
+            print(f"✅ OTP email sent to {recipient_email}")
+        except Exception as e:
+            print(f"❌ SMTP Error for {recipient_email}: {e}")
+            print(f"💡 Fallback: Use OTP {otp} for testing if email delivery failed.")
+
+    # Run in background thread to avoid blocking the main request
+    threading.Thread(target=_send).start()
 
 @app.route('/auth/request-otp', methods=['POST'])
 def request_otp():
@@ -332,9 +351,7 @@ def request_otp():
     conn.commit()
     conn.close()
     
-    success = send_otp_email(email, otp)
-    if not success:
-        print(f"Warning: Failed to send real email. The OTP for {email} is {otp}")
+    send_otp_email(email, otp)
 
     return jsonify({'message': 'OTP sent successfully'})
 
