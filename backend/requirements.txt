@@ -11,3 +11,5 @@ simple-websocket
 gevent-websocket
 google-genai
 google-generativeai
+python-jose[cryptography]
+requests

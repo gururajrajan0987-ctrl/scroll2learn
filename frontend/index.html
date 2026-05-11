@@ -12,6 +12,7 @@
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
   <style>
     /* ═══════════════════════════════════════════════════════
    ROOT VARIABLES & RESET
@@ -4149,6 +4150,12 @@
   <script>
     const API = 'https://scroll2learn.onrender.com';
     let socket = null;
+    
+    // ── Auth0 Configuration ──────────────────────────────────────────────────
+    let auth0Client = null;
+    const AUTH0_DOMAIN = 'dev-qshh23st2p263itw.us.auth0.com';
+    const AUTH0_CLIENT_ID = 'y7xZ6n86rPInH6V3u11qUo1N8B8rVAn4';
+    const AUTH0_AUDIENCE = 'https://scroll2learn.onrender.com';
     let authToken = localStorage.getItem('s2l_token') || '';
     let currentUser = JSON.parse(localStorage.getItem('s2l_user') || 'null');
     let feedPage = 1;
@@ -4206,42 +4213,80 @@
     });
 
     async function initApp() {
-      if (authToken && !appBooted) {
-        // Show a loading indicator while verifying token
-        document.getElementById('authScreen').style.display = 'none';
-        const loadEl = document.getElementById('loading');
-        if (loadEl) loadEl.style.display = 'flex';
-        try {
-          // Verify token and get fresh user data
-          const data = await api('/auth/me');
-          currentUser = data.user;
+      // 1. Initialize Auth0 Client
+      try {
+        auth0Client = await auth0.createAuth0Client({
+          domain: AUTH0_DOMAIN,
+          clientId: AUTH0_CLIENT_ID,
+          authorizationParams: {
+            audience: AUTH0_AUDIENCE,
+            redirect_uri: window.location.origin
+          },
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+
+        // 2. Handle Redirect Callback
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0Client.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/");
+        }
+
+        // 3. Check Authentication Status
+        const isAuthenticated = await auth0Client.isAuthenticated();
+        if (isAuthenticated) {
+          const token = await auth0Client.getTokenSilently();
+          authToken = token;
+          localStorage.setItem('s2l_token', token);
+
+          // Sync user with backend
+          const syncRes = await api('/auth/sync', { method: 'POST' });
+          currentUser = syncRes.user;
           localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+          
           appBooted = true;
-          if (loadEl) loadEl.style.display = 'none';
           initSocket();
+          
           if (!currentUser.is_setup) {
             showSetup();
           } else {
             showMainApp();
           }
-        } catch (e) {
-          if (loadEl) loadEl.style.display = 'none';
-          // Only log out on genuine 401 (bad token), NOT on server unavailable / network errors
-          if (e.message === 'Session expired') {
-            logoutUser(true);
+        } else {
+          // Check for legacy token if Auth0 fails/not used
+          if (authToken && !appBooted) {
+             // ... existing logic ...
+             await verifyLegacyToken();
           } else {
-            // Server is waking up — keep the token, just show auth screen
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('authErr') && (document.getElementById('authErr').textContent = 'Server waking up, please try again in a moment...');
+            showAuth();
           }
         }
-      } else {
-        // Not logged in: Ensure main shell is hidden, show auth
+      } catch (e) {
+        console.error("Auth0 Init Error:", e);
+        showAuth();
+      }
+    }
+
+    async function verifyLegacyToken() {
+        try {
+            const data = await api('/auth/me');
+            currentUser = data.user;
+            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+            appBooted = true;
+            initSocket();
+            if (!currentUser.is_setup) showSetup();
+            else showMainApp();
+        } catch (e) {
+            logoutUser(true);
+        }
+    }
+
+    function showAuth() {
         document.getElementById('topbar').style.display = 'none';
         document.getElementById('mainArea').style.display = 'none';
         document.getElementById('bottomNav').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
-      }
     }
     function initSocket() {
       if (!currentUser || socket) return;
@@ -4602,42 +4647,20 @@
     let pendingRegData = null;
 
     async function handleAuth() {
-      const email = document.getElementById('authEmail').value.trim();
-      const pass = document.getElementById('authPass').value;
-      const errEl = document.getElementById('authErr');
-      errEl.textContent = '';
-
-      if (!email || !pass) { errEl.textContent = 'Please fill all fields'; return; }
-
-      const btn = document.getElementById('authSubmit');
-      const origText = btn.textContent;
-      btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto"></div>';
-      btn.disabled = true;
-
       try {
-        if (authMode === 'login') {
-          const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ identifier: email, password: pass }) });
-          processAuthSuccess(data);
-        } else {
-          const username = document.getElementById('regUsername').value.trim();
-          if (!username) { errEl.textContent = 'Username required'; btn.textContent = origText; btn.disabled = false; return; }
-
-          pendingRegData = { username, email, password: pass };
-
-          // Request OTP instead of direct register
-          const res = await api('/auth/request-otp', { method: 'POST', body: JSON.stringify({ email, username }) });
-
-          document.getElementById('otpOverlay').style.display = 'flex';
-          document.getElementById('otpErr').textContent = '';
-          document.getElementById('otpInput').value = '';
-          document.getElementById('authScreen').style.display = 'none';
-          toast('📩 OTP Sent to your email');
+        if (!auth0Client) {
+            toast('Auth0 is initializing, please wait...');
+            return;
         }
+        // Use Auth0 Universal Login for both Login and Signup
+        await auth0Client.loginWithRedirect({
+          authorizationParams: {
+            screen_hint: authMode === 'signup' ? 'signup' : 'login'
+          }
+        });
       } catch (e) {
-        errEl.textContent = e.message;
+        document.getElementById('authErr').textContent = 'Login failed: ' + e.message;
       }
-      btn.disabled = false;
-      btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
     }
 
     async function verifyOTP() {
@@ -4691,7 +4714,16 @@
     }
 
     async function logoutUser(silent = false) {
-      try { if (!silent) await api('/auth/logout', { method: 'POST' }); } catch (e) { }
+      try { 
+        if (auth0Client) {
+            await auth0Client.logout({
+                logoutParams: {
+                    returnTo: window.location.origin
+                }
+            });
+        }
+        if (!silent) await api('/auth/logout', { method: 'POST' }); 
+      } catch (e) { }
       localStorage.removeItem('s2l_token');
       localStorage.removeItem('s2l_user');
       authToken = '';

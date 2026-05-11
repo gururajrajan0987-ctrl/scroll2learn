@@ -16,6 +16,9 @@ import cloudinary.api
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from functools import wraps
+from jose import jwt
+import requests
 
 # ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
 load_dotenv()
@@ -98,6 +101,84 @@ online_users = set()
 app.config['SECRET_KEY'] = SECRET_KEY
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'mov'}
+
+# ── Auth0 Configuration ──────────────────────────────────────────────────────
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
+AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE')
+AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
+ALGORITHMS = ["RS256"]
+JWKS_CACHE = None
+
+def get_jwks():
+    global JWKS_CACHE
+    if JWKS_CACHE is None:
+        try:
+            JWKS_CACHE = requests.get(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json", timeout=10).json()
+        except Exception as e:
+            print(f"❌ Failed to fetch JWKS: {e}")
+            return None
+    return JWKS_CACHE
+
+class AuthError(Exception):
+    def __init__(self, error, status_code):
+        self.error = error
+        self.status_code = status_code
+
+def get_token_auth_header():
+    auth = request.headers.get("Authorization", None)
+    if not auth:
+        raise AuthError({"code": "authorization_header_missing", "description": "Authorization header is expected"}, 401)
+    parts = auth.split()
+    if parts[0].lower() != "bearer":
+        raise AuthError({"code": "invalid_header", "description": "Authorization header must start with Bearer"}, 401)
+    elif len(parts) == 1:
+        raise AuthError({"code": "invalid_header", "description": "Token not found"}, 401)
+    elif len(parts) > 2:
+        raise AuthError({"code": "invalid_header", "description": "Authorization header must be Bearer token"}, 401)
+    return parts[1]
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            token = get_token_auth_header()
+            jwks = get_jwks()
+            if not jwks:
+                raise AuthError({"code": "jwks_fetch_failed", "description": "Unable to fetch authentication keys"}, 500)
+            
+            unverified_header = jwt.get_unverified_header(token)
+            rsa_key = {}
+            for key in jwks["keys"]:
+                if key["kid"] == unverified_header["kid"]:
+                    rsa_key = {
+                        "kty": key["kty"],
+                        "kid": key["kid"],
+                        "use": key["use"],
+                        "n": key["n"],
+                        "e": key["e"]
+                    }
+            if rsa_key:
+                payload = jwt.decode(
+                    token,
+                    rsa_key,
+                    algorithms=ALGORITHMS,
+                    audience=AUTH0_AUDIENCE,
+                    issuer=f"https://{AUTH0_DOMAIN}/"
+                )
+                request.current_user = payload
+                return f(*args, **kwargs)
+            raise AuthError({"code": "invalid_header", "description": "Unable to find appropriate key"}, 401)
+        except AuthError as ae:
+            return jsonify(ae.error), ae.status_code
+        except Exception as e:
+            return jsonify({"code": "invalid_token", "description": str(e)}), 401
+    return decorated
+
+@app.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'guru')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', '2005')
 
@@ -148,6 +229,31 @@ def get_current_user(req):
     auth = req.headers.get('Authorization', '')
     if not auth.startswith('Bearer '): return None
     token = auth[7:]
+    
+    # Try Auth0 JWT verification first
+    try:
+        jwks = get_jwks()
+        if jwks:
+            unverified_header = jwt.get_unverified_header(token)
+            rsa_key = {}
+            for key in jwks["keys"]:
+                if key["kid"] == unverified_header["kid"]:
+                    rsa_key = {"kty": key["kty"], "kid": key["kid"], "use": key["use"], "n": key["n"], "e": key["e"]}
+            
+            if rsa_key:
+                payload = jwt.decode(token, rsa_key, algorithms=ALGORITHMS, audience=AUTH0_AUDIENCE, issuer=f"https://{AUTH0_DOMAIN}/")
+                # Found Auth0 token, find user in DB
+                conn = get_db()
+                if conn:
+                    curr = conn.cursor()
+                    curr.execute('SELECT * FROM users WHERE auth0_id=%s', (payload['sub'],))
+                    row = curr.fetchone()
+                    conn.close()
+                    if row: return dict(row)
+    except Exception:
+        pass # Not a valid Auth0 token or user not synced yet, try legacy session
+
+    # Legacy session fallback
     conn = get_db()
     if not conn: return None
     curr = conn.cursor()
@@ -201,7 +307,10 @@ def init_db():
         is_admin INTEGER DEFAULT 0,
         interests TEXT DEFAULT '[]',
         profession TEXT DEFAULT 'College',
+        auth0_id TEXT UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+    c.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS auth0_id TEXT UNIQUE''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS sessions (
         id SERIAL PRIMARY KEY, 
@@ -557,6 +666,47 @@ def login():
     curr.execute('INSERT INTO sessions (user_id,token) VALUES (%s,%s)',(user['id'],token))
     conn.commit(); conn.close()
     return jsonify({'token':token,'user':serialize_user(dict(user)),'is_new':not user['is_setup']})
+
+@app.route('/auth/sync', methods=['POST'])
+@requires_auth
+def auth_sync():
+    """Sync Auth0 user with local database"""
+    user_info = request.current_user
+    # user_info contains 'sub' (auth0 id), 'email', etc.
+    # We might need 'email' from the request body if not in token, or just from token
+    email = user_info.get('email') or request.get_json().get('email')
+    username = user_info.get('nickname') or user_info.get('name', 'user').split('@')[0]
+    auth0_id = user_info.get('sub')
+    
+    if not email:
+        return jsonify({'error': 'Email is required for synchronization'}), 400
+        
+    conn = get_db()
+    curr = conn.cursor()
+    
+    # Check if user already exists by auth0_id or email
+    curr.execute("SELECT * FROM users WHERE auth0_id=%s OR email=%s", (auth0_id, email))
+    user = curr.fetchone()
+    
+    if not user:
+        # Create new user
+        # We use a random password since Auth0 handles auth
+        temp_pass = hash_password(secrets.token_hex(16))
+        curr.execute(
+            "INSERT INTO users (username, email, password_hash, auth0_id, is_setup) VALUES (%s, %s, %s, %s, 0) RETURNING *",
+            (username, email, temp_pass, auth0_id)
+        )
+        user = curr.fetchone()
+        conn.commit()
+    else:
+        # Update existing user if needed (e.g. set auth0_id)
+        if not user.get('auth0_id'):
+            curr.execute("UPDATE users SET auth0_id=%s WHERE id=%s", (auth0_id, user['id']))
+            conn.commit()
+            user['auth0_id'] = auth0_id
+
+    conn.close()
+    return jsonify({'status': 'success', 'user': user})
 
 @app.route('/auth/me', methods=['GET'])
 def me():
