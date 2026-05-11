@@ -4214,56 +4214,55 @@
 
     async function initApp() {
       // 1. Initialize Auth0 Client
-      try {
-        auth0Client = await auth0.createAuth0Client({
-          domain: AUTH0_DOMAIN,
-          clientId: AUTH0_CLIENT_ID,
-          authorizationParams: {
-            redirect_uri: window.location.origin
-          },
-          cacheLocation: 'localstorage',
-          useRefreshTokens: true
-        });
-        // 2. Handle Redirect Callback
-        const query = window.location.search;
-        if (query.includes("code=") && query.includes("state=")) {
-          await auth0Client.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/");
-        }
-
-        // 3. Check Authentication Status
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        if (isAuthenticated) {
-          const token = await auth0Client.getTokenSilently();
-          authToken = token;
-          localStorage.setItem('s2l_token', token);
-
-          // Sync user with backend
-          const syncRes = await api('/auth/sync', { method: 'POST' });
-          currentUser = syncRes.user;
-          localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-
-          appBooted = true;
-          initSocket();
-
-          if (!currentUser.is_setup) {
-            showSetup();
-          } else {
-            showMainApp();
-          }
-        } else {
-          // Check for legacy token if Auth0 fails/not used
-          if (authToken && !appBooted) {
-            // ... existing logic ...
-            await verifyLegacyToken();
-          } else {
-            showAuth();
-          }
-        }
-      } catch (e) {
-        console.error("Auth0 Init Error:", e);
-        showAuth();
+      auth0Client = await auth0.createAuth0Client({
+        domain: AUTH0_DOMAIN,
+        clientId: AUTH0_CLIENT_ID,
+        authorizationParams: {
+          redirect_uri: window.location.origin + "/"
+        },
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true
+      });
+      // 2. Handle Redirect Callback
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
       }
+
+      // 3. Check Authentication Status
+      const isAuthenticated = await auth0Client.isAuthenticated();
+      if (isAuthenticated) {
+        const token = await auth0Client.getTokenSilently();
+        authToken = token;
+        localStorage.setItem('s2l_token', token);
+
+        // Sync user with backend
+        const syncRes = await api('/auth/sync', { method: 'POST' });
+        currentUser = syncRes.user;
+        localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+
+        appBooted = true;
+        initSocket();
+
+        if (!currentUser.is_setup) {
+          showSetup();
+        } else {
+          showMainApp();
+        }
+      } else {
+        // Check for legacy token if Auth0 fails/not used
+        if (authToken && !appBooted) {
+          // ... existing logic ...
+          await verifyLegacyToken();
+        } else {
+          showAuth();
+        }
+      }
+    } catch (e) {
+      console.error("Auth0 Init Error:", e);
+      showAuth();
+    }
     }
 
     async function verifyLegacyToken() {
