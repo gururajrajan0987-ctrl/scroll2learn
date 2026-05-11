@@ -4219,13 +4219,11 @@
           domain: AUTH0_DOMAIN,
           clientId: AUTH0_CLIENT_ID,
           authorizationParams: {
-            audience: AUTH0_AUDIENCE,
             redirect_uri: window.location.origin
           },
           cacheLocation: 'localstorage',
           useRefreshTokens: true
         });
-
         // 2. Handle Redirect Callback
         const query = window.location.search;
         if (query.includes("code=") && query.includes("state=")) {
