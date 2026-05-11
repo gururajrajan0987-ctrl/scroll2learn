@@ -4214,15 +4214,20 @@
 
     async function initApp() {
       // 1. Initialize Auth0 Client
-      auth0Client = await auth0.createAuth0Client({
-        domain: AUTH0_DOMAIN,
-        clientId: AUTH0_CLIENT_ID,
-        authorizationParams: {
-          redirect_uri: window.location.origin + "/"
-        },
-        cacheLocation: 'localstorage',
-        useRefreshTokens: true
-      });
+      try {
+        auth0Client = await auth0.createAuth0Client({
+          domain: AUTH0_DOMAIN,
+          clientId: AUTH0_CLIENT_ID,
+          authorizationParams: {
+            redirect_uri: window.location.origin + "/"
+          },
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+
+      } catch (e) {
+        console.error("Auth0 Init Error:", e);
+      }
       // 2. Handle Redirect Callback
       const query = window.location.search;
       if (query.includes("code=") && query.includes("state=")) {
