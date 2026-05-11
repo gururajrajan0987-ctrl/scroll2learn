@@ -4150,10 +4150,10 @@
   <script>
     const API = 'https://scroll2learn.onrender.com';
     let socket = null;
-    
+
     // ── Auth0 Configuration ──────────────────────────────────────────────────
     let auth0Client = null;
-    const AUTH0_DOMAIN = 'dev-qshh23st2p263itw.us.auth0.com';
+    const AUTH0_DOMAIN = 'dev-l5i8xe6vipjhh8r0.us.auth0.com';
     const AUTH0_CLIENT_ID = 'y7xZ6n86rPInH6V3u11qUo1N8B8rVAn4';
     const AUTH0_AUDIENCE = 'https://scroll2learn.onrender.com';
     let authToken = localStorage.getItem('s2l_token') || '';
@@ -4244,10 +4244,10 @@
           const syncRes = await api('/auth/sync', { method: 'POST' });
           currentUser = syncRes.user;
           localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-          
+
           appBooted = true;
           initSocket();
-          
+
           if (!currentUser.is_setup) {
             showSetup();
           } else {
@@ -4256,8 +4256,8 @@
         } else {
           // Check for legacy token if Auth0 fails/not used
           if (authToken && !appBooted) {
-             // ... existing logic ...
-             await verifyLegacyToken();
+            // ... existing logic ...
+            await verifyLegacyToken();
           } else {
             showAuth();
           }
@@ -4269,24 +4269,24 @@
     }
 
     async function verifyLegacyToken() {
-        try {
-            const data = await api('/auth/me');
-            currentUser = data.user;
-            localStorage.setItem('s2l_user', JSON.stringify(currentUser));
-            appBooted = true;
-            initSocket();
-            if (!currentUser.is_setup) showSetup();
-            else showMainApp();
-        } catch (e) {
-            logoutUser(true);
-        }
+      try {
+        const data = await api('/auth/me');
+        currentUser = data.user;
+        localStorage.setItem('s2l_user', JSON.stringify(currentUser));
+        appBooted = true;
+        initSocket();
+        if (!currentUser.is_setup) showSetup();
+        else showMainApp();
+      } catch (e) {
+        logoutUser(true);
+      }
     }
 
     function showAuth() {
-        document.getElementById('topbar').style.display = 'none';
-        document.getElementById('mainArea').style.display = 'none';
-        document.getElementById('bottomNav').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('topbar').style.display = 'none';
+      document.getElementById('mainArea').style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
     }
     function initSocket() {
       if (!currentUser || socket) return;
@@ -4649,8 +4649,8 @@
     async function handleAuth() {
       try {
         if (!auth0Client) {
-            toast('Auth0 is initializing, please wait...');
-            return;
+          toast('Auth0 is initializing, please wait...');
+          return;
         }
         // Use Auth0 Universal Login for both Login and Signup
         await auth0Client.loginWithRedirect({
@@ -4714,15 +4714,15 @@
     }
 
     async function logoutUser(silent = false) {
-      try { 
+      try {
         if (auth0Client) {
-            await auth0Client.logout({
-                logoutParams: {
-                    returnTo: window.location.origin
-                }
-            });
+          await auth0Client.logout({
+            logoutParams: {
+              returnTo: window.location.origin
+            }
+          });
         }
-        if (!silent) await api('/auth/logout', { method: 'POST' }); 
+        if (!silent) await api('/auth/logout', { method: 'POST' });
       } catch (e) { }
       localStorage.removeItem('s2l_token');
       localStorage.removeItem('s2l_user');
