@@ -4229,7 +4229,12 @@
         // 2. Handle Redirect Callback
         const query = window.location.search;
         if (query.includes("code=") && query.includes("state=")) {
-          await auth0Client.handleRedirectCallback();
+          try {
+            await auth0Client.handleRedirectCallback();
+          } catch (err) {
+            console.error("Redirect Error:", err);
+            toast("❌ Login failed: " + err.message);
+          }
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
