@@ -1,3 +1,6 @@
+import sys
+print("🚀 BACKEND STARTING...", flush=True)
+
 import gevent.monkey
 gevent.monkey.patch_all()
 from flask import Flask, request, jsonify, Response
@@ -44,13 +47,14 @@ try:
     gemini_client = genai.Client(api_key=GEMINI_KEY)
 
     GEMINI_OK = True
-    print("✅ Gemini AI loaded")
+    print("✅ Gemini AI loaded", flush=True)
 
 except Exception as e:
     GEMINI_OK = False
-    print(f"⚠️ Gemini AI not available: {e}")
+    print(f"⚠️ Gemini AI not available: {e}", flush=True)
 
 app = Flask(__name__)
+print("🎈 Flask app created", flush=True)
 
 ALLOWED_ORIGINS = [
     "https://scroll2learn.netlify.app",
