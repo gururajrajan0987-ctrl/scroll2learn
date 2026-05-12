@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-# ── Load .env FIRST so all os.getenv() calls below pick up values ──────────
+# ── Load .env FIRST so all os.getenv() calls below pick up values ──
 load_dotenv()
 
 # ── Cloudinary configuration (reads from environment variables) ─────────────
