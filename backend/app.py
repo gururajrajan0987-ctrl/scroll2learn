@@ -109,18 +109,28 @@ AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID', '5ZdBBL7d2gOJYUj4784hiCE2Zi3sMKR6
 ALGORITHMS = ["RS256"]
 JWKS_CACHE = None
 
+import sys
+
 def get_jwks(force=False):
     global JWKS_CACHE
     if JWKS_CACHE is None or force:
         try:
             url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-            print(f"🔄 Fetching JWKS from: {url}")
+            print(f"🔄 Fetching JWKS from: {url}", flush=True)
             JWKS_CACHE = requests.get(url, timeout=10).json()
-            print("✅ JWKS fetched successfully")
+            print("✅ JWKS fetched successfully", flush=True)
         except Exception as e:
-            print(f"❌ Failed to fetch JWKS: {e}")
+            print(f"❌ Failed to fetch JWKS: {e}", flush=True)
             return None
     return JWKS_CACHE
+
+# Heartbeat thread to confirm logs are working
+def heartbeat():
+    while True:
+        print("💓 Backend Heartbeat - Logs are active", flush=True)
+        time.sleep(30)
+
+threading.Thread(target=heartbeat, daemon=True).start()
 
 class AuthError(Exception):
     def __init__(self, error, status_code):
