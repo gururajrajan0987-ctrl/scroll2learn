@@ -4220,7 +4220,7 @@
           clientId: AUTH0_CLIENT_ID,
           authorizationParams: {
             audience: AUTH0_AUDIENCE,
-            redirect_uri: window.location.origin + "/"
+            redirect_uri: window.location.origin
           },
           cacheLocation: 'localstorage',
           useRefreshTokens: true
@@ -4230,7 +4230,7 @@
         const query = window.location.search;
         if (query.includes("code=") && query.includes("state=")) {
           await auth0Client.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/");
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         // 3. Check Authentication Status
