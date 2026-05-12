@@ -1190,14 +1190,16 @@ Formatting: Use bullet points for lists. Use **bold** for key terms. Keep answer
             except Exception as model_err:
                 last_err = model_err
                 err_msg = str(model_err)
-                # Retry if rate limited (429) OR if model not found (404) to move to the next fallback
-                if '429' in err_msg or '404' in err_msg or 'NOT_FOUND' in err_msg or 'RESOURCE_EXHAUSTED' in err_msg:
+                # Retry if rate limited (429), model not found (404), OR location restricted (400/PRECONDITION)
+                if any(x in err_msg for x in ['429', '404', 'NOT_FOUND', 'RESOURCE_EXHAUSTED', '400', 'LOCATION', 'PRECONDITION']):
                     continue 
                 break # Hard failure for other errors
         # If all models failed
         err_str = str(last_err)
         if '429' in err_str or 'RESOURCE_EXHAUSTED' in err_str:
             return jsonify({'error': 'AI is temporarily busy. Please try again in about a minute.'}), 429
+        if 'LOCATION' in err_str or 'PRECONDITION' in err_str:
+            return jsonify({'error': 'AI service is currently unavailable in this region. We are working on a fix.'}), 400
         return jsonify({'error': f'AI error: {err_str}'}), 500
     except Exception as e:
         return jsonify({'error': f'AI error: {str(e)}'}), 500
