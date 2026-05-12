@@ -4153,8 +4153,8 @@
 
     // ── Auth0 Configuration ──────────────────────────────────────────────────
     let auth0Client = null;
-    const AUTH0_DOMAIN = 'dev-l5i8xe6vipjhh8r0.us.auth0.com';
-    const AUTH0_CLIENT_ID = 'y7xZ6n86rPInH6V3u11qUo1N8B8rVAn4';
+    const AUTH0_DOMAIN = 'dev-l5i8xe6vipjhh8r0.auth0.com';
+    const AUTH0_CLIENT_ID = '5ZdBBL7d2gOJYUj4784hiCE2Zi3sMKR6';
     const AUTH0_AUDIENCE = 'https://scroll2learn.onrender.com';
     let authToken = localStorage.getItem('s2l_token') || '';
     let currentUser = JSON.parse(localStorage.getItem('s2l_user') || 'null');
@@ -4219,11 +4219,8 @@
           domain: AUTH0_DOMAIN,
           clientId: AUTH0_CLIENT_ID,
           authorizationParams: {
-            // audience: AUTH0_AUDIENCE,
             redirect_uri: window.location.origin
-          },
-          cacheLocation: 'localstorage',
-          useRefreshTokens: true
+          }
         });
 
         // 2. Handle Redirect Callback
