@@ -109,11 +109,14 @@ AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID', '5ZdBBL7d2gOJYUj4784hiCE2Zi3sMKR6
 ALGORITHMS = ["RS256"]
 JWKS_CACHE = None
 
-def get_jwks():
+def get_jwks(force=False):
     global JWKS_CACHE
-    if JWKS_CACHE is None:
+    if JWKS_CACHE is None or force:
         try:
-            JWKS_CACHE = requests.get(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json", timeout=10).json()
+            url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+            print(f"🔄 Fetching JWKS from: {url}")
+            JWKS_CACHE = requests.get(url, timeout=10).json()
+            print("✅ JWKS fetched successfully")
         except Exception as e:
             print(f"❌ Failed to fetch JWKS: {e}")
             return None
@@ -141,10 +144,14 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         try:
+            print(f"🔑 Auth Check for: {request.path}")
             token = get_token_auth_header()
             jwks = get_jwks()
             if not jwks:
-                raise AuthError({"code": "jwks_fetch_failed", "description": "Unable to fetch authentication keys"}, 500)
+                # Try one more time with force=True
+                jwks = get_jwks(force=True)
+                if not jwks:
+                    raise AuthError({"code": "jwks_fetch_failed", "description": "Unable to fetch authentication keys"}, 500)
             
             unverified_header = jwt.get_unverified_header(token)
             rsa_key = {}
@@ -181,6 +188,7 @@ def requires_auth(f):
             print("❌ JWT Error: No matching key found")
             raise AuthError({"code": "invalid_header", "description": "Unable to find appropriate key"}, 401)
         except AuthError as ae:
+            print(f"❌ AuthError: {ae.error['code']} - {ae.error['description']}")
             return jsonify(ae.error), ae.status_code
         except Exception as e:
             print(f"❌ unexpected Auth Error: {str(e)}")
