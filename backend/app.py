@@ -103,9 +103,9 @@ app.config['SECRET_KEY'] = SECRET_KEY
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm', 'mov'}
 
 # ── Auth0 Configuration ──────────────────────────────────────────────────────
-AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
-AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE')
-AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN', 'dev-l5i8xe6vipjhh8r0.us.auth0.com')
+AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE', 'https://scroll2learn.onrender.com')
+AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID', '5ZdBBL7d2gOJYUj4784hiCE2Zi3sMKR6')
 ALGORITHMS = ["RS256"]
 JWKS_CACHE = None
 
@@ -158,20 +158,33 @@ def requires_auth(f):
                         "e": key["e"]
                     }
             if rsa_key:
-                payload = jwt.decode(
-                    token,
-                    rsa_key,
-                    algorithms=ALGORITHMS,
-                    audience=AUTH0_AUDIENCE,
-                    issuer=f"https://{AUTH0_DOMAIN}/"
-                )
-                request.current_user = payload
-                return f(*args, **kwargs)
+                try:
+                    payload = jwt.decode(
+                        token,
+                        rsa_key,
+                        algorithms=ALGORITHMS,
+                        audience=AUTH0_AUDIENCE,
+                        issuer=f"https://{AUTH0_DOMAIN}/"
+                    )
+                    request.current_user = payload
+                    return f(*args, **kwargs)
+                except jwt.ExpiredSignatureError:
+                    print("❌ JWT Error: Token expired")
+                    raise AuthError({"code": "token_expired", "description": "Token is expired"}, 401)
+                except jwt.JWTClaimsError as e:
+                    print(f"❌ JWT Error: Claims failed ({str(e)})")
+                    raise AuthError({"code": "invalid_claims", "description": str(e)}, 401)
+                except Exception as e:
+                    print(f"❌ JWT Error: {str(e)}")
+                    raise AuthError({"code": "invalid_token", "description": str(e)}, 401)
+                    
+            print("❌ JWT Error: No matching key found")
             raise AuthError({"code": "invalid_header", "description": "Unable to find appropriate key"}, 401)
         except AuthError as ae:
             return jsonify(ae.error), ae.status_code
         except Exception as e:
-            return jsonify({"code": "invalid_token", "description": str(e)}), 401
+            print(f"❌ unexpected Auth Error: {str(e)}")
+            return jsonify({"code": "error", "description": str(e)}), 401
     return decorated
 
 @app.errorhandler(AuthError)
