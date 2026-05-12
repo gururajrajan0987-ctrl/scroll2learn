@@ -260,6 +260,15 @@ def time_ago(ts):
     except Exception:
         return 'recently'
 
+@app.route('/auth/debug', methods=['GET'])
+def auth_debug():
+    return jsonify({
+        "AUTH0_DOMAIN": AUTH0_DOMAIN,
+        "AUTH0_AUDIENCE": AUTH0_AUDIENCE,
+        "JWKS_READY": JWKS_CACHE is not None,
+        "TIME": datetime.utcnow().isoformat()
+    })
+
 def get_current_user(req):
     auth = req.headers.get('Authorization', '')
     if not auth.startswith('Bearer '): return None
